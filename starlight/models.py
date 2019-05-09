@@ -366,6 +366,7 @@ class Card(MagiModel):
     ############################################################
     # Cache stage girl
 
+    _cached_stage_girl_collection_name = 'stagegirl'
     _cache_j_stage_girl = models.TextField(null=True)
 
     def to_cache_stage_girl(self):

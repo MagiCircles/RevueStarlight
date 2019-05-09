@@ -136,7 +136,10 @@ DISQUS_SHORTNAME = 'starlight'
 
 ACCOUNT_MODEL = models.Account
 
-# todo USER_COLORS = (raw value, full localizable color name, CSS elements name (btn-xx, panel-xx, ...), hex code of the color)
+USER_COLORS = [
+    (_element, _details['translation'], _element, _details['color'])
+    for _element, _details in models.ELEMENTS.items()
+]
 
 ############################################################
 # From settings or generated_settings
