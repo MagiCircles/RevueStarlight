@@ -120,11 +120,7 @@ ACTIVITY_TAGS = [
     ('nsfw', {
         'translation': _('NSFW'),
         'hidden_by_default': True,
-        'has_permission_to_show': lambda (r: u'{} {}'.format(
-            _('You need to be over 18 years old.'),
-            _('You can change your birthdate in your settings.')
-            if not r.user.preferences.age else u'') if r.user.is_authenticated() and r.user.preferences.age < 18 else True
-        ),
+        'has_permission_to_show': lambda r: u'{} {}'.format(_('You need to be over 18 years old.'), _('You can change your birthdate in your settings.') if not r.user.preferences.age else u'') if r.user.is_authenticated() and r.user.preferences.age < 18 else True,
     }),
 ]
 
