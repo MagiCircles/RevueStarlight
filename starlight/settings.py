@@ -2,6 +2,9 @@
 from collections import OrderedDict
 from django.conf import settings as django_settings
 from django.utils.translation import ugettext_lazy as _, get_language, string_concat
+from magi.utils import (
+    tourldash,
+)
 from magi.default_settings import (
     DEFAULT_ENABLED_NAVBAR_LISTS,
     DEFAULT_NAVBAR_ORDERING,
