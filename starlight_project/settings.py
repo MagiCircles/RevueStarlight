@@ -104,10 +104,20 @@ from django.utils.translation import ugettext_lazy as _
 LANGUAGES = (
     ('en', _('English')),
     ('es', _('Spanish')),
+    ('zh-hans', _('Simplified Chinese')),
+    ('ru', _('Russian')),
+    ('it', _('Italian')),
     ('fr', _('French')),
     ('de', _('German')),
-    ('it', _('Italian')),
-    ('ru', _('Russian')),
+    ('pl', _('Polish')),
+    ('ja', _('Japanese')),
+    ('kr', _('Korean')),
+    ('id', _('Indonesian')),
+    ('vi', _('Vietnamese')),
+    ('zh-hant', _('Traditional Chinese')),
+    ('pt', _('Portuguese')),
+    ('pt-br', _('Brazilian Portuguese')),
+    ('tr', _('Turkish')),
 )
 
 LANGUAGE_CODE = 'en'
@@ -133,6 +143,8 @@ MAX_WIDTH = 1200
 MAX_HEIGHT = 1200
 MIN_WIDTH = 300
 MIN_HEIGHT = 300
+
+STATIC_FILES_VERSION = ''
 
 try:
     from generated_settings import *

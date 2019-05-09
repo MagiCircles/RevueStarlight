@@ -6,11 +6,15 @@
 @import "main.less";
 @import "mixins/magicircles.less";
 
+@import url('https://fonts.googleapis.com/css?family=Gudea:400|Raleway:600|Slabo+27px');
+
 /******************************************/
 /* Variables */
 
-@mainColor: #4a86e8;
-@secondaryColor: #73c024;
+@mainColor: #1A1D24;
+@secondaryColor: #FF3037;
+
+@navbar-height: 70px;
 
 /******************************************/
 /* Tools */
@@ -24,6 +28,86 @@ html {
 }
 
 @import "generated_colors.less";
+
+body {
+    font-family: 'Gudea', sans-serif;
+    font-weight: 400;
+    font-size: 17px;
+}
+
+h1, h2, h3, h4, h5, h6, .title, .navbar-brand, .btn-lg, .btn-xl, .collection-table .table-headers-sections th {
+    font-family: 'Slabo 27px', serif;
+}
+
+/* todo: set within html to work in production */
+
+.navbar-main,
+.btn-main,
+.list-group-item.active {
+    background-image: url('/static/img/texture.png'); /* todo */
+    background-position: center;
+    &.btn-main {
+        background-size: cover;
+    }
+}
+
+/******************************************/
+/* Navbar */
+
+html {
+    .navbar-main {
+        // Make the navbar bigger
+        .navbar-nav > li > a, .navbar-brand {
+            height: @navbar-height;
+            line-height: @navbar-height - (15px * 2);
+        }
+        .navbar-nav {
+            // Set fonts and colors + add paddings
+            & > li > a, .dropdown-menu > li > a {
+                font-family: 'Raleway', 'Arial Black';
+                font-weight: 600;
+                font-size: 14px;
+                &:not(#navBarIDDropDownyou) {
+                    text-transform: uppercase;
+                }
+            }
+            & > li > a {
+                transition: color @transition;
+                &:hover {
+                    color: @secondaryColor;
+                }
+            }
+            .dropdown-menu > li > a:not(.other-site) {
+                padding: 10px 20px;
+                [class^="flaticon-"], img {
+                    color: @secondaryColor;
+                    padding-right: 8px;
+                    font-weight: 400;
+                }
+            }
+            // Re-align bigger images
+            li[data-link-name="revuestarlight"], li[data-link-name="relive"] {
+                & > a > img {
+                    height: 26px;
+                    margin: -5px 0;
+                }
+            }
+        }
+        // Site title font and size
+        .navbar-brand {
+            font-family: 'Gudea', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+        }
+    }
+    // Re-align content to match with the new navbar height
+    .navbar + main {
+        margin-top: @navbar-height + 1px;
+    }
+    #togglebutton {
+        top: @navbar-height + 1px;
+    }
+}
 
 /******************************************/
 /* Single pages */

@@ -1,3 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from starlight.settings import MAIN_SITE_URL
 
-# Create your views here.
+def index(request):
+    return redirect('/prelaunch/')
+    # todo when prelaunch ends return redirect(MAIN_SITE_URL)
