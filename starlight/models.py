@@ -26,9 +26,9 @@ from magi.utils import (
 ############################################################
 # Languages
 
-LANGUAGES_NEED_OWN_NAME = [
+NON_LATIN_LANGUAGES = [
     l for l in django_settings.LANGUAGES
-    if l[0] in ['ru', 'zh-hans', 'zh-hant', 'kr']
+    if l[0] in ['ja', 'ru', 'zh-hans', 'zh-hant', 'kr']
 ]
 LANGUAGES_CANT_SPEAK_ENGLISH = [
     l for l in django_settings.LANGUAGES
@@ -135,8 +135,9 @@ class VoiceActress(MagiModel):
     owner = models.ForeignKey(User, related_name='added_voiceactresses')
 
     name = models.CharField(_('Name'), max_length=100, unique=True)
-    NAMES_CHOICES = LANGUAGES_NEED_OWN_NAME
+    NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
+    japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
 
     _original_image = models.ImageField(null=True, upload_to=uploadTiny('voiceactress'))
     image = models.ImageField(_('Image'), upload_to=uploadItem('voiceactress'), null=True)
@@ -172,6 +173,10 @@ class VoiceActress(MagiModel):
     m_description = models.TextField(_('Description'), null=True)
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_descriptions = models.TextField(_('Description'), null=True)
+
+    reverse_related = [
+        ('stagegirls', 'stagegirls', _('Stage girl')),
+    ]
 
     def __unicode__(self):
         return self.t_name
@@ -214,11 +219,11 @@ class StageGirl(MagiModel):
     owner = models.ForeignKey(User, related_name='added_stagegirls')
 
     name = models.CharField(_('Name'), max_length=100, unique=True)
-    NAMES_CHOICES = LANGUAGES_NEED_OWN_NAME
+    NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
 
-    _original_image = models.ImageField(null=True, upload_to=uploadTiny('idol'))
-    image = models.ImageField(_('Image'), upload_to=uploadItem('idol'), null=True)
+    _original_image = models.ImageField(null=True, upload_to=uploadTiny('stagegirl'))
+    image = models.ImageField(_('Image'), upload_to=uploadItem('stagegirl'), null=True)
 
     voice_actress = models.ForeignKey(
         VoiceActress, verbose_name=_('Voice actress'), related_name='stagegirls',

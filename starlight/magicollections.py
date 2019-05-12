@@ -1,4 +1,5 @@
-from django.utils.translation import ugettext_lazy as _, string_concat
+from django.utils.html import mark_safe
+from django.utils.translation import ugettext_lazy as _, string_concat, get_language
 from magi.magicollections import (
     MagiCollection,
     MainItemCollection,
@@ -7,6 +8,10 @@ from magi.magicollections import (
     ActivityCollection as _ActivityCollection,
     AccountCollection as _AccountCollection,
     UserCollection as _UserCollection,
+)
+from magi.utils import (
+    setSubField,
+    listUnique,
 )
 from starlight import models, forms
 
@@ -83,6 +88,55 @@ class VoiceActressCollection(MainItemCollection):
     translated_fields = ('name', 'specialty', 'hobbies', 'm_description')
     form_class = forms.VoiceActressForm
     multipart = True
+
+    fields_icons = {
+        'name': 'id',
+        'birthday': 'event',
+        'height': 'measurements',
+        'blood': 'healer',
+        'specialty': 'star',
+        'hobbies': 'hobbies',
+        'description': 'id',
+        'stagegirls': 'idol',
+    }
+
+    fields_images = {
+        'astrological_sign': lambda _i: _i.astrological_sign_image_url,
+    }
+
+    def to_fields(self, view, item, *args, **kwargs):
+        fields = super(VoiceActressCollection, self).to_fields(
+            view, item, *args, **kwargs)
+
+        names = listUnique([
+            unicode(item.t_name),
+            item.name,
+            item.japanese_name,
+        ])
+        if len(names) > 1:
+            setSubField(fields, 'name', key='type', value='text_annotation')
+            setSubField(fields, 'name', key='annotation', value=mark_safe(u'<br>'.join(names[1:])))
+        return fields
+
+    class ListView(MainItemCollection.ListView):
+        per_line = 3
+        show_items_names = True
+
+    class ItemView(MainItemCollection.ItemView):
+        def get_queryset(self, queryset, parameters, request):
+            queryset = super(VoiceActressCollection.ItemView, self).get_queryset(queryset, parameters, request)
+            queryset = queryset.prefetch_related('stagegirls')
+            return queryset
+
+        def to_fields(self, item, prefetched_together=None, *args, **kwargs):
+
+            # Prefetched
+            if prefetched_together is None: prefetched_together = []
+            prefetched_together += ['stagegirls']
+
+            fields = super(VoiceActressCollection.ItemView, self).to_fields(
+                item, prefetched_together=prefetched_together, *args, **kwargs)
+            return fields
 
 ############################################################
 # School Collection
