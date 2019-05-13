@@ -128,14 +128,18 @@ class VoiceActressCollection(MainItemCollection):
             queryset = queryset.prefetch_related('stagegirls')
             return queryset
 
-        def to_fields(self, item, prefetched_together=None, *args, **kwargs):
+        def to_fields(self, item, prefetched=None, *args, **kwargs):
 
             # Prefetched
-            if prefetched_together is None: prefetched_together = []
-            prefetched_together += ['stagegirls']
+            if prefetched is None: prefetched = []
+            prefetched += ['stagegirls']
 
             fields = super(VoiceActressCollection.ItemView, self).to_fields(
-                item, prefetched_together=prefetched_together, *args, **kwargs)
+                item, prefetched=prefetched, *args, **kwargs)
+
+            # Age
+            setSubField(fields, 'birthday', key='type', value='text_annotation')
+            setSubField(fields, 'birthday', key='annotation', value=item.display_age)
             return fields
 
 ############################################################

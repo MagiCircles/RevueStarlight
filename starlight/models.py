@@ -9,6 +9,7 @@ from magi.abstract_models import BaseAccount
 from magi.item_model import MagiModel, i_choices
 from magi.utils import (
     ColorField,
+    getAge,
     ordinalNumber,
     staticImageURL,
     uploadItem,
@@ -144,6 +145,8 @@ class VoiceActress(MagiModel):
 
     birthday = models.DateField(_('Birthday'), null=True)
     display_birthday = property(lambda _s: date_format(_s.birthday, format='DATE_FORMAT', use_l10n=True))
+    age = property(lambda _s: getAge(_s.birthday))
+    display_age = property(lambda _s: getAge(_s.birthday, formatted=True))
 
     ASTROLOGICAL_SIGN_CHOICES = ASTROLOGICAL_SIGN_CHOICES
     i_astrological_sign = models.PositiveIntegerField(
