@@ -33,8 +33,10 @@ def generate_settings():
 
     print 'Show a banner for current and upcoming birthdays of characters'
     def get_name_image_url_from_character(character):
-        card = models.Card.objects.filter(idol=character).filter(
-            show_art_on_homepage=True).order_by('-i_rarity', '-id')[0]
+        try:
+            card = models.Card.objects.filter(stage_girl=character).all().order_by('-i_rarity', '-number')[0]
+        except IndexError:
+            return (None, None, None)
         return character.first_name, card.art_original_url, character.item_url
     latest_news = getCharactersBirthdays(
         models.StageGirl.objects.all(),
