@@ -162,6 +162,7 @@ class VoiceActressCollection(MainItemCollection):
 
     class ListView(MainItemCollection.ListView):
         per_line = 5
+        page_size = 20
         show_items_names = True
         default_ordering = 'name'
         filter_form = forms.VoiceActressFilterForm
@@ -307,6 +308,7 @@ class StageGirlCollection(MainItemCollection):
         show_items_names = True
         default_ordering = 'school'
         per_line = 5
+        page_size = 20
         filter_form = forms.StageGirlFilterForm
 
     class ItemView(MainItemCollection.ItemView):
