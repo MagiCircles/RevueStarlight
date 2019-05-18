@@ -115,16 +115,59 @@ html {
 /******************************************/
 /* MagiCollections */
 
-/* Voice actress */
+/* User profile */
 
-.voiceactress-info, [data-item="voiceactress"] {
-    .voiceactress-image {
-        max-height: none;
+.profile-tabs {
+    [data-link^="favorite_voiceactress"],
+    [data-link^="favorite_character"] {
+        img {
+            @size: 30px;
+            width: @size;
+            height: @size;
+            margin: -((@size - 24) / 2);
+            border-radius: 50%;
+        }
     }
 }
 
-.modal-body > .voiceactress-info {
-    .voiceactress-image {
-        max-height: 200px;
+
+/* Shared by multiple collections */
+
+[data-cuteform-name="id_i_astrological_sign"] .cuteform-elt:not([data-cuteform-val=""]) {
+    background-color: fade(white, 80%);
+    border-radius: 8px;
+    padding: 3px;
+    width: 22px;
+    &.cuteform-selected {
+        background-color: white;
+    }
+}
+
+[data-cuteform-name="id_school"] .cuteform-elt:not([data-cuteform-val=""]) {
+    border-radius: 8px;
+    background: white;
+    opacity: 0.8;
+    &.cuteform-selected {
+        opacity: 1;
+    }
+}
+
+/* Staff */
+
+.list-items-staff {
+    & > tbody > tr > td, & > tbody > tr > th {
+        padding: 20px;
+    }
+    th:first-child, td:first-child {
+        width: 50%;
+        text-align: right;
+    }
+    [data-field="name"] {
+        a {
+            .a-nodifference;
+            > span {
+                text-decoration: underline;
+            }
+        }
     }
 }

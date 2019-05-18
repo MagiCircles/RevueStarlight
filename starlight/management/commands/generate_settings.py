@@ -1,4 +1,5 @@
 import datetime
+from collections import OrderedDict
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings as django_settings
 from django.utils import timezone
@@ -64,8 +65,28 @@ def generate_settings():
     favorite_characters = [(
         stage_girl.pk,
         stage_girl.name,
-        stage_girl.image_url,
+        stage_girl.small_image_url,
     ) for stage_girl in all_stage_girls]
+
+    print 'Cache schools'
+    all_schools = OrderedDict([
+        (school.pk, {
+            'name': school.name,
+            'names': school.names,
+            'image': school.image_url,
+        })
+        for school in models.School.objects.all().order_by('name')
+    ])
+
+    print 'Cache voice actresses'
+    all_voiceactresses = OrderedDict([
+        (voiceactress.pk, {
+            'name': voiceactress.name,
+            'names': voiceactress.names,
+            'thumbnail': voiceactress.image_thumbnail_url,
+        })
+        for voiceactress in models.VoiceActress.objects.all().order_by('name')
+    ])
 
     # print 'Get the backgrounds'
     # backgrounds = [
@@ -86,8 +107,12 @@ def generate_settings():
         'DONATION_MONTH': donation_month,
         'STAFF_CONFIGURATIONS': staff_configurations,
         'FAVORITE_CHARACTERS': favorite_characters,
+        'SCHOOLS': all_schools,
+        'VOICE_ACTRESSES': all_voiceactresses,
         # 'BACKGROUNDS': backgrounds,
-    })
+    }, imports=[
+        'from collections import OrderedDict',
+    ])
 
 class Command(BaseCommand):
     can_import_settings = True

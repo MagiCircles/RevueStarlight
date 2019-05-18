@@ -16,6 +16,11 @@ from magi.utils import (
     uploadTiny,
     upload2x,
     uploadTthumb,
+    YouTubeVideoField,
+)
+from starlight.django_translated import t
+from starlight.utils import (
+    displayNameHTML,
 )
 
 ############################################################
@@ -135,13 +140,14 @@ class VoiceActress(MagiModel):
 
     owner = models.ForeignKey(User, related_name='added_voiceactresses')
 
-    name = models.CharField(_('Name'), max_length=100, unique=True)
+    name = models.CharField(_('Name'), max_length=100, unique=True, db_index=True)
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
     japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
 
-    _original_image = models.ImageField(null=True, upload_to=uploadTiny('voiceactress'))
     image = models.ImageField(_('Image'), upload_to=uploadItem('voiceactress'), null=True)
+    _tthumbnail_image = models.ImageField(null=True, upload_to=uploadTthumb('voiceactress'))
+    _original_image = models.ImageField(null=True, upload_to=uploadTiny('voiceactress'))
 
     birthday = models.DateField(_('Birthday'), null=True)
     display_birthday = property(lambda _s: date_format(_s.birthday, format='DATE_FORMAT', use_l10n=True))
@@ -177,9 +183,56 @@ class VoiceActress(MagiModel):
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_descriptions = models.TextField(_('Description'), null=True)
 
+    video = YouTubeVideoField(_('Video'), null=True)
+
+    ############################################################
+    # Reverse relations
+
     reverse_related = [
-        ('stagegirls', 'stagegirls', _('Stage girl')),
+        { 'field_name': 'stagegirls', 'verbose_name': _('Stage girl') },
+        { 'field_name': 'links', 'verbose_name': _('Social media'), 'max_per_line': None },
     ]
+
+    ############################################################
+    # Views utils
+
+    display_name = property(displayNameHTML)
+
+    top_image_list = property(lambda _s: _s.image_thumbnail_url)
+    image_for_prefetched = property(lambda _s: _s.image_thumbnail_url)
+
+    ############################################################
+    # Unicode
+
+    def __unicode__(self):
+        return self.t_name
+
+############################################################
+# Voice Actress link
+
+class VoiceActressLink(MagiModel):
+    collection_name = 'voiceactresslink'
+
+    owner = models.ForeignKey(User, related_name='added_voiceactresslinks')
+
+    voice_actress = models.ForeignKey(
+        VoiceActress, verbose_name=_('Voice actress'), related_name='links',
+        on_delete=models.CASCADE, db_index=True,
+    )
+
+    name = models.CharField(_('Platform'), max_length=100)
+    NAMES_CHOICES = NON_LATIN_LANGUAGES
+    d_names = models.TextField(_('Platform'), null=True)
+
+    url = models.CharField(_('URL'), max_length=100)
+
+    ############################################################
+    # Views utils
+
+    display_item_url = property(lambda _s: _s.url)
+
+    ############################################################
+    # Unicode
 
     def __unicode__(self):
         return self.t_name
@@ -196,12 +249,22 @@ class School(MagiModel):
     NAMES_CHOICES = ALL_ALT_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
 
-    _original_image = models.ImageField(null=True, upload_to=uploadTiny('school'))
     image = models.ImageField(_('Image'), upload_to=uploadItem('school'), null=True)
+    _original_image = models.ImageField(null=True, upload_to=uploadTiny('school'))
 
     m_description = models.TextField(_('Description'), null=True)
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_descriptions = models.TextField(_('Description'), null=True)
+
+    ############################################################
+    # Reverse relations
+
+    reverse_related = [
+        ('students', 'stagegirls', _('Students')),
+    ]
+
+    ############################################################
+    # Unicode
 
     def __unicode__(self):
         return self.t_name
@@ -224,14 +287,30 @@ class StageGirl(MagiModel):
     name = models.CharField(_('Name'), max_length=100, unique=True)
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
+    japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
 
-    _original_image = models.ImageField(null=True, upload_to=uploadTiny('stagegirl'))
     image = models.ImageField(_('Image'), upload_to=uploadItem('stagegirl'), null=True)
+    _original_image = models.ImageField(null=True, upload_to=uploadTiny('stagegirl'))
+
+    small_image = models.ImageField(
+        upload_to=uploadItem('stagegirl/s'), null=True,
+        help_text='Map pins, favorite characters on profile and character selectors.')
 
     voice_actress = models.ForeignKey(
         VoiceActress, verbose_name=_('Voice actress'), related_name='stagegirls',
         null=True, on_delete=models.SET_NULL,
+        db_index=True,
     )
+
+    school = models.ForeignKey(
+        School, verbose_name=_('School'), related_name='students',
+        db_index=True,
+    )
+
+    YEAR_CHOICES = _to_year_choices()
+    i_year = models.PositiveIntegerField(_('School year'), choices=i_choices(YEAR_CHOICES), null=True)
+    to_year_choices = classmethod(lambda _s: _to_year_choices())
+    to_t_year = classmethod(lambda _s, _i: dict(i_choices(_to_year_choices())).get(_i, None))
 
     birthday = models.DateField(_('Birthday'), null=True, help_text='The year will be ignored.')
     display_birthday = property(lambda _s: date_format(_s.birthday, format='MONTH_DAY_FORMAT', use_l10n=True))
@@ -243,15 +322,6 @@ class StageGirl(MagiModel):
         lambda _s: staticImageURL(_s.i_astrological_sign, folder='i_astrological_sign', extension='png'))
 
     color = ColorField(_('Color'), null=True, blank=True)
-
-    school = models.ForeignKey(
-        School, verbose_name=_('School'), related_name='students',
-    )
-
-    YEAR_CHOICES = _to_year_choices()
-    i_year = models.PositiveIntegerField(_('School year'), choices=i_choices(YEAR_CHOICES), null=True)
-    to_year_choices = classmethod(lambda _s: _to_year_choices())
-    to_t_year = classmethod(lambda _s, _i: dict(i_choices(_to_year_choices())).get(_i, None))
 
     # todo: department, class?
 
@@ -283,6 +353,71 @@ class StageGirl(MagiModel):
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_descriptions = models.TextField(_('Description'), null=True)
 
+    video = YouTubeVideoField(_('Video'), null=True)
+
+    ############################################################
+    # Images settings
+
+    tinypng_settings = {
+        'small_image': {
+            'resize': 'fit',
+            'width': 80,
+            'height': 80,
+        }
+    }
+
+    ############################################################
+    # Reverse relations
+
+    reverse_related = [
+        { 'field_name': 'cards', 'verbose_name': _('Cards') },
+    ]
+
+    ############################################################
+    # Views utils
+
+    display_name = property(displayNameHTML)
+
+    image_for_prefetched = property(lambda _s: _s.small_image_url)
+
+    ############################################################
+    # Unicode
+
+    def __unicode__(self):
+        return self.t_name
+
+############################################################
+# Staff
+
+class Staff(MagiModel):
+    collection_name = 'staff'
+
+    owner = models.ForeignKey(User, related_name='added_staff')
+
+    name = models.CharField(_('Name'), max_length=100)
+    NAMES_CHOICES = NON_LATIN_LANGUAGES
+    d_names = models.TextField(_('Name'), null=True)
+    japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
+
+    role = models.CharField(_('Role'), max_length=100, db_index=True)
+    ROLES_CHOICES = ALL_ALT_LANGUAGES
+    d_roles = models.TextField(_('Role'), null=True)
+
+    social_media_url = models.CharField(_('Social media'), max_length=100, null=True)
+
+    importance = models.IntegerField(
+        'Importance', default=0, db_index=True,
+        help_text='Allows to re-order how the staff appear. Highest number shows first.',
+    )
+
+    ############################################################
+    # Views utils
+
+    display_name = property(displayNameHTML)
+
+    ############################################################
+    # Unicode
+
     def __unicode__(self):
         return self.t_name
 
@@ -292,18 +427,15 @@ class StageGirl(MagiModel):
 ############################################################
 ############################################################
 
-############################################################
-# Card
-
-class Card(MagiModel):
+class BaseCard(MagiModel):
     collection_name = 'card'
-    owner = models.ForeignKey(User, related_name='added_cards')
+    owner = models.ForeignKey(User, related_name='added_%(class)ss')
 
     ############################################################
     # Basic details: Rarity, elements, ...
 
     number = models.PositiveIntegerField(_('ID'), unique=True, primary_key=True)
-    stage_girl = models.ForeignKey(StageGirl, verbose_name=_('Stage girl'), related_name='cards')
+    stage_girl = models.ForeignKey(StageGirl, verbose_name=_('Stage girl'), related_name='%(class)ss')
 
     name = models.CharField(_('Title'), max_length=100, null=True)
     NAMES_CHOICES = ALL_ALT_LANGUAGES
@@ -337,22 +469,22 @@ class Card(MagiModel):
     ############################################################
     # Images
 
-    _2x_image = models.ImageField(null=True, upload_to=upload2x('card'))
-    _original_image = models.ImageField(null=True, upload_to=uploadTiny('card'))
     image = models.ImageField(_('Image'), upload_to=uploadItem('card'), null=True)
+    _original_image = models.ImageField(null=True, upload_to=uploadTiny('card'))
+    _2x_image = models.ImageField(null=True, upload_to=upload2x('card'))
 
-    _original_icon = models.ImageField(null=True, upload_to=uploadTiny('card/icon'))
     icon = models.ImageField(_('Icon'), upload_to=uploadItem('card/icon'), null=True)
+    _original_icon = models.ImageField(null=True, upload_to=uploadTiny('card/icon'))
 
-    _2x_art = models.ImageField(null=True, upload_to=upload2x('card/art'))
+    art = models.ImageField(_('Art'), upload_to=uploadItem('card/art'), null=True)
     _original_art = models.ImageField(null=True, upload_to=uploadTiny('card/art'))
     _tthumbnail_art = models.ImageField(null=True, upload_to=uploadTthumb('card/art'))
-    art = models.ImageField(_('Art'), upload_to=uploadItem('card/art'), null=True)
+    _2x_art = models.ImageField(null=True, upload_to=upload2x('card/art'))
 
-    _2x_transparent = models.ImageField(null=True, upload_to=upload2x('card/transparent'))
+    transparent = models.ImageField(_('Transparent'), upload_to=uploadItem('card/transparent'), null=True)
     _original_transparent = models.ImageField(null=True, upload_to=uploadTiny('card/transparent'))
     _tthumbnail_transparent = models.ImageField(null=True, upload_to=uploadTthumb('card/transparent'))
-    transparent = models.ImageField(_('Transparent'), upload_to=uploadItem('card/transparent'), null=True)
+    _2x_transparent = models.ImageField(null=True, upload_to=upload2x('card/transparent'))
 
     live2d_model_package = models.FileField(upload_to=uploadItem('card/live2d'), null=True)
 
@@ -383,8 +515,8 @@ class Card(MagiModel):
         return {
             'id': self.stage_girl_id,
             'name': self.stage_girl.name,
-            'names': self.stage_girl.d_names or {},
-            'image': unicode(self.stage_girl.image),
+            'names': self.stage_girl.names or {},
+            'image': unicode(self.stage_girl.small_image),
         }
 
     ############################################################
@@ -398,3 +530,18 @@ class Card(MagiModel):
                 name=self.t_name or '',
             )
         return u''
+
+    class Meta(MagiModel.Meta):
+        abstract = True
+
+############################################################
+# Card
+
+class Card(BaseCard):
+    pass
+
+############################################################
+# Card
+
+class Memoir(BaseCard):
+    pass

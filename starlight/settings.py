@@ -4,12 +4,14 @@ from django.conf import settings as django_settings
 from django.utils.translation import ugettext_lazy as _, get_language, string_concat
 from magi.utils import (
     tourldash,
+    ordinalNumber,
 )
 from magi.default_settings import (
     DEFAULT_ENABLED_NAVBAR_LISTS,
     DEFAULT_NAVBAR_ORDERING,
     DEFAULT_ENABLED_PAGES,
     DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
+    DEFAULT_EXTRA_PREFERENCES,
 )
 from starlight import models
 
@@ -69,7 +71,7 @@ SMARTPHONE_GAME_PER_LANGUAGE = {
 # todo CONTACT_REDDIT = ''
 # todo CONTACT_FACEBOOK = ''
 
-# todo FEEDBACK_FORM = ''
+FEEDBACK_FORM = 'https://forms.gle/6aRWq6zNhPBz9UGHA'
 GITHUB_REPOSITORY = ('MagiCircles', 'RevueStarlight')
 
 TWITTER_HANDLE = 'r_starlight_en'
@@ -81,6 +83,17 @@ HASHTAGS = ['スタァライト', 'RevueStarlight', 'Starira', 'RevueStarlightRe
 FAVORITE_CHARACTER_NAME = _('Stage girl')
 FAVORITE_CHARACTER_TO_URL = lambda link: (
     '/stagegirl/{pk}/{name}/'.format(pk=link.raw_value, name=tourldash(link.value)))
+
+CUSTOM_PREFERENCES_FORM = True
+
+EXTRA_PREFERENCES = DEFAULT_EXTRA_PREFERENCES + [
+    ('favorite_voiceactress1', lambda: _('{nth} Favorite {thing}').format(
+        thing=_('Voice actress').lower(), nth=_(ordinalNumber(1)))),
+    ('favorite_voiceactress2', lambda: _('{nth} Favorite {thing}').format(
+        thing=_('Voice actress').lower(), nth=_(ordinalNumber(2)))),
+    ('favorite_voiceactress3', lambda: _('{nth} Favorite {thing}').format(
+        thing=_('Voice actress').lower(), nth=_(ordinalNumber(3)))),
+]
 
 ############################################################
 # Donators
@@ -159,14 +172,20 @@ LATEST_NEWS = getattr(django_settings, 'LATEST_NEWS', None)
 
 ENABLED_PAGES = DEFAULT_ENABLED_PAGES.copy()
 
+# Enable wiki for relive
 ENABLED_PAGES['wiki'][0]['enabled'] = True
 ENABLED_PAGES['wiki'][1]['enabled'] = True
 ENABLED_PAGES['wiki'][0]['divider_before'] = True
 ENABLED_PAGES['wiki'][0]['navbar_link_list'] = 'relive'
 
+# Homepage redirects to main site
 ENABLED_PAGES['index']['custom'] = True
 ENABLED_PAGES['index']['enabled'] = True
 
+# Add voice actress cuteform to settings
+ENABLED_PAGES['settings']['custom'] = True
+
+# Redirect to main site for some non-migrated pages
 ENABLED_PAGES['about_revuestarlight'] = {
     'title': lambda _l: _('About {thing}').format(thing=LICENSE_NAME_PER_LANGUAGE.get(
         get_language(),LICENSE_NAME)),
@@ -235,23 +254,6 @@ for _link_name, _link in SOCIAL_MEDIA_LINKS.items():
         'new_tab': True,
         'check_permissions': lambda c: c['request'].LANGUAGE_CODE not in DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
 }
-
-if django_settings.DEBUG:
-
-    ENABLED_PAGES['gallery'] = {
-        'title': _('Gallery'),
-        'redirect': '#',
-        'icon': 'pictures',
-        'divider_before': True,
-        'navbar_link_list': 'relive',
-    }
-
-    ENABLED_PAGES['stageofdream'] = {
-        'title': _('Stage of dream'),
-        'redirect': '#',
-        'icon': 'leaderboard',
-        'navbar_link_list': 'relive',
-    }
 
 ############################################################
 # Customize nav bar

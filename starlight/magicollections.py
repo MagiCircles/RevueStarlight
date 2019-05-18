@@ -1,3 +1,4 @@
+from django.conf import settings as django_settings
 from django.utils.html import mark_safe
 from django.utils.translation import ugettext_lazy as _, string_concat, get_language
 from magi.magicollections import (
@@ -10,8 +11,16 @@ from magi.magicollections import (
     UserCollection as _UserCollection,
 )
 from magi.utils import (
+    AttrDict,
+    CuteFormType,
+    ordinalNumber,
     setSubField,
-    listUnique,
+)
+from starlight.django_translated import t
+from starlight.utils import (
+    getVoiceActressNameFromPk,
+    getVoiceActressURLFromPk,
+    getVoiceActressThumbnailFromPk,
 )
 from starlight import models, forms
 
@@ -37,10 +46,33 @@ class DonateCollection(_DonateCollection):
 # User Collection
 
 class UserCollection(_UserCollection):
+    icon = 'users'
     navbar_link = True
     navbar_link_list = 'community'
-    navbar_link_title = _('Users')
-    icon = 'users'
+
+    def navbar_link_title(self, context):
+        return t['users'].title()
+
+    class ItemView(_UserCollection.ItemView):
+
+        def get_meta_links(self, user, *args, **kwargs):
+            first_links, meta_links, links = super(UserCollection.ItemView, self).get_meta_links(
+                user, *args, **kwargs)
+            # Add link to favorite voice actresses from preferences
+            for nth in reversed(range(1, 4)):
+                field_name = 'favorite_voiceactress{}'.format(nth)
+                voiceactress_pk = user.preferences.extra.get(field_name, None)
+                if voiceactress_pk:
+                    meta_links.insert(0, AttrDict({
+                        'name': field_name,
+                        'verbose_name': _('{nth} Favorite {thing}').format(
+                            thing=_('Voice actress').lower(), nth=_(ordinalNumber(nth))),
+                        'value': getVoiceActressNameFromPk(voiceactress_pk),
+                        'raw_value': voiceactress_pk,
+                        'url': getVoiceActressURLFromPk(voiceactress_pk),
+                        'image': getVoiceActressThumbnailFromPk(voiceactress_pk),
+                    }))
+            return (first_links, meta_links, links)
 
 ############################################################
 # Activity Collection
@@ -80,13 +112,14 @@ class AccountCollection(_AccountCollection):
 
 class VoiceActressCollection(MainItemCollection):
     queryset = models.VoiceActress.objects.all()
+    plural_name = 'voiceactresses'
     title = _('Voice actress')
     plural_title = _('Voice actresses')
     navbar_link_list = 'revuestarlight'
     navbar_link_title = _('Cast')
     icon = 'voice-actress'
-    translated_fields = ('name', 'specialty', 'hobbies', 'm_description')
     form_class = forms.VoiceActressForm
+    translated_fields = ('name', 'specialty', 'hobbies', 'm_description')
     multipart = True
 
     fields_icons = {
@@ -98,49 +131,86 @@ class VoiceActressCollection(MainItemCollection):
         'hobbies': 'hobbies',
         'description': 'id',
         'stagegirls': 'idol',
+        'links': 'url',
+        'video': 'film',
     }
 
     fields_images = {
         'astrological_sign': lambda _i: _i.astrological_sign_image_url,
     }
 
+    filter_cuteform = {
+        'i_astrological_sign': {
+        },
+        'i_blood': {
+            'type': CuteFormType.HTML,
+        },
+        'school': {
+            'to_cuteform': lambda _k, _v: django_settings.SCHOOLS[_k]['image'],
+        },
+    }
+
     def to_fields(self, view, item, *args, **kwargs):
         fields = super(VoiceActressCollection, self).to_fields(
             view, item, *args, **kwargs)
 
-        names = listUnique([
-            unicode(item.t_name),
-            item.name,
-            item.japanese_name,
-        ])
-        if len(names) > 1:
-            setSubField(fields, 'name', key='type', value='text_annotation')
-            setSubField(fields, 'name', key='annotation', value=mark_safe(u'<br>'.join(names[1:])))
+        # Age
+        setSubField(fields, 'birthday', key='type', value='text_annotation')
+        setSubField(fields, 'birthday', key='annotation', value=item.display_age)
+
         return fields
 
     class ListView(MainItemCollection.ListView):
-        per_line = 3
+        per_line = 5
         show_items_names = True
+        default_ordering = 'name'
+        filter_form = forms.VoiceActressFilterForm
+
+        def ordering_fields(self, item, only_fields=None, *args, **kwargs):
+            # Show birthday when ordring by birthday
+            return super(VoiceActressCollection.ListView, self).ordering_fields(
+                item, only_fields=(only_fields or []) + (
+                    ['birthday'] if 'birthday_month' in only_fields
+                    else []), *args, **kwargs)
 
     class ItemView(MainItemCollection.ItemView):
-        def get_queryset(self, queryset, parameters, request):
-            queryset = super(VoiceActressCollection.ItemView, self).get_queryset(queryset, parameters, request)
-            queryset = queryset.prefetch_related('stagegirls')
-            return queryset
+        fields_prefetched = ['stagegirls']
+        fields_prefetched_together = ['links']
+        comments_enabled = False
 
-        def to_fields(self, item, prefetched=None, *args, **kwargs):
+############################################################
+# Voice Actress Link Collection
 
-            # Prefetched
-            if prefetched is None: prefetched = []
-            prefetched += ['stagegirls']
+class VoiceActressLinkCollection(MainItemCollection):
+    queryset = models.VoiceActressLink.objects.all().select_related('voice_actress')
+    title = string_concat(_('Voice actress'), ' - ', _('Link'))
+    plural_title = string_concat(_('Voice actress'), ' - ', _('Links'))
+    icon = 'link'
+    navbar_link_list = 'staff'
+    one_permissions_required = ['manage_main_items', 'translate_items']
+    translated_fields = ('name',)
+    form_class = forms.VoiceActressLinkForm
 
-            fields = super(VoiceActressCollection.ItemView, self).to_fields(
-                item, prefetched=prefetched, *args, **kwargs)
+    class ListView(MainItemCollection.ListView):
+        display_style = 'table'
+        display_style_table_fields = ['voice_actress', 'name', 'url']
+        show_item_buttons_as_icons = True
 
-            # Age
-            setSubField(fields, 'birthday', key='type', value='text_annotation')
-            setSubField(fields, 'birthday', key='annotation', value=item.display_age)
-            return fields
+    class ItemView(MainItemCollection.ItemView):
+        enabled = False
+        fields_preselected = ['voice_actress'] # used by table_fields in list view
+
+    class AddView(MainItemCollection.AddView):
+        back_to_list_button = False
+
+        def redirect_after_add(self, request, item, ajax):
+            return item.voice_actress.item_url if not ajax else '/ajax/successadd/'
+
+    class EditView(MainItemCollection.EditView):
+        back_to_list_button = False
+
+        def redirect_after_edit(self, request, item, ajax):
+            return item.voice_actress.item_url if not ajax else '/ajax/successedit/'
 
 ############################################################
 # School Collection
@@ -151,9 +221,27 @@ class SchoolCollection(MainItemCollection):
     plural_title = _('Schools')
     navbar_link_list = 'staff'
     icon = 'school'
-    form_class = forms.SchoolForm
     translated_fields = ('name', 'm_description')
     multipart = True
+
+    fields_icons = {
+        'name': 'school',
+        'description': 'about',
+        'students': 'idol',
+    }
+
+    class ItemView(MainItemCollection.ItemView):
+        fields_prefetched_together = ['students']
+
+    class ListView(MainItemCollection.ListView):
+        show_items_names = True
+        staff_required = True
+        permissions_required = ['manage_main_items']
+
+        def has_permissions_to_see_in_navbar(self, request, context):
+            super(SchoolCollection.ListView, self).has_permissions_to_see_in_navbar(request, context)
+            return (request.user.is_authenticated()
+                    and request.user.hasPermission('manage_main_items'))
 
 ############################################################
 # Stage Girl Collection
@@ -176,6 +264,38 @@ class StageGirlCollection(MainItemCollection):
         'm_description',
     ]
 
+    fields_icons = {
+        'name': 'id',
+        'voice_actress': 'voice-actress',
+        'school': 'school',
+        'birthday': 'event',
+        'color': 'palette',
+        'year': 'education',
+        'weapon': 'skill',
+        'favorite_food': 'food-like',
+        'least_favorite_food': 'food-dislike',
+        'likes': 'heart',
+        'dislikes': 'heart-empty',
+        'hobbies': 'hobbies',
+        'description': 'id',
+        'cards': 'cards',
+    }
+
+    fields_images = {
+        'astrological_sign': lambda _i: _i.astrological_sign_image_url,
+    }
+
+    filter_cuteform = {
+        'i_astrological_sign': {
+        },
+        'school': {
+            'to_cuteform': lambda _k, _v: django_settings.SCHOOLS[_k]['image'],
+        },
+        'i_year': {
+            'type': CuteFormType.HTML,
+        },
+    }
+
     def after_save(self, request, instance, type=None):
         super(StageGirlCollection, self).after_save(request, instance, type=type)
         # Update cards caches when stage girls get edited
@@ -183,16 +303,45 @@ class StageGirlCollection(MainItemCollection):
             card.force_update_cache('stage_girl')
         return instance
 
+    class ListView(MainItemCollection.ListView):
+        show_items_names = True
+        default_ordering = 'school'
+        per_line = 5
+        filter_form = forms.StageGirlFilterForm
+
+    class ItemView(MainItemCollection.ItemView):
+        fields_preselected = ['voice_actress', 'school']
+        fields_prefetched_together = ['cards']
+        fields_exclude = ['small_image']
+
 ############################################################
 # Staff Collection
 
 class StaffCollection(MainItemCollection):
-    queryset = models.Account.objects.all() # todo
+    queryset = models.Staff.objects.all()
     title = _('Staff')
     plural_title = ('Staff')
     navbar_link_list = 'revuestarlight'
     navbar_link_list_divider_before = True
     icon = 'list'
+    translated_fields = ('name', 'role')
+
+    class ListView(MainItemCollection.ListView):
+        default_ordering = '-importance,role'
+        display_style = 'table'
+        display_style_table_fields = ['role', 'name']
+        show_item_buttons_as_icons = True
+
+        def table_fields(self, item, *args, **kwargs):
+            fields = super(StaffCollection.ListView, self).table_fields(item, *args, **kwargs)
+            if item.social_media_url:
+                setSubField(fields, 'name', key='type', value='link')
+                setSubField(fields, 'name', key='link_text', value=item.display_name)
+                setSubField(fields, 'name', key='value', value=item.social_media_url)
+            return fields
+
+    class ItemView(MainItemCollection.ItemView):
+        enabled = False
 
 ############################################################
 # Song Collection

@@ -38,7 +38,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'corsheaders',
     'bootstrapform',
-    'bootstrap_form_horizontal',
     'rest_framework',
     'storages',
     'magi',
@@ -138,6 +137,8 @@ AWS_SES_RETURN_PATH = 'contact@schoolido.lu'
 
 FAVORITE_CHARACTERS = []
 STAFF_CONFIGURATIONS = {}
+SCHOOLS = {}
+VOICE_ACTRESSES = {}
 
 MAX_WIDTH = 1200
 MAX_HEIGHT = 1200
