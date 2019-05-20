@@ -335,6 +335,7 @@ class StageGirl(MagiModel):
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
     japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
+    first_name = property(lambda _s: name.split(' ')[-1])
 
     image = models.ImageField(_('Image'), upload_to=uploadItem('stagegirl'), null=True)
     _original_image = models.ImageField(null=True, upload_to=uploadTiny('stagegirl'))
