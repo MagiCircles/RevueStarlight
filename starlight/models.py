@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
 from collections import OrderedDict
 from django.conf import settings as django_settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.formats import date_format
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, string_concat
 from magi.abstract_models import BaseAccount
-from magi.item_model import MagiModel, i_choices
+from magi.item_model import MagiModel, i_choices, getInfoFromChoices
 from magi.utils import (
     ColorField,
     getAge,
+    getStaffConfiguration,
     ordinalNumber,
     staticImageURL,
     uploadItem,
@@ -21,6 +23,7 @@ from magi.utils import (
 from starlight.django_translated import t
 from starlight.utils import (
     displayNameHTML,
+    getMaxStatistic,
 )
 
 ############################################################
@@ -46,6 +49,31 @@ ALL_ALT_LANGUAGES = [
 ]
 
 ############################################################
+# Versions
+
+VERSIONS = OrderedDict((
+    ('JP', {
+        'translation': _('Japanese version'),
+        'image': 'ja',
+        'prefix': 'jp_',
+        'timezone': 'Asia/Tokyo',
+    }),
+    ('WW', {
+        'translation': _('Worldwide version'),
+        'image': 'world',
+        'prefix': 'ww_',
+        'timezone': 'UTC',
+    }),
+))
+
+VERSION_CHOICES = [(_name, _info['translation']) for _name, _info in VERSIONS.items()]
+
+LANGUAGES_TO_VERSIONS = {
+    'ja': 'JP',
+}
+DEFAULT_VERSION = 'WW'
+
+############################################################
 # Elements
 
 ELEMENTS = OrderedDict([
@@ -54,42 +82,56 @@ ELEMENTS = OrderedDict([
         'japanese': u'花',
         'color': '#F0484D',
         'light_color': '#FFD7CE',
+        'resists_against': 'wind',
+        'weak_against': 'snow',
     }),
     ('wind', {
         'translation': _('Wind'),
         'japanese': u'風',
         'color': '#30AB49',
         'light_color': '#AEFFBD',
+        'resists_against': 'snow',
+        'weak_against': 'flower',
     }),
     ('snow', {
         'translation': _('Snow'),
         'japanese': u'雪',
         'color': '#0072A6',
         'light_color': '#99EFFF',
+        'resists_against': 'flower',
+        'weak_against': 'wind',
     }),
     ('cloud', {
         'translation': _('Cloud'),
         'japanese': u'雲',
         'color': '#F3608A',
         'light_color': '#FFCED7',
+        'resists_against': 'moon',
+        'weak_against': 'cosmos',
     }),
     ('moon', {
         'translation': _('Moon'),
         'japanese': u'月',
         'color': '#F9AA12',
         'light_color': '#FBFEC8',
+        'resists_against': 'cosmos',
+        'weak_against': 'cloud',
     }),
     ('cosmos', {
         'translation': _('Cosmos'),
         'japanese': u'宙',
         'color': '#794A92',
         'light_color': '#E5D4FF',
+        'resists_against': 'cloud',
+        'weak_against': 'moon',
     }),
     ('dream', {
         'translation': _('Dream'),
         'japanese': u'夢',
         'color': '#38495A',
         'light_color': '#BDD5DE',
+        'resists_against': None,
+        'weak_against': None,
     }),
 ])
 
@@ -260,7 +302,12 @@ class School(MagiModel):
     # Reverse relations
 
     reverse_related = [
-        ('students', 'stagegirls', _('Students')),
+        {
+            'field_name': 'students',
+            'url': 'stagegirls',
+            'verbose_name': _('Students'),
+            'max_per_line': None,
+        },
     ]
 
     ############################################################
@@ -321,13 +368,23 @@ class StageGirl(MagiModel):
     astrological_sign_image_url = property(
         lambda _s: staticImageURL(_s.i_astrological_sign, folder='i_astrological_sign', extension='png'))
 
-    color = ColorField(_('Color'), null=True, blank=True)
+    color = ColorField(_('Color'), null=True)
 
     # todo: department, class?
 
-    weapon = models.CharField(_('Weapon'), max_length=100, null=True)
+    weapon = models.CharField(
+        _('Weapon'), max_length=100, null=True,
+        help_text='Example: Possibility of Puberty',
+    )
     WEAPONS_CHOICES = ALL_ALT_LANGUAGES
     d_weapons = models.TextField(_('Weapon'), null=True)
+
+    weapon_type = models.CharField(
+        _('Weapon'), max_length=100, null=True,
+        help_text='Example: Saber',
+    )
+    WEAPON_TYPES_CHOICES = ALL_ALT_LANGUAGES
+    d_weapon_types = models.TextField(_('Weapon'), null=True)
 
     favorite_food = models.CharField(_('Liked food'), max_length=100, null=True)
     FAVORITE_FOODS_CHOICES = ALL_ALT_LANGUAGES
@@ -427,6 +484,54 @@ class Staff(MagiModel):
 ############################################################
 ############################################################
 
+############################################################
+# Act
+
+class Act(MagiModel):
+    collection_name = 'act'
+    owner = models.ForeignKey(User, related_name='added_acts')
+
+    TYPES = OrderedDict([
+        ('basic', {
+            'translation': _('Basic'),
+        }),
+        ('climax', {
+            'translation': _('Climax'),
+        }),
+        ('auto', {
+            'translation': _('Auto'),
+        }),
+        ('finishing', {
+            'translation': _('Finishing'),
+        }),
+        ('auto', {
+            'translation': _('Auto'),
+        }),
+        ('auto', {
+            'translation': _('Auto'),
+        }),
+    ])
+    TYPE_CHOICES = [(_name, _info['translation']) for _name, _info in TYPES.items()]
+    i_type = models.PositiveIntegerField(_('Type'), choices=i_choices(TYPE_CHOICES))
+
+    name = models.CharField(_('Title'), max_length=100, db_index=True)
+    NAMES_CHOICES = ALL_ALT_LANGUAGES
+    d_names = models.TextField(_('Title'), null=True)
+
+    template = models.CharField(_('Template'), max_length=100, db_index=True)
+    TEMPLATES_CHOICES = ALL_ALT_LANGUAGES
+    d_templates = models.TextField(_('Template'), null=True)
+
+    image = models.ImageField(_('Image'), upload_to=uploadItem('card'), null=True)
+    _original_image = models.ImageField(null=True, upload_to=uploadTiny('card'))
+
+    cost = models.PositiveIntegerField('AP', default=1)
+
+    #affected_attribute =
+
+############################################################
+# Abstract: Base card
+
 class BaseCard(MagiModel):
     collection_name = 'card'
     owner = models.ForeignKey(User, related_name='added_%(class)ss')
@@ -441,30 +546,84 @@ class BaseCard(MagiModel):
     NAMES_CHOICES = ALL_ALT_LANGUAGES
     d_names = models.TextField(_('Title'), null=True)
 
-    RARITY_CHOICES = (
-        (1, u'★'),
-        (2, u'★★'),
-        (3, u'★★★'),
-        (4, u'★★★★'),
-    )
+    RARITIES = OrderedDict([
+        (1, {
+            'translation': u'★',
+            'cost': getStaffConfiguration('rarity_1_cost', 2),
+        }),
+        (2, {
+            'translation': u'★★',
+            'cost': getStaffConfiguration('rarity_2_cost', 6),
+        }),
+        (3, {
+            'translation': u'★★★',
+            'cost': getStaffConfiguration('rarity_3_cost', 9),
+        }),
+        (4, {
+            'translation': u'★★★★',
+            'cost': getStaffConfiguration('rarity_4_cost', 12),
+        }),
+        (5, {
+            'translation': u'★★★★★',
+            'cost': getStaffConfiguration('rarity_5_cost', 12),
+        }),
+        (6, {
+            'translation': u'★★★★★★',
+            'cost': getStaffConfiguration('rarity_6_cost', 12),
+        }),
+    ])
+    RARITY_CHOICES = [(_name, _info['translation']) for _name, _info in RARITIES.items()]
     RARITY_WITHOUT_I_CHOICES = True
     i_rarity = models.PositiveIntegerField(_('Rarity'), choices=RARITY_CHOICES, db_index=True)
+    rarity_image = property(lambda _s: staticImageURL(_s.i_rarity, folder='i_rarity', extension='png'))
+    cost = property(getInfoFromChoices('rarity', RARITIES, 'cost'))
 
-    ELEMENTS_CHOICES = ELEMENT_CHOICES
-    c_elements = models.TextField(_('Elements'), blank=True, null=True)
+    ELEMENT_CHOICES = ELEMENT_CHOICES
+    i_element = models.PositiveIntegerField(_('Element'), choices=i_choices(ELEMENT_CHOICES), db_index=True)
+    element_image = property(lambda _s: staticImageURL(_s.element, folder='color', extension='png'))
+    element_color = property(getInfoFromChoices('element', ELEMENTS, 'color'))
+    element_resists_against = property(getInfoFromChoices('element', ELEMENTS, 'resists_against'))
+    element_resists_against_image = property(lambda _s: staticImageURL(
+        _s.element_resists_against, folder='color', extension='png'))
+    element_weak_against = property(getInfoFromChoices('element', ELEMENTS, 'weak_against'))
+    element_weak_against_image = property(lambda _s: staticImageURL(
+        _s.element_weak_against, folder='color', extension='png'))
 
     DAMAGE_CHOICES = (
         ('normal', _('Normal')),
         ('special', _('Special')),
     )
     i_damage = models.PositiveIntegerField(_('Damage'), choices=i_choices(DAMAGE_CHOICES), default=0)
+    damage_icon_image = property(lambda _s: staticImageURL(_s.damage, folder='i_damage', extension='png'))
+    damage_image = property(lambda _s: staticImageURL(_s.i_damage, folder='i_damage', extension='png'))
 
     POSITION_CHOICES = (
-        ('front', _('Front')),
-        ('center', _('Center')),
         ('rear', _('Rear')),
+        ('center', _('Center')),
+        ('front', _('Front')),
     )
-    i_position = models.PositiveIntegerField(_('Position'), choices=i_choices(POSITION_CHOICES), default=0)
+    i_position = models.PositiveIntegerField(_('Position'), choices=i_choices(POSITION_CHOICES), default=1)
+    position_image = property(lambda _s: staticImageURL(_s.i_position, folder='i_position', extension='png'))
+
+    ROLES_CHOICES = (
+        ('anti-tank', _('Anti-tank')),
+        ('assassin', _('Assassin')),
+        ('attacker', _('Attacker')),
+        ('burn', _('Burn')),
+        ('debuffer', _('Debuffer')),
+        ('defender', _('Defender')),
+        ('disabler', _('Disabler')),
+        ('healer', _('Healer')),
+        ('nuker', _('Nuker')),
+        ('poison', _('Poison')),
+        ('special-defender', _('Special defender')),
+        ('special-defense-tank', _('Special defense tank')),
+        ('support', _('Support')),
+        ('tank', _('Tank')),
+    )
+    c_roles = models.TextField(_('Roles'), null=True)
+
+    limited = models.BooleanField(_('Limited'), default=False)
 
     ############################################################
     # Images
@@ -498,14 +657,125 @@ class BaseCard(MagiModel):
     ############################################################
     # Statistics fields
 
+    base_hp = models.PositiveIntegerField(_('HP'), null=True)
+    base_act_power = models.PositiveIntegerField(_('ACT Power'), null=True)
+    base_normal_defense = models.PositiveIntegerField(_('Normal defense'), null=True)
+    base_special_defense = models.PositiveIntegerField(_('Special defense'), null=True)
+    base_agility = models.PositiveIntegerField(_('Agility'), null=True)
+
+    delta_hp = models.PositiveIntegerField(string_concat(u'Δ ', _('HP')), null=True)
+    delta_act_power = models.PositiveIntegerField(string_concat(u'Δ ', _('ACT Power')), null=True)
+    delta_normal_defense = models.PositiveIntegerField(string_concat(u'Δ ', _('Normal defense')), null=True)
+    delta_special_defense = models.PositiveIntegerField(string_concat(u'Δ ', _('Special defense')), null=True)
+    delta_agility = models.PositiveIntegerField(string_concat(u'Δ ', _('Agility')), null=True)
+
     ############################################################
     # Statistics utils
 
-    # todo: so many things
+    STATISTICS_FIELDS = ['hp', 'act_power', 'normal_defense', 'special_defense', 'agility']
+    STATISTICS_PREFIXES = OrderedDict([
+        ('base_', _('Base')),
+        ('delta_', u'Δ'),
+    ])
+    ALL_STATISTICS_FIELDS = [
+        u'{}{}'.format(_prefix, _statistic)
+        for _statistic in STATISTICS_FIELDS
+        for _prefix in STATISTICS_PREFIXES.keys()
+    ]
+
+    def get_statistic(self, statistic, prefix):
+        return getattr(self, u'{}{}'.format(prefix, statistic)) or 0
+
+    def statistic_percent(self, statistic, prefix):
+        return (
+            self.get_statistic(statistic, prefix) / getMaxStatistic(statistic)
+        ) * 100
+
+    def display_statistic(self, statistic, prefix):
+        field_name = u'{}{}'.format(prefix, statistic)
+        return u"""
+	<div class="row">
+	  <div class="col-xs-4 text-left"><span class="stat-label-{statistic}">{verbose_name}</span></div>
+	  <div class="col-xs-2 text-right">{value}</div>
+	  <div class="col-xs-6">
+	    <div class="progress">
+	      <div class="progress-bar progress-bar-{element} progress-bar-striped"
+		   role="progressbar"
+		   style="width: {percent}%;">
+	      </div>
+	    </div>
+	  </div>
+        </div>
+        """.format(
+            statistic=statistic,
+            element=self.element,
+            verbose_name=self._meta.get_field(field_name).verbose_name,
+            value=self.get_statistic(statistic, prefix),
+            percent=self.statistic_percent(statistic, prefix),
+        )
+
+    @property
+    def display_statistics(self):
+        return u"""
+  <div class="card-statistics">
+    <div class="btn-group" data-toggle="buttons" data-control-tabs="card-{card_number}">
+        {labels}
+    </div>
+    <br><br>
+    <div class="tab-content" data-tabs="card-{card_number}">
+        {tabs}
+    </div>
+  </div>
+        """.format(
+            card_number=self.number,
+            labels=u''.join([u"""
+                <label class="btn btn-{element} {active}" style="width: {width}%"
+                       data-open-tab="card-{card_number}-{prefix}">
+	        <input type="radio" {checked}> {verbose_name}
+                </label>
+            """.format(
+                element=self.element,
+                active='active' if i == 0 else '',
+                checked='checked' if i == 0 else '',
+                width=100 / len(self.STATISTICS_PREFIXES),
+                card_number=self.number,
+                prefix=prefix[:-1],
+                verbose_name=verbose_name,
+            ) for i, (prefix, verbose_name) in enumerate(self.STATISTICS_PREFIXES.items())]),
+            tabs=u''.join([u"""
+            <div class="tab-pane {active}" data-tab="card-{card_number}-{prefix}">
+            {statistics}
+      </div>
+            """.format(
+                active='active' if i == 0 else '',
+                card_number=self.number,
+                prefix=prefix[:-1],
+                statistics=u''.join([
+                    self.display_statistic(statistic, prefix)
+                    for statistic in self.STATISTICS_FIELDS
+                ]),
+            ) for i, (prefix, verbose_name) in enumerate(self.STATISTICS_PREFIXES.items())]),
+        )
+
+    ############################################################
+    # Descriptions
+
+    description = models.TextField(_('Description'), null=True)
+    DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
+    d_descriptions = models.TextField(_('Description'), null=True)
+
+    profile = models.TextField(_('Profile'), null=True)
+    PROFILES_CHOICES = ALL_ALT_LANGUAGES
+    d_profiles = models.TextField(_('Profile'), null=True)
+
+    message = models.TextField(_('Message'), null=True)
+    MESSAGES_CHOICES = ALL_ALT_LANGUAGES
+    d_messages = models.TextField(_('Message'), null=True)
 
     ############################################################
     # Cache stage girl
 
+    _cache_stage_girl_update_on_none = True
     _cached_stage_girl_collection_name = 'stagegirl'
     _cache_j_stage_girl = models.TextField(null=True)
 
@@ -516,8 +786,47 @@ class BaseCard(MagiModel):
             'id': self.stage_girl_id,
             'name': self.stage_girl.name,
             'names': self.stage_girl.names or {},
-            'image': unicode(self.stage_girl.small_image),
+            'image_url': unicode(self.stage_girl.small_image_url),
         }
+
+    ############################################################
+    # Type
+
+    TYPES = OrderedDict([
+        ('permanent', {
+            'icon': 'chest',
+            'translation': _('Permanent'),
+            'filter': lambda _q: _q.filter(limited=False),
+            'is': lambda _s: not _s.limited,
+        }),
+        ('limited', {
+            'icon': 'hourglass',
+            'translation': _('Limited'),
+            'filter': lambda _q: _q.filter(limited=True),
+            'is': lambda _s: _s.limited,
+        }),
+        # ('event', {
+        #     'icon': 'event',
+        #     'translation': _('Event'),
+        #     'filter': lambda _q: _q.filter(event__isnull=False),
+        #     'is': lambda _s: bool(_s.event_id),
+        # }),
+    ])
+    TYPE_CHOICES = [(_name, _info['translation']) for _name, _info in TYPES.items()]
+
+    @property
+    def types(self):
+        return [
+            _type
+            for _type, _details in reversed(self.TYPES.items())
+            if _details['is'](self)
+        ]
+
+    @property
+    def type(self):
+        return self.types[0]
+
+    type_icon = property(getInfoFromChoices('type', TYPES, 'icon'))
 
     ############################################################
     # Unicode

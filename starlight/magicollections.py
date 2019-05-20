@@ -13,14 +13,20 @@ from magi.magicollections import (
 from magi.utils import (
     AttrDict,
     CuteFormType,
+    CuteFormTransform,
     ordinalNumber,
     setSubField,
+    staticImageURL,
 )
 from starlight.django_translated import t
 from starlight.utils import (
+    getElementsCuteForm,
+    getSchoolsCuteForm,
+    getStageGirlsCuteForm,
     getVoiceActressNameFromPk,
-    getVoiceActressURLFromPk,
     getVoiceActressThumbnailFromPk,
+    getVoiceActressURLFromPk,
+    mergeSchoolStageGirlCuteForm,
 )
 from starlight import models, forms
 
@@ -145,9 +151,7 @@ class VoiceActressCollection(MainItemCollection):
         'i_blood': {
             'type': CuteFormType.HTML,
         },
-        'school': {
-            'to_cuteform': lambda _k, _v: django_settings.SCHOOLS[_k]['image'],
-        },
+        'school': getSchoolsCuteForm(),
     }
 
     def to_fields(self, view, item, *args, **kwargs):
@@ -258,6 +262,7 @@ class StageGirlCollection(MainItemCollection):
     translated_fields = [
         'name',
         'weapon',
+        'weapon_type',
         'favorite_food',
         'least_favorite_food',
         'likes', 'dislikes',
@@ -279,19 +284,18 @@ class StageGirlCollection(MainItemCollection):
         'dislikes': 'heart-empty',
         'hobbies': 'hobbies',
         'description': 'id',
-        'cards': 'cards',
+        'video': 'film',
     }
 
     fields_images = {
         'astrological_sign': lambda _i: _i.astrological_sign_image_url,
+        'cards': 'dresses.png',
     }
 
     filter_cuteform = {
         'i_astrological_sign': {
         },
-        'school': {
-            'to_cuteform': lambda _k, _v: django_settings.SCHOOLS[_k]['image'],
-        },
+        'school': getSchoolsCuteForm(),
         'i_year': {
             'type': CuteFormType.HTML,
         },
@@ -314,7 +318,14 @@ class StageGirlCollection(MainItemCollection):
     class ItemView(MainItemCollection.ItemView):
         fields_preselected = ['voice_actress', 'school']
         fields_prefetched_together = ['cards']
-        fields_exclude = ['small_image']
+        fields_exclude = ['small_image', 'weapon_type']
+
+        def to_fields(self, item, *args, **kwargs):
+            fields = super(StageGirlCollection.ItemView, self).to_fields(item, *args, **kwargs)
+            if item.weapon_type:
+                setSubField(fields, 'weapon', key='type', value='text_annotation')
+                setSubField(fields, 'weapon', key='annotation', value=item.t_weapon_type)
+            return fields
 
 ############################################################
 # Staff Collection
@@ -370,15 +381,127 @@ class CardCollection(MainItemCollection):
     title = _('Card')
     plural_title = _('Cards')
     navbar_link_list = 'relive'
-    icon = 'cards'
+    navbar_link_title = string_concat(_('Dresses'), ' (', _('Cards'), ')')
+    image = 'red_dresses'
     form_class = forms.CardForm
     multipart = True
     translated_fields = [
         'name',
+        'description',
+        'profile',
+        'message',
     ]
+
+    filter_cuteform = {
+        'i_rarity': {
+            'image_folder': 'small_rarity',
+        },
+        'i_element': getElementsCuteForm(models.Card),
+        'i_damage': {
+        },
+        'i_position': {
+        },
+        'type': {
+            'to_cuteform': lambda _k, _v: models.Card.TYPES[_k]['icon'],
+            'transform': CuteFormTransform.Flaticon,
+        },
+        'stage_girl': getStageGirlsCuteForm(),
+        'resists_against': getElementsCuteForm(),
+        'weak_against': getElementsCuteForm(),
+    }
+    mergeSchoolStageGirlCuteForm(filter_cuteform)
+
+    fields_icons = {
+        'number': 'hashtag',
+        'stage_girl': 'idol',
+        'name': 'id',
+        'limited': 'hourglass',
+        'description': 'about',
+        'profile': 'id',
+        'message': 'chat',
+        'roles': 'staff',
+    }
+    fields_icons.update({
+        _statistic: 'hp' if '_hp' in _statistic else 'statistics'
+        for _statistic in models.Card.ALL_STATISTICS_FIELDS
+    })
+
+    fields_images = {
+        'position': lambda _i: _i.position_image,
+        'rarity': 'rarity.png',
+        'element': lambda _i: _i.element_image,
+        'damage': lambda _i: _i.damage_icon_image,
+    }
+
+    def to_fields(self, view, item, *args, **kwargs):
+        fields = super(CardCollection, self).to_fields(
+            view, item, *args, **kwargs)
+
+        # Show rarity as images
+        setSubField(fields, 'rarity', key='type', value='image')
+        setSubField(fields, 'rarity', key='value', value=item.rarity_image)
+
+        # Limited / permanent
+        if not item.limited:
+            setSubField(fields, 'limited', key='icon', value='chest')
+            setSubField(fields, 'limited', key='verbose_name', value=_('Permanent'))
+            setSubField(fields, 'limited', key='value', value=True)
+
+        # Roles -> Role
+        if len(item.roles) == 1:
+            setSubField(fields, 'roles', key='verbose_name', value=_('Role'))
+        return fields
 
     class ListView(MainItemCollection.ListView):
         default_ordering = 'number'
+        filter_form = forms.CardFilterForm
+        ajax_callback = 'loadCardsFilters'
+
+    class ItemView(MainItemCollection.ItemView):
+        fields_exclude = models.Card.ALL_STATISTICS_FIELDS
+        ajax_callback = 'loadCard'
+
+        def to_fields(self, item, extra_fields=None, *args, **kwargs):
+            if extra_fields is None: extra_fields = []
+
+            # Resists / Weak
+            for field_name, verbose_name in [
+                    ('resists', _('Resists against')),
+                    ('weak', _('Weak against')),
+            ]:
+                element = getattr(item, u'element_{}_against'.format(field_name))
+                i_element = models.Card.get_i('element', element)
+                parameters = { 'i_element': i_element }
+                extra_fields.append((field_name, {
+                    'verbose_name': verbose_name,
+                    'type': 'image_link',
+                    'link': self.collection.get_list_url(parameters=parameters),
+                    'ajax_link': self.collection.get_list_url(ajax=True, parameters=parameters),
+                    'link_text': models.Card.get_verbose_i('element', i_element),
+                    'value': getattr(item, u'element_{}_against_image'.format(field_name)),
+                    'image': staticImageURL(field_name, extension='png'),
+                }))
+
+            # Cost
+            extra_fields.append(('cost', {
+                'verbose_name': _('Cost'),
+                'type': 'text',
+                'value': item.cost,
+                'icon': 'money',
+            }))
+
+            # Statistics
+            extra_fields.append(('statistics', {
+                'verbose_name': _('Statistics'),
+                'icon': 'statistics',
+                'type': 'html',
+                'value': item.display_statistics,
+                'spread_across': True
+            }))
+
+            fields = super(CardCollection.ItemView, self).to_fields(
+                item, *args, extra_fields=extra_fields, **kwargs)
+            return fields
 
 ############################################################
 # Memoir Collection

@@ -18,7 +18,7 @@ from starlight import models
 ############################################################
 # License, game and site settings
 
-SITE_NAME = 'Revue Starlight International'
+SITE_NAME = 'Starlight Academy'
 GAME_NAME = u'SHOUJO☆KAGEKI REVUE STARLIGHT'
 LICENSE_NAME = 'Revue Starlight'
 SMARTPHONE_GAME = 'ReLIVE'
@@ -38,6 +38,9 @@ LAUNCH_DATE = True
 
 ############################################################
 # Images
+
+CORNER_POPUP_IMAGE = 'giraffe.png'
+CORNER_POPUP_IMAGE_OVERFLOW = True
 
 SITE_IMAGE = 'starlight.png'
 # todo SITE_NAV_LOGO = ''

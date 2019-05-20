@@ -90,6 +90,14 @@ def generate_settings():
         for voiceactress in models.VoiceActress.objects.all().order_by('name')
     ])
 
+    print 'Max statistics'
+    max_statistics = {
+        statistic: getattr(
+            models.Card.objects.order_by(u'-delta_{}'.format(statistic))[0],
+            u'delta_{}'.format(statistic),
+        ) for statistic in models.Card.STATISTICS_FIELDS
+    }
+
     # print 'Get the backgrounds'
     # backgrounds = [
     # {
@@ -111,6 +119,7 @@ def generate_settings():
         'FAVORITE_CHARACTERS': favorite_characters,
         'SCHOOLS': all_schools,
         'VOICE_ACTRESSES': all_voiceactresses,
+        'MAX_STATISTICS': max_statistics,
         # 'BACKGROUNDS': backgrounds,
     }, imports=[
         'from collections import OrderedDict',

@@ -35,7 +35,9 @@ body {
     font-size: 17px;
 }
 
-h1, h2, h3, h4, h5, h6, .title, .navbar-brand, .btn-lg, .btn-xl, .collection-table .table-headers-sections th {
+h1, h2, h3, h4, h5, h6, .title,
+.navbar-brand, .btn-lg, .btn-xl,
+.collection-table .table-headers-sections th {
     font-family: 'Slabo 27px', serif;
 }
 
@@ -51,6 +53,13 @@ h1, h2, h3, h4, h5, h6, .title, .navbar-brand, .btn-lg, .btn-xl, .collection-tab
     }
 }
 
+#filter-form-search-button > button {
+    font-family: 'Raleway', 'Arial Black';
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 1em;
+}
+
 /******************************************/
 /* Navbar */
 
@@ -64,10 +73,10 @@ html {
         .navbar-nav {
             // Set fonts and colors + add paddings
             & > li > a, .dropdown-menu > li > a {
-                font-family: 'Raleway', 'Arial Black';
-                font-weight: 600;
-                font-size: 14px;
                 &:not(#navBarIDDropDownyou) {
+                    font-family: 'Raleway', 'Arial Black';
+                    font-weight: 600;
+                    font-size: 14px;
                     text-transform: uppercase;
                 }
             }
@@ -92,6 +101,11 @@ html {
                     margin: -5px 0;
                 }
             }
+            [data-link-name="card_list"] > a > img {
+                @extra: 4px;
+                height: 16px + (@extra * 2);
+                margin: @extra * -1;
+            }
         }
         // Site title font and size
         .navbar-brand {
@@ -115,22 +129,6 @@ html {
 /******************************************/
 /* MagiCollections */
 
-/* User profile */
-
-.profile-tabs {
-    [data-link^="favorite_voiceactress"],
-    [data-link^="favorite_character"] {
-        img {
-            @size: 30px;
-            width: @size;
-            height: @size;
-            margin: -((@size - 24) / 2);
-            border-radius: 50%;
-        }
-    }
-}
-
-
 /* Shared by multiple collections */
 
 [data-cuteform-name="id_i_astrological_sign"] .cuteform-elt:not([data-cuteform-val=""]) {
@@ -151,6 +149,49 @@ html {
         opacity: 1;
     }
 }
+
+/* Card */
+
+[data-cuteform-name="id_i_rarity"] .cuteform-elt:not([data-cuteform-val=""]) {
+    width: auto;
+    height: 15px;
+    border-radius: 10px;
+    padding: 2px;
+    margin: 0;
+}
+
+[data-cuteform-name="id_i_damage"] .cuteform-elt:not([data-cuteform-val=""]) {
+    width: auto;
+    height: 20px;
+    border-radius: 6px;
+    margin: 0 5px;
+}
+
+[data-cuteform-name="id_i_position"] .cuteform-elt:not([data-cuteform-val=""]) {
+    border-radius: 6px;
+}
+
+.card-statistics {
+    .btn-group, .tab-content {
+        width: 100%;
+    }
+}
+
+/* User profile */
+
+.profile-tabs {
+    [data-link^="favorite_voiceactress"],
+    [data-link^="favorite_character"] {
+        img {
+            @size: 30px;
+            width: @size;
+            height: @size;
+            margin: -((@size - 24) / 2);
+            border-radius: 50%;
+        }
+    }
+}
+
 
 /* Staff */
 

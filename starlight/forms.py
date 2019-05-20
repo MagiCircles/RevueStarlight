@@ -14,6 +14,7 @@ from starlight import models
 from starlight.utils import (
     getSchoolChoices,
     getVoiceActressChoices,
+    getStageGirlChoices,
 )
 
 ############################################################
@@ -192,3 +193,75 @@ class CardForm(AutoForm):
 
     class Meta(AutoForm.Meta):
         model = models.Card
+
+class CardFilterForm(MagiFiltersForm):
+    search_fields = [
+        '_cache_j_stage_girl',
+        'name', 'd_names',
+        'description', 'd_descriptions',
+        'profile', 'd_profiles',
+        'message', 'd_messages',
+    ]
+    search_fields_labels = {
+        '_cache_j_stage_girl': _('Stage girl'),
+    }
+    ordering_fields = [
+        ('number', _('Number')),
+    ] + [
+        (
+            u'base_{}'.format(_statistic),
+            models.Card._meta.get_field(u'base_{}'.format(_statistic)).verbose_name,
+        ) for _statistic in models.Card.STATISTICS_FIELDS
+    ]
+    merge_fields = [
+        ('school', 'stage_girl'),
+    ]
+
+    stage_girl = forms.ChoiceField(label=_('Stage girl'), choices=getStageGirlChoices())
+
+    school = forms.ChoiceField(label=_('School'), choices=getSchoolChoices())
+    school_filter = MagiFilter(selector='stagegirl__school', distinct=True)
+
+    type = forms.ChoiceField(label=_('Type'), choices=models.Card.TYPE_CHOICES)
+    type_filter = MagiFilter(to_queryset=(
+        lambda form, queryset, request, value: models.Card.TYPES[value]['filter'](queryset)
+    ))
+
+    def _against_to_value(against, opposite):
+        def _f(value):
+            elements = []
+            for value in (value if isinstance(value, list) else [value]):
+                if models.ELEMENTS[value][u'{}_against'.format(opposite)] is None:
+                    elements = models.ELEMENTS.keys()
+                else:
+                    for element, details in models.ELEMENTS.items():
+                        if (details[u'{}_against'.format(against)] == value
+                            or details[u'{}_against'.format(against)] is None):
+                            elements.append(element)
+            return [
+                models.Card.get_i('element', element)
+                for element in elements
+            ]
+        return _f
+
+    resists_against = forms.ChoiceField(label=_('Resists against'), choices=models.ELEMENT_CHOICES)
+    resists_against_filter = MagiFilter(selector='i_element', to_value=_against_to_value('resists', 'weak'))
+
+    weak_against = forms.ChoiceField(label=_('Weak against'), choices=models.ELEMENT_CHOICES)
+    weak_against_filter = MagiFilter(selector='i_element', to_value=_against_to_value('weak', 'resists'))
+
+    def __init__(self, *args, **kwargs):
+        super(CardFilterForm, self).__init__(*args, **kwargs)
+        if 'school' in self.fields:
+            self.fields['school'].choices = getSchoolChoices()
+
+    class Meta(MagiFiltersForm.Meta):
+        model = models.Card
+        fields = [
+            'search',
+            'stage_girl', 'school',
+            'i_rarity', 'i_element',
+            'type', 'i_damage', 'i_position',
+            'c_roles',
+            'resists_against', 'weak_against',
+        ]
