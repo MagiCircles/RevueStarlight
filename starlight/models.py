@@ -732,8 +732,8 @@ class BaseCard(MagiModel):
                 </label>
             """.format(
                 element=self.element,
-                active='active' if i == 0 else '',
-                checked='checked' if i == 0 else '',
+                active='active' if i == 1 else '',
+                checked='checked' if i == 1 else '',
                 width=100 / len(self.STATISTICS_PREFIXES),
                 card_number=self.number,
                 prefix=prefix[:-1],
@@ -744,7 +744,7 @@ class BaseCard(MagiModel):
             {statistics}
       </div>
             """.format(
-                active='active' if i == 0 else '',
+                active='active' if i == 1 else '',
                 card_number=self.number,
                 prefix=prefix[:-1],
                 statistics=u''.join([
