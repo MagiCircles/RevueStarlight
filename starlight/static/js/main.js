@@ -1,6 +1,7 @@
 function loadCardsFilters() {
     let form = $('[id="filter-form-card"]');
     if (!form.data('loaded-separators')) {
+        form.data('loaded-separators', true);
         formShowMore(form, 'type', true, 'ordering', false);
     }
 }
