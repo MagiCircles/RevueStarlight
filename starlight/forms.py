@@ -248,6 +248,11 @@ class CardFilterForm(MagiFiltersForm):
         super(CardFilterForm, self).__init__(*args, **kwargs)
         if 'school' in self.fields:
             self.fields['school'].choices = getSchoolChoices()
+        if 'i_rarity' in self.fields:
+            self.fields['i_rarity'].choices = [
+                (k, v) for k, v in self.fields['i_rarity'].choices
+                if k not in (1, 6)
+            ]
 
     class Meta(MagiFiltersForm.Meta):
         model = models.Card
