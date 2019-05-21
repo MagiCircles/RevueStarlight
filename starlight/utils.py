@@ -40,7 +40,7 @@ def displayNameHTML(item):
 # Form choices utils
 
 def getSchoolChoices():
-    return [
+    return BLANK_CHOICE_DASH + [
         (school_id, getTranslatedName(school_details))
         for school_id, school_details in django_settings.SCHOOLS.items()
     ]
