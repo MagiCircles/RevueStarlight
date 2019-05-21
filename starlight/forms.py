@@ -229,19 +229,13 @@ class CardFilterForm(MagiFiltersForm):
 
     def _against_to_value(against, opposite):
         def _f(value):
-            elements = []
-            for value in (value if isinstance(value, list) else [value]):
-                if models.ELEMENTS[value][u'{}_against'.format(opposite)] is None:
-                    elements = models.ELEMENTS.keys()
-                else:
-                    for element, details in models.ELEMENTS.items():
-                        if (details[u'{}_against'.format(against)] == value
-                            or details[u'{}_against'.format(against)] is None):
-                            elements.append(element)
-            return [
-                models.Card.get_i('element', element)
-                for element in elements
-            ]
+            elements_to_filter = []
+            for filtered_element in (value if isinstance(value, list) else [value]):
+                for element, details in models.ELEMENTS.items():
+                    against_elements = details.get(u'{}_against'.format(against), [])
+                    if filtered_element in against_elements:
+                        elements_to_filter.append(models.Card.get_i('element', element))
+            return elements_to_filter
         return _f
 
     resists_against = forms.ChoiceField(label=_('Resists against'), choices=models.ELEMENT_CHOICES)

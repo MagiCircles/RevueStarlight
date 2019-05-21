@@ -469,18 +469,33 @@ class CardCollection(MainItemCollection):
                     ('resists', _('Resists against')),
                     ('weak', _('Weak against')),
             ]:
-                element = getattr(item, u'element_{}_against'.format(field_name))
-                i_element = models.Card.get_i('element', element)
-                parameters = { 'i_element': i_element }
-                extra_fields.append((field_name, {
-                    'verbose_name': verbose_name,
-                    'type': 'image_link',
-                    'link': self.collection.get_list_url(parameters=parameters),
-                    'ajax_link': self.collection.get_list_url(ajax=True, parameters=parameters),
-                    'link_text': models.Card.get_verbose_i('element', i_element),
-                    'value': getattr(item, u'element_{}_against_image'.format(field_name)),
-                    'image': staticImageURL(field_name, extension='png'),
-                }))
+                images = []
+                for element in getattr(item, u'elements_{}_against'.format(field_name)):
+                    i_element = models.Card.get_i('element', element)
+                    t_element = models.Card.get_verbose_i('element', i_element)
+                    parameters = { 'i_element': i_element }
+                    images.append({
+                        'link': self.collection.get_list_url(parameters=parameters),
+                        'ajax_link': self.collection.get_list_url(
+                            ajax=True, modal_only=True, parameters=parameters),
+                        'link_text': t_element,
+                        'tooltip': t_element,
+                        'value': staticImageURL(element, folder='color', extension='png'),
+                    })
+                if images:
+                    extra_fields.append((field_name, {
+                        'image': staticImageURL(field_name, extension='png'),
+                        'verbose_name': verbose_name,
+                        'type': 'images_links',
+                        'images': images,
+                    }))
+                else:
+                    extra_fields.append((field_name, {
+                        'image': staticImageURL(field_name, extension='png'),
+                        'verbose_name': verbose_name,
+                        'type': 'text',
+                        'value': _('None'),
+                    }))
 
             # Cost
             extra_fields.append(('cost', {

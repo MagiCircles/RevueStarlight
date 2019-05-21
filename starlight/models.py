@@ -82,56 +82,56 @@ ELEMENTS = OrderedDict([
         'japanese': u'花',
         'color': '#F0484D',
         'light_color': '#FFD7CE',
-        'resists_against': 'wind',
-        'weak_against': 'snow',
+        'resists_against': ['wind'],
+        'weak_against': ['snow', 'dream'],
     }),
     ('wind', {
         'translation': _('Wind'),
         'japanese': u'風',
         'color': '#30AB49',
         'light_color': '#AEFFBD',
-        'resists_against': 'snow',
-        'weak_against': 'flower',
+        'resists_against': ['snow'],
+        'weak_against': ['flower', 'dream'],
     }),
     ('snow', {
         'translation': _('Snow'),
         'japanese': u'雪',
         'color': '#0072A6',
         'light_color': '#99EFFF',
-        'resists_against': 'flower',
-        'weak_against': 'wind',
+        'resists_against': ['flower'],
+        'weak_against': ['wind', 'dream'],
     }),
     ('cloud', {
         'translation': _('Cloud'),
         'japanese': u'雲',
         'color': '#F3608A',
         'light_color': '#FFCED7',
-        'resists_against': 'moon',
-        'weak_against': 'cosmos',
+        'resists_against': ['moon'],
+        'weak_against': ['cosmos', 'dream'],
     }),
     ('moon', {
         'translation': _('Moon'),
         'japanese': u'月',
         'color': '#F9AA12',
         'light_color': '#FBFEC8',
-        'resists_against': 'cosmos',
-        'weak_against': 'cloud',
+        'resists_against': ['cosmos'],
+        'weak_against': ['cloud', 'dream'],
     }),
     ('cosmos', {
         'translation': _('Cosmos'),
         'japanese': u'宙',
         'color': '#794A92',
         'light_color': '#E5D4FF',
-        'resists_against': 'cloud',
-        'weak_against': 'moon',
+        'resists_against': ['cloud'],
+        'weak_against': ['moon', 'dream'],
     }),
     ('dream', {
         'translation': _('Dream'),
         'japanese': u'夢',
         'color': '#38495A',
         'light_color': '#BDD5DE',
-        'resists_against': None,
-        'weak_against': None,
+        'resists_against': [],
+        'weak_against': ['flower', 'wind', 'snow', 'cloud', 'moon', 'cosmos'],
     }),
 ])
 
@@ -583,12 +583,8 @@ class BaseCard(MagiModel):
     i_element = models.PositiveIntegerField(_('Element'), choices=i_choices(ELEMENT_CHOICES), db_index=True)
     element_image = property(lambda _s: staticImageURL(_s.element, folder='color', extension='png'))
     element_color = property(getInfoFromChoices('element', ELEMENTS, 'color'))
-    element_resists_against = property(getInfoFromChoices('element', ELEMENTS, 'resists_against'))
-    element_resists_against_image = property(lambda _s: staticImageURL(
-        _s.element_resists_against, folder='color', extension='png'))
-    element_weak_against = property(getInfoFromChoices('element', ELEMENTS, 'weak_against'))
-    element_weak_against_image = property(lambda _s: staticImageURL(
-        _s.element_weak_against, folder='color', extension='png'))
+    elements_resists_against = property(getInfoFromChoices('element', ELEMENTS, 'resists_against'))
+    elements_weak_against = property(getInfoFromChoices('element', ELEMENTS, 'weak_against'))
 
     DAMAGE_CHOICES = (
         ('normal', _('Normal')),
@@ -834,8 +830,9 @@ class BaseCard(MagiModel):
 
     def __unicode__(self):
         if self.pk:
-            return u'{rarity} {stage_girl_name} {name}'.format(
+            return u'{rarity} {element} {stage_girl_name} {name}'.format(
                 rarity=self.t_rarity,
+                element=self.t_element,
                 stage_girl_name=self.cached_stage_girl.t_name if self.stage_girl_id else '',
                 name=self.t_name or '',
             )
