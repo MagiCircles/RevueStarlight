@@ -1,0 +1,8 @@
+{% for item in items %}
+{% with act=item %}
+{% ifchanged act.i_type %}
+<h3 class="acts-title">{{ act.t_type }}</h3>
+{% endifchanged %}
+{% include 'items/actItem.html' %}
+{% endwith %}
+{% endfor %}

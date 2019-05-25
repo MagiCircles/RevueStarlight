@@ -1,0 +1,36 @@
+{% with act=item %}
+{% if not parent_item %}
+<p><span class="label label-default">{{ act.t_type }}</span></p>
+{% endif %}
+<div class="panel panel-{% if parent_item %}{{ parent_item.element }}{% else %}default{% endif %} act act-{{ act.type }}{% if act.show_top_details %} act-with-top-details{% endif %}">
+  {% if act.show_title %}
+  {% if act.show_top_details %}
+  <div class="act-top">
+    {% for details in act.top_details %}
+    <span class="label label-default label-{% if parent_item %}{{ parent_item.element }}{% else %}default{% endif %}">{{ details.verbose_name }}</span>
+    <span class="label-value">{{ details.value }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="panel-heading">
+    <span>
+      {{ act.t_name }}
+    </span>
+  </div>
+  {% endif %}
+  <div class="panel-body">
+    {% if act.image %}
+    <div class="row">
+      <div class="col-xs-2">
+        <img src="{{ act.image_url }}" alt="{{ act.t_name }}" class="act-image">
+      </div>
+      <div class="col-xs-10">
+        {% endif %}
+        {{ act.t_description }}
+        {% if act.image %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div><br>
+{% endwith %}
