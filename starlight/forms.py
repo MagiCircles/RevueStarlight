@@ -58,26 +58,6 @@ class UserPreferencesForm(_UserPreferencesForm):
 ############################################################
 # Voice Actress
 
-class VoiceActressForm(AutoForm):
-    def __init__(self, *args, **kwargs):
-        super(VoiceActressForm, self).__init__(*args, **kwargs)
-        if not self.is_creating:
-            self.belowform = mark_safe(u'<h1 class="text-center padding50 form-title">Links</h1><ul class="container_form list-group">{links}<li class="list-group-item"><a href="{add_url}" data-ajax-url="{ajax_add_url}" data-ajax-handle-form="true" class="btn btn-secondary btn-sm pull-right">Add link</a><br></li></ul>'.format(
-                links=u''.join([
-                    u'<li class="list-group-item"><a href="{edit_url}" class="btn btn-secondary btn-sm pull-right" data-ajax-url="{ajax_edit_url}" data-ajax-handle-form="true">Edit link</a><a href="{url}">{name}</a></li>'.format(
-                        edit_url=link.edit_url,
-                        ajax_edit_url=link.ajax_edit_url,
-                        url=link.url,
-                        name=link.t_name,
-                    ) for link in self.instance.links.all()
-                ]),
-                add_url=u'/voiceactresslinks/add/?voice_actress={}'.format(self.instance.pk),
-                ajax_add_url=u'/ajax/voiceactresslinks/add/?voice_actress={}'.format(self.instance.pk),
-            ))
-
-    class Meta(AutoForm.Meta):
-        model = models.VoiceActress
-
 class VoiceActressFilterForm(MagiFiltersForm):
     search_fields = [
         'name', 'd_names',
@@ -117,14 +97,6 @@ class VoiceActressFilterForm(MagiFiltersForm):
             'i_astrological_sign', 'i_blood',
             'ordering', 'reverse_order',
         ]
-
-############################################################
-# Voice actress link
-
-class VoiceActressLinkForm(AutoForm):
-    class Meta(AutoForm.Meta):
-        model = models.VoiceActressLink
-        allow_initial_in_get = ('voice_actress',)
 
 ############################################################
 # Stage girl

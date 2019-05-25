@@ -177,6 +177,73 @@ html {
     }
 }
 
+[data-field="acts"] {
+    h3.acts-title {
+        font-family: inherit;
+        font-size: 1.1em;
+        background: #D3D2D7 url('/static/img/act_title.png') no-repeat bottom right;
+        background-size: auto 100%;
+        text-align: left;
+        padding: 10px 15px;
+        margin: 5px 0 15px 0;
+        border-radius: 4px;
+    }
+}
+
+/* Act */
+
+.panel.act {
+    overflow: hidden;
+    text-align: left;
+    .act-image {
+        display: block;
+        margin: auto!important;
+        width: auto!important;
+        min-width: 50px!important;
+        max-width: 100%;
+    }
+    &.act-with-top-details {
+        .panel-heading {
+            width: 80%;
+            -ms-transform: skewX(15deg);
+            -webkit-transform: skewX(-30deg);
+            transform: skewX(-30deg);
+            margin-left: -13px;
+            padding-left: 30px;
+            border-top-right-radius: 0;
+            & > span {
+                display: block;
+                -ms-transform: skewX(30deg);
+                -webkit-transform: skewX(30deg);
+                transform: skewX(30deg);
+            }
+        }
+        .act-top {
+            float: right;
+            text-align: right;
+            width: 19%;
+            margin-right: 1%;
+            padding: 10px 15px;
+            border-bottom: 5px dotted #ccc;
+            &, & > .label {
+                line-height: 1.42857143;
+                font-size: 1em;
+            }
+            & > .label-value {
+                padding: .2em .6em .3em;
+            }
+        }
+    }
+    &.act-climax {
+        background: #FFD2D2 url('/static/img/climax_act_background.png') no-repeat bottom 5px right 5px;
+        border-color: #FF5155;
+        .panel-heading {
+            background-color: #FF5155;
+            border-color: #FF5155;
+        }
+    }
+}
+
 /* User profile */
 
 .profile-tabs {

@@ -14,6 +14,7 @@ from magi.utils import (
     getStaffConfiguration,
     ordinalNumber,
     staticImageURL,
+    summarize,
     uploadItem,
     uploadTiny,
     upload2x,
@@ -495,21 +496,28 @@ class Act(MagiModel):
     TYPES = OrderedDict([
         ('basic', {
             'translation': _('Basic'),
+            'show_cost': True,
+            'show_title': True,
         }),
         ('climax', {
             'translation': _('Climax'),
+            'show_cost': True,
+            'show_title': True,
         }),
         ('auto', {
             'translation': _('Auto'),
+            'show_cost': False,
+            'show_title': False,
         }),
         ('finishing', {
             'translation': _('Finishing'),
+            'show_cost': False,
+            'show_title': True,
         }),
-        ('auto', {
-            'translation': _('Auto'),
-        }),
-        ('auto', {
-            'translation': _('Auto'),
+        ('event', {
+            'translation': _('Event'),
+            'show_cost': False,
+            'show_title': False,
         }),
     ])
     TYPE_CHOICES = [(_name, _info['translation']) for _name, _info in TYPES.items()]
@@ -519,16 +527,54 @@ class Act(MagiModel):
     NAMES_CHOICES = ALL_ALT_LANGUAGES
     d_names = models.TextField(_('Title'), null=True)
 
-    template = models.CharField(_('Template'), max_length=100, db_index=True)
-    TEMPLATES_CHOICES = ALL_ALT_LANGUAGES
-    d_templates = models.TextField(_('Template'), null=True)
+    description = models.CharField(_('Description'), max_length=100)
+    DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
+    d_descriptions = models.TextField(_('Description'), null=True)
 
-    image = models.ImageField(_('Image'), upload_to=uploadItem('card'), null=True)
-    _original_image = models.ImageField(null=True, upload_to=uploadTiny('card'))
+    image = models.ImageField(_('Image'), upload_to=uploadItem('act'), null=True)
+    _original_image = models.ImageField(null=True, upload_to=uploadTiny('act'))
+
+    small_image = models.ImageField('Small image', upload_to=uploadItem('act'), null=True)
+    _original_small_image = models.ImageField(null=True, upload_to=uploadTiny('act'))
 
     cost = models.PositiveIntegerField('AP', default=1)
 
-    #affected_attribute =
+    j_details = models.TextField(null=True)
+
+    ############################################################
+    # Views utils
+
+    show_cost = property(getInfoFromChoices('type', TYPES, 'show_cost'))
+    show_title = property(getInfoFromChoices('type', TYPES, 'show_title'))
+
+    template_for_prefetched = 'items/acts.html'
+
+    @property
+    def show_top_details(self):
+        return self.show_cost
+
+    @property
+    def top_details(self):
+        return [
+            d for d in [
+                {
+                    'verbose_name': _('AP'),
+                    'value': self.cost,
+                } if self.show_cost else None,
+            ] if d
+        ]
+
+    ############################################################
+    # Unicode
+
+    def __unicode__(self):
+        return u'{} - {}'.format(
+            self.t_name,
+            summarize(self.t_description, max_length=(50 - len(unicode(self.t_name)))),
+        )
+
+    class Meta(MagiModel.Meta):
+        unique_together = (('name', 'description'), )
 
 ############################################################
 # Abstract: Base card
@@ -653,6 +699,8 @@ class BaseCard(MagiModel):
 
     ############################################################
     # Statistics fields
+
+    acts = models.ManyToManyField(Act, related_name='%(class)ss')
 
     base_hp = models.PositiveIntegerField(_('HP'), null=True)
     base_act_power = models.PositiveIntegerField(_('ACT Power'), null=True)
@@ -824,6 +872,13 @@ class BaseCard(MagiModel):
         return self.types[0]
 
     type_icon = property(getInfoFromChoices('type', TYPES, 'icon'))
+
+    ############################################################
+    # Reverse relations
+
+    reverse_related = [
+        { 'field_name': 'acts', 'verbose_name': _('Acts'), 'max_per_line': None },
+    ]
 
     ############################################################
     # Unicode

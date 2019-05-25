@@ -1,9 +1,12 @@
 from django.conf import settings as django_settings
+from django.db.models import Prefetch
 from django.utils.html import mark_safe
 from django.utils.translation import ugettext_lazy as _, string_concat, get_language
 from magi.magicollections import (
     MagiCollection,
     MainItemCollection,
+    SubItemCollection,
+    custom_item_template,
     StaffConfigurationCollection as _StaffConfigurationCollection,
     DonateCollection as _DonateCollection,
     ActivityCollection as _ActivityCollection,
@@ -124,7 +127,6 @@ class VoiceActressCollection(MainItemCollection):
     navbar_link_list = 'revuestarlight'
     navbar_link_title = _('Cast')
     icon = 'voice-actress'
-    form_class = forms.VoiceActressForm
     translated_fields = ('name', 'specialty', 'hobbies', 'm_description')
     multipart = True
 
@@ -186,45 +188,38 @@ class VoiceActressCollection(MainItemCollection):
 ############################################################
 # Voice Actress Link Collection
 
-class VoiceActressLinkCollection(MainItemCollection):
+class VoiceActressLinkCollection(SubItemCollection):
+    main_collection = 'voiceactress'
+    main_fk = 'voice_actress'
+    main_related = 'links'
+
     queryset = models.VoiceActressLink.objects.all().select_related('voice_actress')
     title = string_concat(_('Voice actress'), ' - ', _('Link'))
     plural_title = string_concat(_('Voice actress'), ' - ', _('Links'))
     icon = 'link'
-    navbar_link_list = 'staff'
-    one_permissions_required = ['manage_main_items', 'translate_items']
     translated_fields = ('name',)
-    form_class = forms.VoiceActressLinkForm
 
-    class ListView(MainItemCollection.ListView):
+    class ListView(SubItemCollection.ListView):
         display_style = 'table'
         display_style_table_fields = ['voice_actress', 'name', 'url']
         show_item_buttons_as_icons = True
 
-    class ItemView(MainItemCollection.ItemView):
+    class ItemView(SubItemCollection.ItemView):
         enabled = False
         fields_preselected = ['voice_actress'] # used by table_fields in list view
-
-    class AddView(MainItemCollection.AddView):
-        back_to_list_button = False
-
-        def redirect_after_add(self, request, item, ajax):
-            return item.voice_actress.item_url if not ajax else '/ajax/successadd/'
-
-    class EditView(MainItemCollection.EditView):
-        back_to_list_button = False
-
-        def redirect_after_edit(self, request, item, ajax):
-            return item.voice_actress.item_url if not ajax else '/ajax/successedit/'
 
 ############################################################
 # School Collection
 
-class SchoolCollection(MainItemCollection):
+class SchoolCollection(SubItemCollection):
+    main_collection = 'stagegirl'
+    main_many2many = True
+    main_related = 'school'
+
     queryset = models.School.objects.all()
     title = _('School')
     plural_title = _('Schools')
-    navbar_link_list = 'staff'
+
     icon = 'school'
     translated_fields = ('name', 'm_description')
     multipart = True
@@ -235,18 +230,11 @@ class SchoolCollection(MainItemCollection):
         'students': 'idol',
     }
 
-    class ItemView(MainItemCollection.ItemView):
+    class ItemView(SubItemCollection.ItemView):
         fields_prefetched_together = ['students']
 
-    class ListView(MainItemCollection.ListView):
+    class ListView(SubItemCollection.ListView):
         show_items_names = True
-        staff_required = True
-        permissions_required = ['manage_main_items']
-
-        def has_permissions_to_see_in_navbar(self, request, context):
-            super(SchoolCollection.ListView, self).has_permissions_to_see_in_navbar(request, context)
-            return (request.user.is_authenticated()
-                    and request.user.hasPermission('manage_main_items'))
 
 ############################################################
 # Stage Girl Collection
@@ -374,6 +362,28 @@ class SongCollection(MainItemCollection):
 ############################################################
 
 ############################################################
+# Act Collection
+
+class ActCollection(SubItemCollection):
+    main_collection = 'card'
+    main_many2many = True
+    main_related = 'acts'
+
+    queryset = models.Act.objects.all().select_related('card')
+    title = _('Act')
+    plural_title = _('Acts')
+    icon = 'skill'
+    translated_fields = ('name', 'description')
+    multipart = True
+
+    class ListView(SubItemCollection.ListView):
+        per_line = 1
+        item_template = custom_item_template
+
+    class ItemView(SubItemCollection.ItemView):
+        template = custom_item_template
+
+############################################################
 # Card Collection
 
 class CardCollection(MainItemCollection):
@@ -385,6 +395,7 @@ class CardCollection(MainItemCollection):
     image = 'red_dresses'
     form_class = forms.CardForm
     multipart = True
+
     translated_fields = [
         'name',
         'description',
@@ -420,6 +431,7 @@ class CardCollection(MainItemCollection):
         'profile': 'id',
         'message': 'chat',
         'roles': 'staff',
+        'acts': 'skill',
     }
     fields_icons.update({
         _statistic: 'hp' if '_hp' in _statistic else 'statistics'
@@ -459,7 +471,16 @@ class CardCollection(MainItemCollection):
 
     class ItemView(MainItemCollection.ItemView):
         fields_exclude = models.Card.ALL_STATISTICS_FIELDS
+        fields_prefetched_together = ['acts']
         ajax_callback = 'loadCard'
+
+        def get_queryset(self, queryset, parameters, request):
+            # Order acts by type, cost
+            queryset = queryset.prefetch_related(Prefetch(
+                'acts', queryset=models.Act.objects.order_by('i_type', 'cost'),
+            ))
+            queryset = super(CardCollection.ItemView, self).get_queryset(queryset, parameters, request)
+            return queryset
 
         def to_fields(self, item, extra_fields=None, *args, **kwargs):
             if extra_fields is None: extra_fields = []
@@ -517,6 +538,12 @@ class CardCollection(MainItemCollection):
             fields = super(CardCollection.ItemView, self).to_fields(
                 item, *args, extra_fields=extra_fields, **kwargs)
             return fields
+
+    class AddView(MainItemCollection.AddView):
+        savem2m = True
+
+    class EditView(MainItemCollection.EditView):
+        savem2m = True
 
 ############################################################
 # Memoir Collection

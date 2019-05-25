@@ -1,6 +1,10 @@
 from __future__ import print_function
 from collections import OrderedDict
-from magi.import_data import import_data as magi_import_data
+from magi.import_data import (
+    import_generic_item,
+    save_item,
+    import_data as magi_import_data,
+)
 from starlight import models
 
 TO_STATISTICS = {
@@ -67,6 +71,17 @@ TO_POSITION = {
     3: 'front',
 }
 
+TO_SKILL_TYPE = {
+    'command_1': 'basic',
+    'command_2': 'basic',
+    'command_3': 'basic',
+    'unique': 'climax',
+    'confusion': None, # couldn't find what it was in the game?
+    # Missing from json files atm:
+    'auto': 'auto',
+    'finishing': 'finishing',
+}
+
 def cardCallback(details, item, unique_data, data):
     pass
 
@@ -81,7 +96,7 @@ def mapCardStatistics(prefix):
 def mapTranslatedValues(field_name):
     def _f(v):
         return {
-            field_name: v.get('en', None) or None,
+            field_name: v.get('en', None) or v.get('ja', None) or None,
             u'd_{}s'.format(field_name): {
                 _l: _t for _l, _t in {
                     'ja': v.get('ja', None) or None,
@@ -90,6 +105,39 @@ def mapTranslatedValues(field_name):
                 }.items() if _t } or None,
         }
     return _f
+
+def mapSkills(skills):
+    added_acts = []
+    for skill_name, details in skills.items():
+        details['i_type'] = TO_SKILL_TYPE[skill_name]
+        if details['i_type']:
+            act_unique_data, act_data, not_in_fields = import_generic_item({
+                'model': models.Act,
+                'unique_fields': [
+                    'name',
+                    'description',
+                ],
+                'fields': [
+                    'i_type',
+                    'cost',
+                ],
+                'mapping': {
+                    'name': mapTranslatedValues('name'),
+                    'description': mapTranslatedValues('description'),
+                    'details': 'j_details',
+                },
+                'ignored_fields': [
+                    'id',
+                    'attribute_id', # same as card
+                    'icon_id',
+                    'sequence_id',
+                ],
+            }, details)
+            print('- Ignored:', not_in_fields)
+            item = save_item(models.Act, act_unique_data, act_data, print, unique_together=True)
+            if item:
+                added_acts.append(item)
+    return ('acts', added_acts)
 
 IMPORT_CONFIGURATION = OrderedDict()
 IMPORT_CONFIGURATION['cards'] = {
@@ -107,7 +155,7 @@ IMPORT_CONFIGURATION['cards'] = {
         'position': lambda v: ('i_position', TO_POSITION[v]),
         'base': mapCardStatistics('base_'),
         'delta': mapCardStatistics('delta_'),
-        # 'skills': todo,
+        'skills': mapSkills,
         'name': mapTranslatedValues('name'),
         'description': mapTranslatedValues('description'),
         'profile': mapTranslatedValues('profile'),
@@ -115,7 +163,6 @@ IMPORT_CONFIGURATION['cards'] = {
     },
     'callback': cardCallback,
     'ignored_fields': [
-        'skills', # todo
         'cost', # value can be determined by rarity
 
         # I don't think we will store these
