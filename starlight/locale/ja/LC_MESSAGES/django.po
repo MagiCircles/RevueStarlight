@@ -1,0 +1,436 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-15 10:34+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: starlight/magicollections.py:54
+msgid "Feed"
+msgstr ""
+
+#: starlight/magicollections.py:87 starlight/models.py:274
+msgid "Voice actress"
+msgstr ""
+
+#: starlight/magicollections.py:88
+msgid "Voice actresses"
+msgstr ""
+
+#: starlight/magicollections.py:90
+msgid "Cast"
+msgstr ""
+
+#: starlight/magicollections.py:135 starlight/models.py:279
+msgid "School"
+msgstr ""
+
+#: starlight/magicollections.py:136
+msgid "Schools"
+msgstr ""
+
+#: starlight/magicollections.py:157 starlight/models.py:187
+#: starlight/models.py:377 starlight/settings.py:81
+msgid "Stage girl"
+msgstr ""
+
+#: starlight/magicollections.py:158
+msgid "Stage girls"
+msgstr ""
+
+#: starlight/magicollections.py:211
+msgid "Staff"
+msgstr ""
+
+#: starlight/magicollections.py:222
+msgid "Song"
+msgstr ""
+
+#: starlight/magicollections.py:223 starlight/settings.py:99
+msgid "Songs"
+msgstr ""
+
+#: starlight/magicollections.py:225
+msgid "Discography"
+msgstr ""
+
+#: starlight/magicollections.py:239
+msgid "Card"
+msgstr ""
+
+#: starlight/magicollections.py:240 starlight/models.py:332
+#: starlight/settings.py:96
+msgid "Cards"
+msgstr ""
+
+#: starlight/magicollections.py:258
+msgid "Memoir"
+msgstr ""
+
+#: starlight/magicollections.py:259
+msgid "Memoirs"
+msgstr ""
+
+#: starlight/magicollections.py:268 starlight/settings.py:98
+msgid "Event"
+msgstr ""
+
+#: starlight/magicollections.py:269
+msgid "Events"
+msgstr ""
+
+#: starlight/magicollections.py:278
+msgid "Conversation"
+msgstr ""
+
+#: starlight/magicollections.py:279
+msgid "Conversations"
+msgstr ""
+
+#: starlight/magicollections.py:281
+msgid "My theater"
+msgstr ""
+
+#: starlight/magicollections.py:289
+msgid "Comic"
+msgstr ""
+
+#: starlight/magicollections.py:290
+msgid "Comics"
+msgstr ""
+
+#: starlight/models.py:51
+msgid "Flower"
+msgstr ""
+
+#: starlight/models.py:57
+msgid "Wind"
+msgstr ""
+
+#: starlight/models.py:63
+msgid "Snow"
+msgstr ""
+
+#: starlight/models.py:69
+msgid "Cloud"
+msgstr ""
+
+#: starlight/models.py:75
+msgid "Moon"
+msgstr ""
+
+#: starlight/models.py:81
+msgid "Cosmos"
+msgstr ""
+
+#: starlight/models.py:87
+msgid "Dream"
+msgstr ""
+
+#: starlight/models.py:100
+msgid "Leo"
+msgstr ""
+
+#: starlight/models.py:101
+msgid "Aries"
+msgstr ""
+
+#: starlight/models.py:102
+msgid "Libra"
+msgstr ""
+
+#: starlight/models.py:103
+msgid "Virgo"
+msgstr ""
+
+#: starlight/models.py:104
+msgid "Scorpio"
+msgstr ""
+
+#: starlight/models.py:105
+msgid "Capricorn"
+msgstr ""
+
+#: starlight/models.py:106
+msgid "Pisces"
+msgstr ""
+
+#: starlight/models.py:107
+msgid "Gemini"
+msgstr ""
+
+#: starlight/models.py:108
+msgid "Cancer"
+msgstr ""
+
+#: starlight/models.py:109
+msgid "Sagittarius"
+msgstr ""
+
+#: starlight/models.py:110
+msgid "Aquarius"
+msgstr ""
+
+#: starlight/models.py:111
+msgid "Taurus"
+msgstr ""
+
+#: starlight/models.py:141 starlight/models.py:143 starlight/models.py:226
+#: starlight/models.py:228 starlight/models.py:265 starlight/models.py:267
+msgid "Name"
+msgstr ""
+
+#: starlight/models.py:147 starlight/models.py:231 starlight/models.py:271
+#: starlight/models.py:413
+msgid "Image"
+msgstr ""
+
+#: starlight/models.py:149 starlight/models.py:287 starlight/settings.py:102
+msgid "Birthday"
+msgstr ""
+
+#: starlight/models.py:156 starlight/models.py:292
+msgid "Astrological sign"
+msgstr ""
+
+#: starlight/models.py:166
+msgid "Blood type"
+msgstr ""
+
+#: starlight/models.py:168
+msgid "Height"
+msgstr ""
+
+#: starlight/models.py:171 starlight/models.py:173
+msgid "Specialty"
+msgstr ""
+
+#: starlight/models.py:175 starlight/models.py:177 starlight/models.py:320
+#: starlight/models.py:322
+msgid "Hobbies"
+msgstr ""
+
+#: starlight/models.py:179 starlight/models.py:181 starlight/models.py:233
+#: starlight/models.py:235 starlight/models.py:324 starlight/models.py:326
+msgid "Description"
+msgstr ""
+
+#: starlight/models.py:241
+msgid "Students"
+msgstr ""
+
+#: starlight/models.py:255 starlight/models.py:256 starlight/models.py:257
+#, python-brace-format
+msgid "{nth} year"
+msgstr ""
+
+#: starlight/models.py:283
+msgid "School year"
+msgstr ""
+
+#: starlight/models.py:296
+msgid "Color"
+msgstr ""
+
+#: starlight/models.py:300 starlight/models.py:302
+msgid "Weapon"
+msgstr ""
+
+#: starlight/models.py:304 starlight/models.py:306
+msgid "Liked food"
+msgstr ""
+
+#: starlight/models.py:308 starlight/models.py:310
+msgid "Disliked food"
+msgstr ""
+
+#: starlight/models.py:312 starlight/models.py:314
+msgid "Likes"
+msgstr ""
+
+#: starlight/models.py:316 starlight/models.py:318
+msgid "Dislikes"
+msgstr ""
+
+#: starlight/models.py:376
+msgid "ID"
+msgstr ""
+
+#: starlight/models.py:379 starlight/models.py:381
+msgid "Title"
+msgstr ""
+
+#: starlight/models.py:390
+msgid "Rarity"
+msgstr ""
+
+#: starlight/models.py:393
+msgid "Elements"
+msgstr ""
+
+#: starlight/models.py:396
+msgid "Normal"
+msgstr ""
+
+#: starlight/models.py:397
+msgid "Special"
+msgstr ""
+
+#: starlight/models.py:399
+msgid "Damage"
+msgstr ""
+
+#: starlight/models.py:402
+msgid "Front"
+msgstr ""
+
+#: starlight/models.py:403
+msgid "Center"
+msgstr ""
+
+#: starlight/models.py:404
+msgid "Rear"
+msgstr ""
+
+#: starlight/models.py:406
+msgid "Position"
+msgstr ""
+
+#: starlight/models.py:416
+msgid "Icon"
+msgstr ""
+
+#: starlight/models.py:421
+msgid "Art"
+msgstr ""
+
+#: starlight/models.py:426
+msgid "Transparent"
+msgstr ""
+
+#: starlight/settings.py:94
+msgid "Comedy"
+msgstr ""
+
+#: starlight/settings.py:95
+msgid "Meme"
+msgstr ""
+
+#: starlight/settings.py:97
+msgid "Scouting"
+msgstr ""
+
+#: starlight/settings.py:100
+msgid "Introduce yourself"
+msgstr ""
+
+#: starlight/settings.py:101
+msgid "Characters"
+msgstr ""
+
+#: starlight/settings.py:103
+msgid "Anime"
+msgstr ""
+
+#: starlight/settings.py:103
+msgid "Manga"
+msgstr ""
+
+#: starlight/settings.py:104
+msgid "Cosplay"
+msgstr ""
+
+#: starlight/settings.py:105
+msgid "Fanart"
+msgstr ""
+
+#: starlight/settings.py:106
+msgid "Graphic edit"
+msgstr ""
+
+#: starlight/settings.py:107
+msgid "Merchandise"
+msgstr ""
+
+#: starlight/settings.py:108 starlight/settings.py:300
+msgid "Community"
+msgstr ""
+
+#: starlight/settings.py:109
+msgid "Question"
+msgstr ""
+
+#: starlight/settings.py:111
+msgid "Staff picks"
+msgstr ""
+
+#: starlight/settings.py:115
+msgid "Community event"
+msgstr ""
+
+#: starlight/settings.py:118
+#, python-format
+msgid "Not about %(game)s"
+msgstr ""
+
+#: starlight/settings.py:118
+msgid "BanG Dream!"
+msgstr ""
+
+#: starlight/settings.py:119
+msgid "Swearing"
+msgstr ""
+
+#: starlight/settings.py:121
+msgid "Questionable"
+msgstr ""
+
+#: starlight/settings.py:124
+msgid "NSFW"
+msgstr ""
+
+#: starlight/settings.py:126
+msgid "You need to be over 18 years old."
+msgstr ""
+
+#: starlight/settings.py:126
+msgid "You can change your birthdate in your settings."
+msgstr ""
+
+#: starlight/settings.py:171 starlight/settings.py:195
+#, python-brace-format
+msgid "About {thing}"
+msgstr ""
+
+#: starlight/settings.py:180
+msgid "News"
+msgstr ""
+
+#: starlight/settings.py:188
+msgid "Lyrics"
+msgstr ""
+
+#: starlight/settings.py:242
+msgid "Gallery"
+msgstr ""
+
+#: starlight/settings.py:250
+msgid "Stage of dream"
+msgstr ""
+
+#: starlight/templates/pages/map.html:1
+msgid "Map"
+msgstr ""
