@@ -169,7 +169,7 @@ class AccountForm(_AccountForm):
         if 'level' in self.fields:
             try:
                 max_level = int(getStaffConfiguration('max_level', None))
-            except ValueError, TypeError:
+            except (ValueError, TypeError):
                 max_level = None
             if max_level:
                 self.fields['level'].validators += [

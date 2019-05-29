@@ -167,7 +167,7 @@ class NewsCollection(_ActivityCollection):
         max_per_user_per_hour = None
 
         def after_save(self, request, instance, type=None):
-            instance = super(NewsCollection.EditView, self).after_save(request, instance, type=type)
+            instance = super(NewsCollection.AddView, self).after_save(request, instance, type=type)
             return self.collection._after_save(request, instance)
 
         def redirect_after_add(self, *args, **kwargs):

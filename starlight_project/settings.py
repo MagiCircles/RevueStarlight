@@ -130,7 +130,7 @@ STATIC_UPLOADED_FILES_PREFIX = None
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_URLS_REGEX = r'^/api/.*$'
 
-LOGIN_REDIRECT_URL = '/accounts/add/?get_started'
+LOGIN_REDIRECT_URL = '/'
 LOG_EMAIL = 'emails-log@schoolido.lu'
 PASSWORD_EMAIL = 'password@schoolido.lu'
 AWS_SES_RETURN_PATH = 'contact@schoolido.lu'
