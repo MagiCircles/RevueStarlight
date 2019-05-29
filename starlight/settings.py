@@ -212,8 +212,8 @@ ACTIVITY_TAGS = [
 # Technical settings
 
 MAIN_SITE_URL = 'https://revuestarlight-en.net/'
-SITE_URL = 'https://starlight-sandbox.db0.company/'
-SITE_STATIC_URL = '//localhost:{}/'.format(django_settings.DEBUG_PORT) if django_settings.DEBUG else '//i.starlight-sandbox.db0.company/'
+SITE_URL = 'https://starlight.academy/'
+SITE_STATIC_URL = '//localhost:{}/'.format(django_settings.DEBUG_PORT) if django_settings.DEBUG else '//i.starlight.academy/'
 
 GET_GLOBAL_CONTEXT = starlightGlobalContext
 
