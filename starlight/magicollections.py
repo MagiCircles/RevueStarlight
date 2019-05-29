@@ -490,7 +490,7 @@ class StageGirlCollection(MainItemCollection):
         show_items_names = True
         default_ordering = 'school'
         per_line = 5
-        page_size = 20
+        page_size = 25
         filter_form = forms.StageGirlFilterForm
         show_section_header_on_change = 'school'
 
