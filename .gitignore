@@ -102,3 +102,4 @@ starlight/templates/pages/map.html
 collected/
 db.sqlite3
 starlight/static/uploaded/
+*.json

@@ -1,0 +1,13 @@
+.navbar-main,
+.btn-main,
+.list-group-item.active {
+    background-image: url('{{ static_url }}img/texture.png');
+}
+
+[data-field="acts"] h3.acts-title {
+    background: #D3D2D7 url('{{ static_url }}img/act_title.png') no-repeat bottom right;
+}
+
+.panel.act.act-climax {
+    background: #FFD2D2 url('{{ static_url }}img/climax_act_background.png') no-repeat bottom 5px right 5px;
+}

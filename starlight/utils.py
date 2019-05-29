@@ -7,10 +7,19 @@ from magi.utils import (
     CuteFormTransform,
     FAVORITE_CHARACTERS_IMAGES,
     getTranslatedName,
+    globalContext,
     listUnique,
     mergedFieldCuteForm,
     tourldash,
 )
+
+############################################################
+# Global context
+
+def starlightGlobalContext(request):
+    context = globalContext(request)
+    context['extracss_template'] = 'include/extracss.css'
+    return context
 
 ############################################################
 # Models display utils

@@ -6,7 +6,7 @@ function loadCardsFilters() {
     }
 }
 
-function loadCard() {
+function loadBaseCard() {
     $('[data-open-tab]').each(function() {
 	$(this).unbind('click');
 	$(this).click(function(e) {
@@ -15,4 +15,47 @@ function loadCard() {
 	    $(this).blur();
 	});
     });
+}
+
+function loadAccountsFilters() {
+    loadAccounts();
+    let form = $('[id="filter-form-account"]');
+    if (!form.data('loaded-separators')) {
+        form.data('loaded-separators', true);
+        formShowMore(form, 'i_version', false, 'ordering', false);
+    }
+}
+
+function loadUsersFilters() {
+    let form = $('[id="filter-form-user"]');
+    if (!form.data('loaded-separators')) {
+        form.data('loaded-separators', true);
+        formShowMore(form, 'color', true, 'ordering', false);
+    }
+}
+
+function loadStaff() {
+    $('[data-field="description"]:not(.loaded)').each(function() {
+        let descriptionTr = $(this);
+        let descriptionContent = descriptionTr.find('.long-text-value');
+        if (descriptionContent.length) {
+            let icon = $('<a href="#show" style="display: block;"></a>');
+            descriptionContent.hide();
+            descriptionTr.append(icon);
+            icon.click(function(e) {
+                e.preventDefault();
+                icon.hide();
+                descriptionContent.show();
+                return false;
+            });
+            descriptionContent.click(function(e) {
+                e.preventDefault();
+                descriptionContent.hide();
+                icon.show();
+                return false;
+            });
+        }
+        descriptionTr.addClass('.loaded');
+    });
+
 }

@@ -1,26 +1,31 @@
 # -*- coding: utf-8 -*-
+import datetime, pytz
 from collections import OrderedDict
 from django.conf import settings as django_settings
+from django.utils.html import mark_safe
 from django.utils.translation import ugettext_lazy as _, get_language, string_concat
 from magi.utils import (
-    tourldash,
     ordinalNumber,
+    tourldash,
 )
 from magi.default_settings import (
     DEFAULT_ENABLED_NAVBAR_LISTS,
-    DEFAULT_NAVBAR_ORDERING,
     DEFAULT_ENABLED_PAGES,
-    DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
     DEFAULT_EXTRA_PREFERENCES,
+    DEFAULT_HOME_ACTIVITY_TABS,
+    DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
+    DEFAULT_NAVBAR_ORDERING,
+    DEFAULT_PRELAUNCH_ENABLED_PAGES,
 )
+from starlight.utils import starlightGlobalContext
 from starlight import models
 
 ############################################################
 # License, game and site settings
 
 SITE_NAME = 'Starlight Academy'
-GAME_NAME = u'SHOUJO☆KAGEKI REVUE STARLIGHT'
 LICENSE_NAME = 'Revue Starlight'
+GAME_NAME = LICENSE_NAME
 SMARTPHONE_GAME = 'ReLIVE'
 
 # todo GAME_DESCRIPTION = ''
@@ -33,8 +38,12 @@ COLOR = '#1A1D24'
 ############################################################
 # Prelaunch details
 
-LAUNCH_DATE = True
-# todo LAUNCH_DATE = datetime.datetime(2019, 06, 01, 12, 0, 0, tzinfo=pytz.UTC)
+LAUNCH_DATE = datetime.datetime(2019, 06, 11, 4, 0, 0, tzinfo=pytz.UTC)
+
+PRELAUNCH_ENABLED_PAGES = DEFAULT_PRELAUNCH_ENABLED_PAGES
+PRELAUNCH_ENABLED_PAGES += [
+    'news_list',
+]
 
 ############################################################
 # Images
@@ -42,8 +51,8 @@ LAUNCH_DATE = True
 CORNER_POPUP_IMAGE = 'giraffe.png'
 CORNER_POPUP_IMAGE_OVERFLOW = True
 
-SITE_IMAGE = 'starlight.png'
-# todo SITE_NAV_LOGO = ''
+SITE_IMAGE = 'starlight_academy.png'
+SITE_LOGO = 'starlight_academy_logo.png'
 
 ABOUT_PHOTO = 'about.png'
 
@@ -55,16 +64,36 @@ EMPTY_IMAGE = 'empty_crown.png'
 ############################################################
 # Settings per languages
 
+SITE_NAME_PER_LANGUAGE = {
+    'ja': u'スタァライト アカデミー',
+    'kr': u'스타라이트 아카데미',
+    'zh-hant': u'星光學院',
+}
+
 GAME_NAME_PER_LANGUAGE = {
-    'ja': u'少女 歌劇 レヴュースタァライト',
+    'ja': u'少女☆歌劇 レヴュースタァライト',
+    'kr': u'소녀가극 레뷰 스타라이트',
+    'zh-hant': u'少女☆歌劇 Revue Starlight',
 }
 
 LICENSE_NAME_PER_LANGUAGE = {
     'ja': u'レヴュースタァライト',
+    'kr': u'레뷰 스타라이트',
+    'zh-hant': u'Revue Starlight',
 }
 
 SMARTPHONE_GAME_PER_LANGUAGE = {
     'ja': 'Re LIVE',
+    'kr': u'스타리라',
+    'zh-hant': 'Relive',
+}
+
+SITE_LOGO_PER_LANGUAGE = {
+    'ja': 'starlight_academy_logo_japanese.png',
+}
+
+SITE_IMAGE_PER_LANGUAGE = {
+    'ja': 'starlight_academy_japanese.png',
 }
 
 ############################################################
@@ -79,6 +108,30 @@ GITHUB_REPOSITORY = ('MagiCircles', 'RevueStarlight')
 
 TWITTER_HANDLE = 'r_starlight_en'
 HASHTAGS = ['スタァライト', 'RevueStarlight', 'Starira', 'RevueStarlightReLIVE']
+
+############################################################
+# Homepage
+
+HOMEPAGE_BACKGROUND = 'background_gradient.png'
+HOMEPAGE_ART_GRADIENT = True
+
+HOMEPAGE_ART_SIDE = 'right'
+HOMEPAGE_ART_POSITION = {
+    'position': 'center left',
+    'size': '150%',
+    'y': '40%',
+    'x': '0%',
+}
+
+HOME_ACTIVITY_TABS = DEFAULT_HOME_ACTIVITY_TABS.copy()
+if 'staffpicks' in HOME_ACTIVITY_TABS:
+    del(HOME_ACTIVITY_TABS['staffpicks'])
+
+############################################################
+# First steps
+
+FIRST_COLLECTION = 'collectedcard'
+GET_STARTED_VIDEO = 'WLfi932cfFI'
 
 ############################################################
 # User preferences and profiles
@@ -98,6 +151,14 @@ EXTRA_PREFERENCES = DEFAULT_EXTRA_PREFERENCES + [
         thing=_('Voice actress').lower(), nth=_(ordinalNumber(3)))),
 ]
 
+ACCOUNT_TAB_ORDERING = [
+    'about',
+    'collectedcard',
+    'collectedmemoir',
+]
+
+MAX_LEVEL_BEFORE_SCREENSHOT_REQUIRED = 50
+
 ############################################################
 # Donators
 
@@ -107,6 +168,8 @@ EXTRA_PREFERENCES = DEFAULT_EXTRA_PREFERENCES + [
 # Activities
 
 ACTIVITY_TAGS = [
+    ('revuestarlight', lambda: LICENSE_NAME_PER_LANGUAGE.get(get_language(), LICENSE_NAME)),
+    ('relive', lambda: SMARTPHONE_GAME_PER_LANGUAGE.get(get_language(), SMARTPHONE_GAME)),
     ('comedy', _('Comedy')),
     ('meme', _('Meme')),
     ('cards', _('Cards')),
@@ -124,14 +187,16 @@ ACTIVITY_TAGS = [
     ('community', _('Community')),
     ('question', _('Question')),
     ('staff', {
-        'translation': _('Staff picks'),
-        'has_permission_to_add': lambda r: r.user.is_staff,
+        'translation': _('News'),
+        'has_permission_to_add': lambda r: r.user.is_staff and r.user.hasPermission('mark_activities_as_staff_pick'),
     }),
     ('communityevent', {
         'translation': _('Community event'),
         'has_permission_to_add': lambda r: r.user.hasPermission('post_community_event_activities'),
     }),
-    ('unrelated',  (_('Not about %(game)s') % { 'game': _('BanG Dream!') })),
+    ('unrelated', lambda: _('Not about {thing}').format(
+        thing=LICENSE_NAME_PER_LANGUAGE.get(get_language(), LICENSE_NAME),
+    )),
     ('swearing', _('Swearing')),
     ('questionable', {
         'translation': _('Questionable'),
@@ -150,6 +215,8 @@ MAIN_SITE_URL = 'https://revuestarlight-en.net/'
 SITE_URL = 'https://starlight-sandbox.db0.company/'
 SITE_STATIC_URL = '//localhost:{}/'.format(django_settings.DEBUG_PORT) if django_settings.DEBUG else '//i.starlight-sandbox.db0.company/'
 
+GET_GLOBAL_CONTEXT = starlightGlobalContext
+
 DISQUS_SHORTNAME = 'starlight'
 # todo GOOGLE_ANALYTICS = ''
 
@@ -165,6 +232,7 @@ USER_COLORS = [
 
 STATIC_FILES_VERSION = django_settings.STATIC_FILES_VERSION
 STAFF_CONFIGURATIONS = getattr(django_settings, 'STAFF_CONFIGURATIONS', {})
+HOMEPAGE_ARTS = getattr(django_settings, 'HOMEPAGE_ARTS', None)
 TOTAL_DONATORS = getattr(django_settings, 'TOTAL_DONATORS', 0) or 2
 FAVORITE_CHARACTERS = getattr(django_settings, 'FAVORITE_CHARACTERS', None)
 # todo BACKGROUNDS = getattr(django_settings, 'BACKGROUNDS', None)
@@ -181,68 +249,75 @@ ENABLED_PAGES['wiki'][1]['enabled'] = True
 ENABLED_PAGES['wiki'][0]['divider_before'] = True
 ENABLED_PAGES['wiki'][0]['navbar_link_list'] = 'relive'
 
-# Homepage redirects to main site
-ENABLED_PAGES['index']['custom'] = True
-ENABLED_PAGES['index']['enabled'] = True
-
 # Add voice actress cuteform to settings
 ENABLED_PAGES['settings']['custom'] = True
 
+def _externalLinkIcon(title):
+    return mark_safe(u'{} <i class="flaticon-link fontx0-8"></i>'.format(title))
+
 # Redirect to main site for some non-migrated pages
 ENABLED_PAGES['about_revuestarlight'] = {
-    'title': lambda _l: _('About {thing}').format(thing=LICENSE_NAME_PER_LANGUAGE.get(
-        get_language(),LICENSE_NAME)),
+    'title': lambda _l: _externalLinkIcon(_('About {thing}').format(thing=LICENSE_NAME_PER_LANGUAGE.get(
+        get_language(), LICENSE_NAME))),
     'redirect': u'{}what-is-revue-starlight/'.format(MAIN_SITE_URL),
     'icon': 'about',
     'navbar_link_list': 'revuestarlight',
     'divider_after': True,
 }
 
-ENABLED_PAGES['news'] = {
+ENABLED_PAGES['news_revuestarlight'] = {
     'title': _('News'),
-    'redirect': u'{}category/news/'.format(MAIN_SITE_URL),
+    'redirect': '/news/?c_tags=revuestarlight',
     'icon': 'new',
     'navbar_link_list': 'revuestarlight',
     'divider_before': True,
 }
 
 ENABLED_PAGES['lyrics'] = {
-    'title': _('Lyrics'),
+    'title': lambda _l: _externalLinkIcon(_('Lyrics')),
     'redirect': u'{}category/lyrics/'.format(MAIN_SITE_URL),
     'icon': 'music',
     'navbar_link_list': 'revuestarlight',
 }
 
 ENABLED_PAGES['about_relive'] = {
-    'title': lambda _l: _('About {thing}').format(thing=SMARTPHONE_GAME_PER_LANGUAGE.get(
-        get_language(),SMARTPHONE_GAME)),
+    'title': lambda _l: _externalLinkIcon(_('About {thing}').format(thing=SMARTPHONE_GAME_PER_LANGUAGE.get(
+        get_language(),SMARTPHONE_GAME))),
     'redirect': u'{}relive_wiki/Beginner%27s_Guide'.format(MAIN_SITE_URL),
     'icon': 'about',
     'navbar_link_list': 'relive',
     'divider_after': True,
 }
 
+ENABLED_PAGES['news_relive'] = {
+    'title': _('News'),
+    'redirect': '/news/?c_tags=relive',
+    'icon': 'new',
+    'navbar_link_list': 'relive',
+    'divider_before': True,
+}
+
 SOCIAL_MEDIA_LINKS = OrderedDict([
     ('discord', {
         'image': 'discord',
         'url': 'https://discordapp.com/invite/dZ93wsW',
-        'title': 'Discord',
+        'title': _externalLinkIcon('Discord'),
         'divider_before': True,
     }),
     ('reddit', {
         'image': 'reddit',
         'url': 'https://www.reddit.com/r/RevueStarlight',
-        'title': 'Reddit',
+        'title': _externalLinkIcon('Reddit'),
     }),
     ('twitter', {
         'icon': 'twitter',
         'url': 'https://twitter.com/r_starlight_en',
-        'title': 'Twitter',
+        'title': _externalLinkIcon('Twitter'),
     }),
     ('facebook', {
         'image': 'facebook',
         'url': 'https://www.facebook.com/revuestarlight.en',
-        'title': 'Facebook',
+        'title': _externalLinkIcon('Facebook'),
     }),
 ])
 
@@ -272,7 +347,7 @@ ENABLED_NAVBAR_LISTS['revuestarlight'] = {
         'stagegirl_list',
         'voiceactress_list',
 
-        'news',
+        'news_revuestarlight',
         'song_list',
         'lyrics',
 
@@ -293,6 +368,7 @@ ENABLED_NAVBAR_LISTS['relive'] = {
         'stageofdream',
 
         'wiki',
+        'news_relive',
 
         'account_list',
 
@@ -305,8 +381,8 @@ ENABLED_NAVBAR_LISTS['community'] = {
     'title': _('Community'),
     'icon': 'users',
     'order': [
-        'user_list',
         'activity_list',
+        'user_list',
     ] + SOCIAL_MEDIA_LINKS.keys(),
 }
 

@@ -35,10 +35,23 @@ body {
     font-size: 17px;
 }
 
+body.homepage {
+    background-size: 100% auto;
+    background-position: top center;
+    background-repeat: no-repeat;
+
+}
+
+.current-prelaunch {
+    main > .container {
+        background: fade(white, 50%);
+    }
+}
+
 h1, h2, h3, h4, h5, h6, .title,
 .navbar-brand, .btn-lg, .btn-xl,
 .collection-table .table-headers-sections th {
-    font-family: 'Slabo 27px', serif;
+    font-family: 'Gudea', sans-serif;
 }
 
 /* todo: set within html to work in production */
@@ -46,7 +59,6 @@ h1, h2, h3, h4, h5, h6, .title,
 .navbar-main,
 .btn-main,
 .list-group-item.active {
-    background-image: url('/static/img/texture.png'); /* todo */
     background-position: center;
     &.btn-main {
         background-size: cover;
@@ -101,10 +113,12 @@ html {
                     margin: -5px 0;
                 }
             }
-            [data-link-name="card_list"] > a > img {
-                @extra: 4px;
-                height: 16px + (@extra * 2);
-                margin: @extra * -1;
+            [data-link-name="card_list"], [data-link-name="memoir_list"] {
+                & > a > img {
+                    @extra: 4px;
+                    height: 16px + (@extra * 2);
+                    margin: @extra * -1;
+                }
             }
         }
         // Site title font and size
@@ -150,7 +164,27 @@ html {
     }
 }
 
-/* Card */
+/* Account */
+
+[data-cuteform-name="id_i_vs_revue_rank"] .cuteform-elt:not([data-cuteform-val=""]) {
+    width: 60px;
+}
+
+/* Stage girl */
+
+.stagegirl-info .top-item {
+    font-size: 0;
+    .stage-girl-image {
+        max-width: 50%;
+    }
+}
+
+.about-table tr[data-field="fans"].spread_across  td:last-child img {
+    width: 11%;
+    min-width: 40px;
+}
+
+/* Card and memoir */
 
 [data-cuteform-name="id_i_rarity"] .cuteform-elt:not([data-cuteform-val=""]) {
     width: auto;
@@ -181,12 +215,28 @@ html {
     h3.acts-title {
         font-family: inherit;
         font-size: 1.1em;
-        background: #D3D2D7 url('/static/img/act_title.png') no-repeat bottom right;
         background-size: auto 100%;
         text-align: left;
         padding: 10px 15px;
         margin: 5px 0 15px 0;
         border-radius: 4px;
+    }
+}
+
+[data-item="card"], [data-item="memoir"] {
+    .below-item-buttons {
+        [data-btn-name="collectedcard"], [data-btn-name="collectedmemoir"] {
+            &.btn-link-main .badge {
+                color: white;
+            }
+            &.btn-secondary .badge {
+                font-size: 0;
+                &:after {
+                    content: '✓';
+                    font-size: 12px;
+                }
+            }
+        }
     }
 }
 
@@ -235,7 +285,6 @@ html {
         }
     }
     &.act-climax {
-        background: #FFD2D2 url('/static/img/climax_act_background.png') no-repeat bottom 5px right 5px;
         border-color: #FF5155;
         .panel-heading {
             background-color: #FF5155;
@@ -266,7 +315,7 @@ html {
     & > tbody > tr > td, & > tbody > tr > th {
         padding: 20px;
     }
-    th:first-child, td:first-child {
+    th:first-child:not(.table-section-header), td:first-child {
         width: 50%;
         text-align: right;
     }
@@ -275,6 +324,75 @@ html {
             .a-nodifference;
             > span {
                 text-decoration: underline;
+            }
+        }
+    }
+    [data-field="description"] {
+        .long-text-value, a[href="#show"] {
+            color: #ccc;
+            text-align: center;
+            font-size: 0.9em;
+            &:hover, &:focus {
+                text-decoration: none;
+            }
+            &:before, &:after {
+                display: block;
+                font-family: serif;
+                font-size: 3em;
+                line-height: 1em;
+            }
+            &:before {
+                content: '“';
+                text-align: left;
+                margin-bottom: -20px;
+            }
+        }
+        .long-text-value {
+            &:after {
+                content: '„';
+                text-align: right;
+            }
+        }
+    }
+}
+
+/* Activities */
+
+.current-activity_list .collection-page-wrapper {
+    .list-page-title-activity {
+        background: fade(white, 70%);
+        font-family: 'Raleway', 'Arial Black';
+        text-transform: uppercase;
+    }
+    .default-index {
+        margin: auto;
+        max-width: 560px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .current-activity_list .collection-page-wrapper {
+        font-size: 0;
+        & > * {
+            font-size: 17px;
+        }
+        .list-page-title-activity,
+        .default-index {
+            display: inline-block;
+            vertical-align: middle;
+            margin: auto;
+            width: 50%;
+        }
+        .list-page-title-activity {
+            text-align: right;
+            font-size: 40px;
+            margin: 30px 0;
+            padding: 30px 50px;
+        }
+        .default-index {
+            text-align: left;
+            #carousel-latest-news {
+                margin: 10px 0;
             }
         }
     }

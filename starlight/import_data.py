@@ -12,7 +12,7 @@ TO_STATISTICS = {
     'atk': 'act_power',
     'pdef': 'special_defense',
     'mdef': 'normal_defense',
-    'agi': 'agility'
+    'agi': 'agility',
 }
 
 TO_CHARACTER = {
@@ -82,13 +82,15 @@ TO_SKILL_TYPE = {
     'finishing': 'finishing',
 }
 
-def cardCallback(details, item, unique_data, data):
-    pass
+MEMOIR_TYPE_TO_UPGRADE = {
+    1: False,
+    2: True,
+}
 
-def mapCardStatistics(prefix):
+def mapStatistics(prefix):
     def _f(v):
         return {
-            u'{}{}'.format(prefix, field_name): v[api_field_name]
+            u'{}{}'.format(prefix, field_name): v.get(api_field_name, None) or None
             for api_field_name, field_name in TO_STATISTICS.items()
         }
     return _f
@@ -140,6 +142,7 @@ def mapSkills(skills):
     return ('acts', added_acts)
 
 IMPORT_CONFIGURATION = OrderedDict()
+
 IMPORT_CONFIGURATION['cards'] = {
     'model': models.Card,
     'unique_fields': [
@@ -149,19 +152,18 @@ IMPORT_CONFIGURATION['cards'] = {
         'id': 'number',
         'character_id': lambda v: ('stage_girl', models.StageGirl.objects.get_or_create(
             name=TO_CHARACTER_NAME_SWAPPED[v], defaults={ 'owner_id': 1, 'school_id': 1 })[0]),
-        'base_rarity': lambda v: ('i_rarity', v + 1),
+        'base_rarity': lambda v: ('i_rarity', v),
         'attribute': lambda v: ('i_element', TO_ATTRIBUTES[v]),
         'damage_type': lambda v: ('i_damage', TO_DAMAGE[v]),
         'position': lambda v: ('i_position', TO_POSITION[v]),
-        'base': mapCardStatistics('base_'),
-        'delta': mapCardStatistics('delta_'),
+        'base': mapStatistics('base_'),
+        'delta': mapStatistics('delta_'),
         'skills': mapSkills,
         'name': mapTranslatedValues('name'),
         'description': mapTranslatedValues('description'),
         'profile': mapTranslatedValues('profile'),
         'get_message': mapTranslatedValues('message'),
     },
-    'callback': cardCallback,
     'ignored_fields': [
         'cost', # value can be determined by rarity
 
@@ -181,6 +183,31 @@ IMPORT_CONFIGURATION['cards'] = {
     ],
 }
 
+IMPORT_CONFIGURATION['memoirs'] = {
+    'model': models.Memoir,
+    'unique_fields': [
+        'number',
+    ],
+    'fields': [
+        'sell_price',
+    ],
+    'mapping': {
+        'id': 'number',
+        'type': lambda v: ('is_upgrade', MEMOIR_TYPE_TO_UPGRADE[v]),
+        'rarity': 'i_rarity',
+        'base': mapStatistics('base_'),
+        'delta': mapStatistics('delta_'),
+        'name': mapTranslatedValues('name'),
+        'profile': mapTranslatedValues('explanation'),
+        'skills': mapSkills, # todo: not in JSON atm
+    },
+    'ignored_fields': [
+        'cost', # value can be determined by rarity
+
+        # Todo: what is this?
+        'material_exp',
+    ],
+}
 
 def import_data(local=False, to_import=None, log_function=print):
     magi_import_data(

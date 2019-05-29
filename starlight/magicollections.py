@@ -1,7 +1,9 @@
+from collections import OrderedDict
 from django.conf import settings as django_settings
 from django.db.models import Prefetch
 from django.utils.html import mark_safe
 from django.utils.translation import ugettext_lazy as _, string_concat, get_language
+from magi.forms import get_account_simple_form
 from magi.magicollections import (
     MagiCollection,
     MainItemCollection,
@@ -13,10 +15,12 @@ from magi.magicollections import (
     AccountCollection as _AccountCollection,
     UserCollection as _UserCollection,
 )
+from magi.middleware.httpredirect import HttpRedirectException # Todo: Should be removed after launch
 from magi.utils import (
     AttrDict,
     CuteFormType,
     CuteFormTransform,
+    getMagiCollection,
     ordinalNumber,
     setSubField,
     staticImageURL,
@@ -59,6 +63,18 @@ class UserCollection(_UserCollection):
     navbar_link = True
     navbar_link_list = 'community'
 
+    filter_cuteform = _UserCollection.filter_cuteform.copy()
+    filter_cuteform.update({
+        'favorite_voice_actress': {
+            'to_cuteform': lambda k, v: getVoiceActressThumbnailFromPk(k),
+            'title': _('Voice actress'),
+            'extra_settings': {
+                'modal': 'true',
+                'modal-text': 'true',
+            },
+        },
+    })
+
     def navbar_link_title(self, context):
         return t['users'].title()
 
@@ -83,6 +99,92 @@ class UserCollection(_UserCollection):
                     }))
             return (first_links, meta_links, links)
 
+    class ListView(_UserCollection.ListView):
+        filter_form = forms.UserFilterForm
+        ajax_callback = 'loadUsersFilters'
+
+############################################################
+# News Collection
+
+class NewsCollection(_ActivityCollection):
+    queryset = _ActivityCollection.queryset.filter(c_tags__contains='"staff"')
+    plural_name = 'news'
+
+    def buttons_per_item(self, view, *args, **kwargs):
+        buttons = super(NewsCollection, self).buttons_per_item(view, *args, **kwargs)
+
+        # Change URLs to use /news/ instead of /activities/
+
+        for button in buttons.values():
+            for field_name in ['url', 'ajax_url']:
+                if button.get(field_name, None):
+                    button[field_name] = button[field_name].replace(
+                        '/activity/', '/news/').replace('/activities/', '/news/')
+
+        return buttons
+
+    class ItemView(_ActivityCollection.ItemView):
+        template = 'activityItem'
+
+    class ListView(_ActivityCollection.ListView):
+        item_template = 'activityItem'
+        shortcut_urls = ['']
+        default_ordering = '-creation'
+        filter_form = forms.NewsFilterForm
+        add_button_subtitle = None
+
+        # Todo: Should be removed after launch
+        def check_permissions(self, request, context):
+            if (context.get('launch_date', None)
+                and (not request.user.is_authenticated()
+                     or not request.user.hasPermission('access_site_before_launch'))):
+                raise HttpRedirectException('/prelaunch/')
+            super(NewsCollection.ListView, self).check_permissions(request, context)
+
+        def top_buttons(self, request, context):
+            # Call parents super to avoid adding warning button
+            return super(_ActivityCollection.ListView, self).top_buttons(request, context)
+
+        def extra_context(self, context):
+            super(NewsCollection.ListView, self).extra_context(context)
+            context['activity_tabs'] = None
+            context['show_bump'] = True
+
+    def _redirect_after_modification(self, request, item, ajax):
+        return (item.ajax_item_url if ajax else item.item_url).replace(
+            '/activity/', '/news/').replace('/activities/', '/news/')
+
+    def _after_save(self, request, instance, type=None):
+        if hasattr(instance, 'forced_creation'):
+            instance.creation = instance.forced_creation
+            instance.save()
+        return instance
+
+    class AddView(_ActivityCollection.AddView):
+        staff_required = True
+        permissions_required = ['mark_activities_as_staff_pick']
+        form_class = forms.NewsForm
+        max_per_user_per_hour = None
+
+        def after_save(self, request, instance, type=None):
+            instance = super(NewsCollection.EditView, self).after_save(request, instance, type=type)
+            return self.collection._after_save(request, instance)
+
+        def redirect_after_add(self, *args, **kwargs):
+            return self.collection._redirect_after_modification(*args, **kwargs)
+
+    class EditView(_ActivityCollection.EditView):
+        staff_required = True
+        permissions_required = ['mark_activities_as_staff_pick']
+        form_class = forms.NewsForm
+
+        def after_save(self, request, instance, type=None):
+            instance = super(NewsCollection.EditView, self).after_save(request, instance, type=type)
+            return self.collection._after_save(request, instance)
+
+        def redirect_after_edit(self, *args, **kwargs):
+            return self.collection._redirect_after_modification(*args, **kwargs)
+
 ############################################################
 # Activity Collection
 
@@ -95,13 +197,20 @@ class ActivityCollection(_ActivityCollection):
         shortcut_urls = [
             _url for _url in _ActivityCollection.ListView.shortcut_urls
             if _url != ''
-        ]
+        ] + ['feed']
 
         def show_homepage(self, context):
             return True
 
         def show_sidebar_on_homepage(self, context):
-            return True
+            return False
+
+        def extra_context(self, context):
+            super(ActivityCollection.ListView, self).extra_context(context)
+            context['hide_header'] = True
+            context['show_title'] = True
+            context['art'] = None
+            context['h1_page_title'] = string_concat(_('Community'), ' - ', _('Feed'))
 
 ############################################################
 # Account Collection
@@ -109,6 +218,74 @@ class ActivityCollection(_ActivityCollection):
 class AccountCollection(_AccountCollection):
     navbar_link_list = 'relive'
     icon = 'trophy'
+    form_class = forms.AccountForm
+
+    filter_cuteform = _AccountCollection.filter_cuteform.copy()
+    filter_cuteform.update({
+        'accept_friend_requests': {
+            'type': CuteFormType.YesNo,
+        },
+        'i_vs_revue_rank': {
+        },
+        'i_version': {
+            'to_cuteform': lambda _k, _v: models.VERSIONS[
+                models.Account.get_reverse_i('version', _k)
+            ]['image'],
+            'image_folder': 'language',
+            'transform': CuteFormTransform.ImagePath,
+        },
+        'i_play_style': {
+            'type': CuteFormType.HTML,
+        },
+        'i_play_style': {
+            'type': CuteFormType.HTML,
+        },
+        'i_os': {
+            'to_cuteform': lambda _k, _v: models.Account.OS_CHOICES[_k].lower(),
+            'transform': CuteFormTransform.FlaticonWithText,
+        },
+    })
+
+    fields_icons = {
+        'play_style': lambda _i: _i.play_style_icon,
+        'os': lambda _i: _i.os_icon,
+        'device': lambda _i: _i.os_icon or 'id',
+    }
+
+    fields_images = {
+        'version': lambda _i: _i.version_image,
+        'stage_of_dreams_level': 'alt_stage_of_dreams.png',
+        'vs_revue_rank': lambda _i: _i.vs_revue_rank_image,
+        'bought_stars': 'stars.png',
+    }
+
+    class ListView(_AccountCollection.ListView):
+        filter_form = forms.AccountFilterForm
+        ajax_callback = 'loadAccountsFilters'
+
+        def buttons_per_item(self, request, context, item):
+            buttons = super(AccountCollection.ListView, self).buttons_per_item(request, context, item)
+            buttons['version'] = {
+                'show': True, 'has_permissions': True,
+                'image': item.version_image,
+                'title': item.t_version,
+                'url': self.collection.get_list_url(preset=item.version),
+                'classes': [],
+            }
+            return buttons
+
+    class AddView(_AccountCollection.AddView):
+        simpler_form = get_account_simple_form(forms.AccountForm, simple_fields=[
+            'nickname', 'i_version', 'level', 'friend_id',
+        ])
+
+        def redirect_after_add(self, request, item, ajax):
+            if not ajax:
+                return '/cards/?get_started&add_to_collectedcard={account_id}&view=icons&version={account_version}&ordering=number&reverse_order='.format(
+                    account_id=item.id,
+                    account_version=item.version,
+                )
+            return super(AccountCollection.AddView, self).redirect_after_add(request, item, ajax)
 
 ############################################################
 ############################################################
@@ -127,7 +304,7 @@ class VoiceActressCollection(MainItemCollection):
     navbar_link_list = 'revuestarlight'
     navbar_link_title = _('Cast')
     icon = 'voice-actress'
-    translated_fields = ('name', 'specialty', 'hobbies', 'm_description')
+    translated_fields = ('name', 'specialty', 'hobbies', 'm_description', 'm_staff_description')
     multipart = True
 
     fields_icons = {
@@ -141,6 +318,7 @@ class VoiceActressCollection(MainItemCollection):
         'stagegirls': 'idol',
         'links': 'url',
         'video': 'film',
+        'fans': 'heart',
     }
 
     fields_images = {
@@ -183,7 +361,17 @@ class VoiceActressCollection(MainItemCollection):
     class ItemView(MainItemCollection.ItemView):
         fields_prefetched = ['stagegirls']
         fields_prefetched_together = ['links']
+        fields_exclude = ['m_staff_description']
         comments_enabled = False
+
+        def to_fields(self, item, prefetched_together=None, *args, **kwargs):
+            if prefetched_together is None: prefetched_together = []
+            prefetched_together += [
+                'fans',
+            ]
+            fields = super(VoiceActressCollection.ItemView, self).to_fields(
+                item, *args, prefetched_together=prefetched_together, **kwargs)
+            return fields
 
 ############################################################
 # Voice Actress Link Collection
@@ -240,7 +428,7 @@ class SchoolCollection(SubItemCollection):
 # Stage Girl Collection
 
 class StageGirlCollection(MainItemCollection):
-    queryset = models.StageGirl.objects.all()
+    queryset = models.StageGirl.objects.all().select_related('school')
     title = _('Stage girl')
     plural_title = _('Stage girls')
     navbar_link_list = 'revuestarlight'
@@ -273,11 +461,13 @@ class StageGirlCollection(MainItemCollection):
         'hobbies': 'hobbies',
         'description': 'id',
         'video': 'film',
+        'fans': 'heart',
     }
 
     fields_images = {
         'astrological_sign': lambda _i: _i.astrological_sign_image_url,
         'cards': 'dresses.png',
+        'memoirs': 'memoirs.png',
     }
 
     filter_cuteform = {
@@ -302,14 +492,20 @@ class StageGirlCollection(MainItemCollection):
         per_line = 5
         page_size = 20
         filter_form = forms.StageGirlFilterForm
+        show_section_header_on_change = 'school'
 
     class ItemView(MainItemCollection.ItemView):
         fields_preselected = ['voice_actress', 'school']
-        fields_prefetched_together = ['cards']
-        fields_exclude = ['small_image', 'weapon_type']
+        fields_prefetched_together = ['cards', 'memoirs']
+        fields_exclude = ['small_image', 'uniform_image', 'square_image', 'weapon_type']
 
-        def to_fields(self, item, *args, **kwargs):
-            fields = super(StageGirlCollection.ItemView, self).to_fields(item, *args, **kwargs)
+        def to_fields(self, item, prefetched_together=None, *args, **kwargs):
+            if prefetched_together is None: prefetched_together = []
+            prefetched_together += [
+                'fans',
+            ]
+            fields = super(StageGirlCollection.ItemView, self).to_fields(
+                item, *args, prefetched_together=prefetched_together, **kwargs)
             if item.weapon_type:
                 setSubField(fields, 'weapon', key='type', value='text_annotation')
                 setSubField(fields, 'weapon', key='annotation', value=item.t_weapon_type)
@@ -325,13 +521,15 @@ class StaffCollection(MainItemCollection):
     navbar_link_list = 'revuestarlight'
     navbar_link_list_divider_before = True
     icon = 'list'
-    translated_fields = ('name', 'role')
+    translated_fields = ('name', 'role', 'm_description')
 
     class ListView(MainItemCollection.ListView):
-        default_ordering = '-importance,role'
+        default_ordering = 'i_category,-importance,-role'
         display_style = 'table'
-        display_style_table_fields = ['role', 'name']
+        display_style_table_fields = ['role', 'name', 'm_description']
         show_item_buttons_as_icons = True
+        show_section_header_on_change = 't_category'
+        ajax_pagination_callback = 'loadStaff'
 
         def table_fields(self, item, *args, **kwargs):
             fields = super(StaffCollection.ListView, self).table_fields(item, *args, **kwargs)
@@ -341,6 +539,46 @@ class StaffCollection(MainItemCollection):
                 setSubField(fields, 'name', key='value', value=item.social_media_url)
             return fields
 
+        def table_fields_headers(self, fields, view=None):
+            return []
+
+        # Show voice actresses before all staff
+
+        before_template = 'include/staffAllVoiceActresses'
+
+        def extra_context(self, context):
+            super(StaffCollection.ListView, self).extra_context(context)
+            context['voice_actresses_section_header'] = _('Cast')
+            context['all_voice_actresses'] = models.VoiceActress.objects.prefetch_related(
+                'stagegirls').order_by('name')
+            for item in context['all_voice_actresses']:
+                stage_girls = list(item.stagegirls.all())
+                item.table_fields = OrderedDict([
+                    ('role', {
+                        'type': 'list_links',
+                        'links': [{
+                            'value': mark_safe(u'<span style="color: {color};">{stage_girl}</span>'.format(
+                                color=stage_girl.color, stage_girl=unicode(stage_girl)
+                            )),
+                            'link': stage_girl.item_url,
+                            'ajax_stage_girl': stage_girl.ajax_item_url,
+                        } for stage_girl in stage_girls],
+                    } if stage_girls else {
+                        'type': 'text',
+                        'value': _('Voice actress'),
+                    }),
+                    ('name', {
+                        'type': 'link',
+                        'link_text': item.display_name,
+                        'value': item.item_url,
+                        'ajax_link': item.ajax_item_url,
+                    }),
+                    ('description', {
+                        'type': 'markdown',
+                        'value': (False, item.t_m_staff_description),
+                    } if item.m_staff_description else {}),
+                ])
+
     class ItemView(MainItemCollection.ItemView):
         enabled = False
 
@@ -348,6 +586,7 @@ class StaffCollection(MainItemCollection):
 # Song Collection
 
 class SongCollection(MainItemCollection):
+    enabled = False
     queryset = models.Account.objects.all() # todo
     title = _('Song')
     plural_title = _('Songs')
@@ -384,69 +623,46 @@ class ActCollection(SubItemCollection):
         template = custom_item_template
 
 ############################################################
-# Card Collection
+# BaseCard Collection
 
-class CardCollection(MainItemCollection):
-    queryset = models.Card.objects.all()
-    title = _('Card')
-    plural_title = _('Cards')
+class BaseCardCollection(MainItemCollection):
+    enabled = False
     navbar_link_list = 'relive'
-    navbar_link_title = string_concat(_('Dresses'), ' (', _('Cards'), ')')
-    image = 'red_dresses'
-    form_class = forms.CardForm
     multipart = True
 
     translated_fields = [
         'name',
-        'description',
-        'profile',
-        'message',
     ]
 
     filter_cuteform = {
         'i_rarity': {
             'image_folder': 'small_rarity',
         },
-        'i_element': getElementsCuteForm(models.Card),
-        'i_damage': {
-        },
-        'i_position': {
-        },
         'type': {
-            'to_cuteform': lambda _k, _v: models.Card.TYPES[_k]['icon'],
             'transform': CuteFormTransform.Flaticon,
         },
         'stage_girl': getStageGirlsCuteForm(),
-        'resists_against': getElementsCuteForm(),
-        'weak_against': getElementsCuteForm(),
     }
     mergeSchoolStageGirlCuteForm(filter_cuteform)
 
     fields_icons = {
-        'number': 'hashtag',
-        'stage_girl': 'idol',
         'name': 'id',
         'limited': 'hourglass',
-        'description': 'about',
-        'profile': 'id',
-        'message': 'chat',
-        'roles': 'staff',
         'acts': 'skill',
+        'art': 'pictures',
+        'icon': 'pictures',
     }
     fields_icons.update({
         _statistic: 'hp' if '_hp' in _statistic else 'statistics'
-        for _statistic in models.Card.ALL_STATISTICS_FIELDS
+        for _statistic in models.BaseCard.ALL_STATISTICS_FIELDS
     })
 
     fields_images = {
-        'position': lambda _i: _i.position_image,
         'rarity': 'rarity.png',
-        'element': lambda _i: _i.element_image,
-        'damage': lambda _i: _i.damage_icon_image,
     }
 
     def to_fields(self, view, item, *args, **kwargs):
-        fields = super(CardCollection, self).to_fields(
+        fields = super(BaseCardCollection, self).to_fields(
             view, item, *args, **kwargs)
 
         # Show rarity as images
@@ -459,33 +675,165 @@ class CardCollection(MainItemCollection):
             setSubField(fields, 'limited', key='verbose_name', value=_('Permanent'))
             setSubField(fields, 'limited', key='value', value=True)
 
-        # Roles -> Role
-        if len(item.roles) == 1:
-            setSubField(fields, 'roles', key='verbose_name', value=_('Role'))
         return fields
 
     class ListView(MainItemCollection.ListView):
         default_ordering = 'number'
-        filter_form = forms.CardFilterForm
-        ajax_callback = 'loadCardsFilters'
+        show_collect_button = True
+        show_item_buttons_as_icons = True
+        item_buttons_classes = ['btn', 'btn-link-main', 'btn-lines']
+
+        alt_views = MainItemCollection.ListView.alt_views + [
+            ('icons', {
+                'verbose_name': string_concat(_('Icons'), ' (', _('Quick add'), ')'),
+                'per_line': 6,
+                'page_size': 42,
+                'show_item_buttons_as_icons': False,
+                'show_collect_button': True,
+                'show_edit_button': False,
+                'item_buttons_classes': ['btn', 'btn-secondary', 'btn-lines'],
+            }),
+        ]
 
     class ItemView(MainItemCollection.ItemView):
-        fields_exclude = models.Card.ALL_STATISTICS_FIELDS
+        fields_exclude = ['number'] + models.BaseCard.ALL_STATISTICS_FIELDS
         fields_prefetched_together = ['acts']
-        ajax_callback = 'loadCard'
+        ajax_callback = 'loadBaseCard'
 
         def get_queryset(self, queryset, parameters, request):
             # Order acts by type, cost
             queryset = queryset.prefetch_related(Prefetch(
                 'acts', queryset=models.Act.objects.order_by('i_type', 'cost'),
             ))
-            queryset = super(CardCollection.ItemView, self).get_queryset(queryset, parameters, request)
+            queryset = super(BaseCardCollection.ItemView, self).get_queryset(queryset, parameters, request)
             return queryset
 
         def to_fields(self, item, extra_fields=None, *args, **kwargs):
             if extra_fields is None: extra_fields = []
 
+            # Cost
+            if item.cost:
+                extra_fields.append(('cost', {
+                    'verbose_name': _('Cost'),
+                    'type': 'text',
+                    'value': item.cost,
+                    'icon': 'money',
+                }))
+
+            # Statistics
+            extra_fields.append(('statistics', {
+                'verbose_name': _('Statistics'),
+                'icon': 'statistics',
+                'type': 'html',
+                'value': item.display_statistics,
+                'spread_across': True
+            }))
+
+            fields = super(BaseCardCollection.ItemView, self).to_fields(
+                item, *args, extra_fields=extra_fields, **kwargs)
+            return fields
+
+    class AddView(MainItemCollection.AddView):
+        savem2m = True
+
+    class EditView(MainItemCollection.EditView):
+        savem2m = True
+
+############################################################
+# Card Collection
+
+class CardCollection(BaseCardCollection):
+    enabled = True
+    queryset = models.Card.objects.all()
+    title = _('Card')
+    plural_title = _('Cards')
+    navbar_link_title = string_concat(_('Cards'), ' (', _('Stage girls'), ')')
+    image = 'red_dresses'
+    form_class = forms.CardForm
+
+    collectible = models.CollectedCard
+
+    def collectible_to_class(self, model_class):
+	return to_CollectedCardCollection(super(CardCollection, self).collectible_to_class(model_class))
+
+    translated_fields = BaseCardCollection.translated_fields + [
+        'description',
+        'profile',
+        'message',
+    ]
+
+    filter_cuteform = BaseCardCollection.filter_cuteform.copy()
+    filter_cuteform.update({
+        'i_element': getElementsCuteForm(models.Card),
+        'i_damage': {
+        },
+        'i_position': {
+        },
+        'resists_against': getElementsCuteForm(),
+        'weak_against': getElementsCuteForm(),
+    })
+    filter_cuteform['type']['to_cuteform'] = lambda _k, _v: models.Card.TYPES[_k]['icon']
+
+    fields_icons = BaseCardCollection.fields_icons.copy()
+    fields_icons.update({
+        'stage_girl': 'idol',
+        'description': 'about',
+        'message': 'chat',
+        'roles': 'staff',
+        'profile': 'id',
+        'transparent': 'pictures',
+    })
+
+    fields_images = BaseCardCollection.fields_images.copy()
+    fields_images.update({
+        'position': lambda _i: _i.position_image,
+        'element': lambda _i: _i.element_image,
+        'damage': lambda _i: _i.damage_icon_image,
+        'collectedcards': 'dresses.png',
+    })
+
+    def to_fields(self, view, item, *args, **kwargs):
+        fields = super(CardCollection, self).to_fields(
+            view, item, *args, **kwargs)
+
+        # Roles -> Role
+        if len(item.roles) == 1:
+            setSubField(fields, 'roles', key='verbose_name', value=_('Role'))
+
+        return fields
+
+    class ListView(BaseCardCollection.ListView):
+        filter_form = forms.CardFilterForm
+        ajax_callback = 'loadCardsFilters'
+
+    class ItemView(BaseCardCollection.ItemView):
+        fields_order = [
+            'name',
+            'stage_girl',
+            'rarity',
+            'element',
+            'resists',
+            'weak',
+            'damage',
+            'position',
+            'cost',
+            'limited',
+            'roles',
+            'description',
+            'profile',
+            'message',
+            'statistics',
+            'acts',
+            'icon',
+            'art',
+            'transparent',
+        ]
+
+        def to_fields(self, item, extra_fields=None, *args, **kwargs):
+            if extra_fields is None: extra_fields = []
+
             # Resists / Weak
+
             for field_name, verbose_name in [
                     ('resists', _('Resists against')),
                     ('weak', _('Weak against')),
@@ -518,47 +866,118 @@ class CardCollection(MainItemCollection):
                         'value': _('None'),
                     }))
 
-            # Cost
-            extra_fields.append(('cost', {
-                'verbose_name': _('Cost'),
-                'type': 'text',
-                'value': item.cost,
-                'icon': 'money',
-            }))
-
-            # Statistics
-            extra_fields.append(('statistics', {
-                'verbose_name': _('Statistics'),
-                'icon': 'statistics',
-                'type': 'html',
-                'value': item.display_statistics,
-                'spread_across': True
-            }))
-
             fields = super(CardCollection.ItemView, self).to_fields(
                 item, *args, extra_fields=extra_fields, **kwargs)
+
+            # Set URL to accounts who collected the cards
+
+            setSubField(fields, 'collectedcards', key='link', value=(
+                u'/accounts/?collected_card={}'.format(item.pk)))
+            setSubField(fields, 'collectedcards', key='ajax_link', value=(
+                u'/ajax/accounts/?collected_card={}&ajax_modal_only'.format(item.pk)))
+
             return fields
-
-    class AddView(MainItemCollection.AddView):
-        savem2m = True
-
-    class EditView(MainItemCollection.EditView):
-        savem2m = True
 
 ############################################################
 # Memoir Collection
 
-class MemoirCollection(MainItemCollection):
-    queryset = models.Account.objects.all() # todo
+class MemoirCollection(BaseCardCollection):
+    enabled = True
+    queryset = models.Memoir.objects.all()
     title = _('Memoir')
     plural_title = _('Memoirs')
     navbar_link_list = 'relive'
-    icon = 'idolized'
+    image = 'red_memoirs'
+
+    collectible = models.CollectedMemoir
+
+    def collectible_to_class(self, model_class):
+	return to_CollectedMemoirCollection(super(MemoirCollection, self).collectible_to_class(model_class))
+
+    translated_fields = BaseCardCollection.translated_fields + [
+        'explanation',
+    ]
+
+    fields_icons = BaseCardCollection.fields_icons.copy()
+    fields_icons.update({
+        'explanation': 'about',
+        'sell_price': 'money',
+        'is_upgrade': 'idolized',
+        'stage_girls': 'idol',
+    })
+
+    fields_images = BaseCardCollection.fields_images.copy()
+    fields_images.update({
+        'collectedmemoirs': 'memoirs.png',
+    })
+
+    filter_cuteform = BaseCardCollection.filter_cuteform.copy()
+    filter_cuteform['type']['to_cuteform'] = lambda _k, _v: models.Memoir.TYPES[_k]['icon']
+
+    def to_fields(self, view, item, exclude_fields=None, *args, **kwargs):
+        if exclude_fields is None: exclude_fields = []
+
+        # Hide upgrade if memoir is not upgrade
+        if not item.is_upgrade:
+            exclude_fields.append('is_upgrade')
+
+        fields = super(MemoirCollection, self).to_fields(
+            view, item, exclude_fields=exclude_fields, *args, **kwargs)
+
+        # Show rarity as images
+        setSubField(fields, 'rarity', key='value', value=item.small_rarity_image)
+
+        return fields
+
+    class ListView(BaseCardCollection.ListView):
+        filter_form = forms.MemoirFilterForm
+
+    class ItemView(BaseCardCollection.ItemView):
+        fields_prefetched_together = BaseCardCollection.ItemView.fields_prefetched_together + [
+            'stage_girls',
+        ]
+
+        fields_order = [
+            'name',
+            'rarity',
+            'is_upgrade',
+            'limited',
+            'cost',
+            'sell_price',
+            'explanation',
+            'statistics',
+            'acts',
+            'icon',
+            'art',
+            'transparent',
+            'stage_girls',
+        ]
+
+        filter_cuteform = BaseCardCollection.filter_cuteform.copy()
+        filter_cuteform.update({
+            'is_upgrade': {
+                'type': CuteFormType.YesNo,
+            },
+        })
+
+        def to_fields(self, item, *args, **kwargs):
+            fields = super(MemoirCollection.ItemView, self).to_fields(
+                item, *args, **kwargs)
+
+            # Set URL to accounts who collected the memoirs
+
+            setSubField(fields, 'collectedmemoirs', key='link', value=(
+                u'/accounts/?collected_memoir={}'.format(item.pk)))
+            setSubField(fields, 'collectedmemoirs', key='ajax_link', value=(
+                u'/ajax/accounts/?collected_memoir={}&ajax_modal_only'.format(item.pk)))
+
+            return fields
 
 ############################################################
 # Event Collection
 
 class EventCollection(MainItemCollection):
+    enabled = False
     queryset = models.Account.objects.all() # todo
     title = _('Event')
     plural_title = _('Events')
@@ -569,6 +988,7 @@ class EventCollection(MainItemCollection):
 # Conversation Collection
 
 class ConversationCollection(MainItemCollection):
+    enabled = False
     queryset = models.Account.objects.all() # todo
     title = _('Conversation')
     plural_title = _('Conversations')
@@ -580,8 +1000,96 @@ class ConversationCollection(MainItemCollection):
 # Comic Collection
 
 class ComicCollection(MainItemCollection):
+    enabled = False
     queryset = models.Account.objects.all() # todo
     title = _('Comic')
     plural_title = _('Comics')
     navbar_link_list = 'relive'
     icon = 'album'
+
+############################################################
+############################################################
+# Re LIVE collectible collections
+############################################################
+############################################################
+
+############################################################
+# Base collected card collection
+
+def to_BaseCollectedCardCollection(cls):
+    class _BaseCollectedCardCollection(cls):
+        filter_cuteform = {
+            'max_leveled': {
+                'type': CuteFormType.YesNo,
+            },
+        }
+
+        fields_icons = {
+            'max_leveled': 'max-level',
+        }
+
+        class AddView(cls.AddView):
+            unique_per_owner = True
+            add_to_collection_variables = cls.AddView.add_to_collection_variables + [
+                'i_rarity',
+            ]
+
+            def quick_add_to_collection(self, request):
+                return request.GET.get('view') == 'icons'
+
+    return _BaseCollectedCardCollection
+
+
+############################################################
+# Collected card Collection
+
+def to_CollectedCardCollection(cls):
+    cls = to_BaseCollectedCardCollection(cls)
+
+    class _CollectedCardCollection(cls):
+        form_class = forms.to_CollectedCardForm(cls)
+
+        filter_cuteform = cls.filter_cuteform.copy()
+        filter_cuteform.update({
+            'max_bonded': {
+                'type': CuteFormType.YesNo,
+            },
+            'i_rarity': {
+                'image_folder': 'i_rarity',
+            },
+        })
+
+        fields_images = {
+            'rarity': 'rarity.png',
+            'rank': 'rank.png',
+        }
+
+        fields_icons = cls.fields_icons.copy()
+        fields_icons.update({
+            'max_bonded': 'max-bond',
+        })
+
+        def to_fields(self, view, item, *args, **kwargs):
+            fields = super(_CollectedCardCollection, self).to_fields(
+                view, item, *args, **kwargs)
+
+            # Show rarity as images
+            setSubField(fields, 'rarity', key='type', value='image')
+            setSubField(fields, 'rarity', key='value', value=item.rarity_image)
+
+            # Show rank as images
+            setSubField(fields, 'rank', key='type', value='image')
+            setSubField(fields, 'rank', key='value', value=item.rank_image)
+
+            return fields
+
+    return _CollectedCardCollection
+
+############################################################
+# Collected memoir Collection
+
+def to_CollectedMemoirCollection(cls):
+    cls = to_BaseCollectedCardCollection(cls)
+    class _CollectedMemoirCollection(cls):
+        pass
+    return _CollectedMemoirCollection

@@ -1,12 +1,10 @@
 import datetime
 from collections import OrderedDict
-from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings as django_settings
+from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Q
 from django.utils import timezone
 from magi import urls # unused, loads static
-from magi.utils import (
-    staticImageURL,
-)
 from magi.tools import (
     totalDonatorsThisMonth,
     latestDonationMonth,
@@ -14,6 +12,10 @@ from magi.tools import (
     generateSettings,
     getUsersBirthdaysToday,
     getCharactersBirthdays,
+)
+from magi.utils import (
+    staticImageURL,
+    birthdays_within,
 )
 from starlight import models
 
@@ -110,11 +112,58 @@ def generate_settings():
     #     for background in models.Background.objects.all()
     # ]
 
+    print 'Get homepage cards'
+    cards = models.Card.objects.exclude(
+        (Q(art__isnull=True) | Q(art=''))
+        & (Q(transparent__isnull=True) | Q(transparent='')),
+    ).exclude(
+        # show_art_on_homepage=False,
+    ).order_by('-number')
+
+    is_character_birthday = False
+    birthday_today_stage_girls_id = models.StageGirl.objects.filter(
+        birthdays_within(days_after=1, days_before=1)).values_list(
+            'id', flat=True)
+    if birthday_today_stage_girls_id:
+        filtered_cards = cards.filter(stage_girl_id__in=birthday_today_stage_girls_id)[:20]
+        is_character_birthday = True
+    else:
+        filtered_cards = None
+
+    if filtered_cards:
+        filtered_cards = filtered_cards[:20]
+    else:
+        filtered_cards = cards[:10]
+        is_character_birthday = False
+
+    homepage_arts = []
+    position = { 'size': 'cover', 'x': 'center', 'y': 'center' }
+    for c in filtered_cards:
+        if c.art:
+            homepage_arts.append({
+                'url': c.art_url,
+                'hd_url': c.art_2x_url or c.art_original_url,
+                'about_url': c.item_url,
+            })
+        elif c.transparent:
+            homepage_arts.append({
+                'foreground_url': c.transparent_url,
+                'about_url': c.item_url,
+                'position': position,
+            })
+
+    homepage_arts.append({
+        'url': staticImageURL('default_art.png'),
+        'hd_url': staticImageURL('default_art_hd.png'),
+    })
+
     print 'Save generated settings'
     generateSettings({
         'LATEST_NEWS': latest_news,
         'TOTAL_DONATORS': total_donators,
         'DONATION_MONTH': donation_month,
+        'HOMEPAGE_ARTS': homepage_arts,
+        'IS_CHARACTER_BIRTHDAY': is_character_birthday,
         'STAFF_CONFIGURATIONS': staff_configurations,
         'FAVORITE_CHARACTERS': favorite_characters,
         'SCHOOLS': all_schools,

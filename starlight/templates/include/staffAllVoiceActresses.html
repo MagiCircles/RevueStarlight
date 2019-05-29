@@ -1,0 +1,12 @@
+<div class="table-responsive">
+  <table class="items list-items-{{ collection.name }} {% for class in display_style_table_classes %}{{ class }} {% endfor %}collection-table">
+    <tr><th colspan="42" class="table-section-header">
+        {{ voice_actresses_section_header }}
+    </th></tr>
+    {% for item in all_voice_actresses %}
+    <tr data-item="staff" data-item-id="{{ item.pk }}">
+      {% include 'items/default_item_table_view.html' %}
+    </tr>
+    {% endfor %}
+  </table>
+</div>
