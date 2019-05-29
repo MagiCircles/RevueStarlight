@@ -254,7 +254,7 @@ class AccountCollection(_AccountCollection):
 
     fields_images = {
         'version': lambda _i: _i.version_image,
-        'stage_of_dreams_level': 'alt_stage_of_dreams.png',
+        'stage_of_dreams_level': 'stage_of_dreams.png',
         'vs_revue_rank': lambda _i: _i.vs_revue_rank_image,
         'bought_stars': 'stars.png',
     }
