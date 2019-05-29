@@ -1138,12 +1138,12 @@ class Card(BaseCard):
     ############################################################
     # Reverse relations
 
-    reverse_related = (
+    reverse_related = BaseCard.reverse_related + [
         {
             'field_name': 'collectedcards',
             'verbose_name': lambda: _('Collected {things}').format(things=_('Cards').lower()),
         },
-    )
+    ]
 
     ############################################################
     # Unicode
