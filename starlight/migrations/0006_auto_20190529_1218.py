@@ -160,7 +160,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='account',
             name='i_version',
-            field=models.PositiveIntegerField(default='en', verbose_name='Version', choices=[(0, 'Japanese version'), (1, 'Worldwide version')]),
+            field=models.PositiveIntegerField(default=0, verbose_name='Version', choices=[(0, 'Japanese version'), (1, 'Worldwide version')]),
             preserve_default=False,
         ),
         migrations.AddField(
