@@ -93,12 +93,15 @@ def generate_settings():
     ])
 
     print 'Max statistics'
-    max_statistics = {
-        statistic: getattr(
-            models.Card.objects.order_by(u'-delta_{}'.format(statistic))[0],
-            u'delta_{}'.format(statistic),
-        ) for statistic in models.Card.STATISTICS_FIELDS
-    }
+    try:
+        max_statistics = {
+            statistic: getattr(
+                models.Card.objects.order_by(u'-delta_{}'.format(statistic))[0],
+                u'delta_{}'.format(statistic),
+            ) for statistic in models.Card.STATISTICS_FIELDS
+        }
+    except IndexError:
+        max_statistics = {}
 
     # print 'Get the backgrounds'
     # backgrounds = [
