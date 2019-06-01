@@ -852,13 +852,23 @@ class BaseCard(MagiModel):
     _original_art = models.ImageField(null=True, upload_to=uploadTiny('card/art'))
     _tthumbnail_art = models.ImageField(null=True, upload_to=uploadTthumb('card/art'))
     _2x_art = models.ImageField(null=True, upload_to=upload2x('card/art'))
+    show_art_on_homepage = models.BooleanField(default=True)
+
+    ############################################################
+    # Images settings and utils
 
     tinypng_settings = {
         'art': {
             'resize': 'scale',
             'height': 402,
         },
+        'image': {
+            'resize': 'scale',
+            'height': 402,
+        },
     }
+
+    top_image = property(lambda _s: _s.image_url or _s.art_url or _s.icon_url)
 
     ############################################################
     # Statistics fields

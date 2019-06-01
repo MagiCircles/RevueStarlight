@@ -127,7 +127,7 @@ def generate_settings():
         (Q(art__isnull=True) | Q(art=''))
         & (Q(transparent__isnull=True) | Q(transparent='')),
     ).exclude(
-        # show_art_on_homepage=False,
+        show_art_on_homepage=False,
     ).order_by('-number')
 
     is_character_birthday = False
