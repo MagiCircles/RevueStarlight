@@ -3,7 +3,11 @@ from __future__ import division
 from collections import OrderedDict
 from django.conf import settings as django_settings
 from django.contrib.auth.models import User
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (
+    MaxValueValidator,
+    MinValueValidator,
+    RegexValidator,
+)
 from django.db import models
 from django.db.models import Q
 from django.utils.formats import date_format
@@ -199,7 +203,9 @@ class Account(BaseAccount):
     ############################################################
     # Generic
 
-    friend_id = models.PositiveIntegerField(_('ID'), null=True)
+    friend_id = models.CharField(_('ID'), null=True, max_length=100, validators=[
+        RegexValidator(r'^[0-9]+$', t['Enter a number.']),
+    ])
     show_friend_id = models.BooleanField(_('Should your friend ID be visible to other players?'), default=True)
     center = models.ForeignKey(
         'CollectedCard', verbose_name=_('Center'), related_name='center_of_account',

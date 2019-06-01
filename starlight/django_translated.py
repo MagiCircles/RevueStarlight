@@ -5,4 +5,5 @@ from magi.django_translated import t
 t.update({
     'Japanese': _('Japanese'),
     'Unknown': _('Unknown'),
+    'Enter a number.': _('Enter a number.'),
 })
