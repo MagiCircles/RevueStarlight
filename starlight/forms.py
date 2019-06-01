@@ -321,6 +321,13 @@ class StageGirlFilterForm(MagiFiltersForm):
 ############################################################
 # Base card
 
+class BaseCardForm(AutoForm):
+
+    acts = forms.ModelMultipleChoiceField(
+        queryset=models.Act.objects.all().order_by('i_type', 'name'),
+        widget=forms.CheckboxSelectMultiple,
+    )
+
 class BaseCardFilterForm(MagiFiltersForm):
     search_fields = [
         'name', 'd_names',
@@ -370,7 +377,7 @@ class BaseCardFilterForm(MagiFiltersForm):
 ############################################################
 # Card
 
-class CardForm(AutoForm):
+class CardForm(BaseCardForm):
     def save(self, commit=False):
         instance = super(CardForm, self).save(commit=False)
         instance.update_cache('stage_girl')
@@ -378,7 +385,7 @@ class CardForm(AutoForm):
             instance.save()
         return instance
 
-    class Meta(AutoForm.Meta):
+    class Meta(BaseCardForm.Meta):
         model = models.Card
 
 class CardFilterForm(BaseCardFilterForm):
@@ -424,6 +431,10 @@ class CardFilterForm(BaseCardFilterForm):
 
 ############################################################
 # Memoir
+
+class MemoirForm(BaseCardForm):
+    class Meta(BaseCardForm.Meta):
+        model = models.Memoir
 
 class MemoirFilterForm(BaseCardFilterForm):
     search_fields = BaseCardFilterForm.search_fields + [

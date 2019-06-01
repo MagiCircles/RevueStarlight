@@ -785,9 +785,10 @@ class Act(MagiModel):
     # Unicode
 
     def __unicode__(self):
-        return u'{} - {}'.format(
+        return u'{}] {} - {}'.format(
+            unicode(self.t_type)[0],
             self.t_name,
-            summarize(self.t_description, max_length=(50 - len(unicode(self.t_name)))),
+            summarize(self.t_description, max_length=(80 - len(unicode(self.t_name)))),
         )
 
     class Meta(MagiModel.Meta):

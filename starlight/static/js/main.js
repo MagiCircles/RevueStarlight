@@ -17,6 +17,24 @@ function loadBaseCard() {
     });
 }
 
+function loadBaseCardForm() {
+    let acts = $('#id_acts').last();
+    if (acts.length == 1 && !acts.data('loaded-show-more')) {
+        acts.css('overflow', 'hidden');
+        acts.css('height', 200);
+        let buttons = acts.parent().find('.btn-group');
+        let button = $('<a href="#showAll" target="_blank" class="btn btn-secondary">See all</a>');
+        button.click(function(e) {
+            e.preventDefault();
+            acts.css('height', 'auto');
+            button.remove();
+            return false;
+        });
+        buttons.prepend(button);
+    }
+
+}
+
 function loadAccountsFilters() {
     loadAccounts();
     let form = $('[id="filter-form-account"]');

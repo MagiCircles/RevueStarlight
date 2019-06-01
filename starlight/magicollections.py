@@ -633,6 +633,7 @@ class ActCollection(SubItemCollection):
     class ListView(SubItemCollection.ListView):
         per_line = 1
         item_template = custom_item_template
+        auto_filter_form = True
 
     class ItemView(SubItemCollection.ItemView):
         template = custom_item_template
@@ -749,9 +750,11 @@ class BaseCardCollection(MainItemCollection):
 
     class AddView(MainItemCollection.AddView):
         savem2m = True
+        ajax_callback = 'loadBaseCardForm'
 
     class EditView(MainItemCollection.EditView):
         savem2m = True
+        ajax_callback = 'loadBaseCardForm'
 
 ############################################################
 # Card Collection
@@ -902,6 +905,7 @@ class MemoirCollection(BaseCardCollection):
     plural_title = _('Memoirs')
     navbar_link_list = 'relive'
     image = 'red_memoirs'
+    form_class = forms.MemoirForm
 
     collectible = models.CollectedMemoir
 
