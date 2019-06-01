@@ -299,14 +299,30 @@ html {
 /* User profile */
 
 .profile-tabs {
-    [data-link^="favorite_voiceactress"],
-    [data-link^="favorite_character"] {
-        img {
-            @size: 30px;
-            width: @size;
-            height: @size;
-            margin: -((@size - 24) / 2);
-            border-radius: 50%;
+    .table-buttons {
+        text-align: left;
+        a {
+            border: 4px dashed fade(white, 10%);
+            border-top: 0;
+            border-left: 0;
+        }
+        td:last-child a {
+            border-right: 0;
+        }
+        [data-link^="favorite_voiceactress"],
+        [data-link^="favorite_character"] {
+            img {
+                @size: 45px;
+                width: @size;
+                height: @size;
+                margin: -((@size - 24) / 2);
+                border-radius: 50%;
+            }
+        }
+    }
+    .table-buttons:last-child {
+        tr a {
+            border-bottom: 0;
         }
     }
 }
