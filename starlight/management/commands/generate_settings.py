@@ -48,11 +48,19 @@ def generate_settings():
         days_after=12, days_before=1,
         field_name='birthday',
     )
-    # todo same for voice actresses
+    def get_name_image_url_from_voice_actress(voice_actress):
+        return voice_actress.t_name, voice_actress.image_url, voice_actress.item_url
+    latest_news = getCharactersBirthdays(
+        models.VoiceActress.objects.all(),
+        get_name_image_url_from_voice_actress,
+        latest_news=latest_news,
+        days_after=12, days_before=1,
+        field_name='birthday',
+    )
 
     print 'Show a happy birthday banner for the users whose birthday is today'
     latest_news = getUsersBirthdaysToday(
-        staticImageURL('happy_birthday.png'),
+        staticImageURL('generic_banner.png'),
         latest_news=latest_news,
         max_usernames=4,
     )

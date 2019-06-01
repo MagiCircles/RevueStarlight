@@ -651,11 +651,14 @@ class Staff(MagiModel):
     owner = models.ForeignKey(User, related_name='added_staff')
 
     CATEGORY_CHOICES = (
-        ('anime', _('Anime')),
+        ('anime', string_concat(_('Anime'), ' - ', _('Cast'))),
+        ('animestaff', string_concat(_('Anime'), ' - ', _('Staff'))),
+        ('general', _('General')),
         ('stageplay', _('Stage play')),
         ('additional', _('Additional')),
     )
     i_category = models.PositiveIntegerField(_('Category'), choices=i_choices(CATEGORY_CHOICES))
+    display_section_header = property(lambda _s: _s.t_category if _s.category != 'anime' else None)
 
     name = models.CharField(_('Name'), max_length=100)
     NAMES_CHOICES = NON_LATIN_LANGUAGES

@@ -26,6 +26,7 @@ from magi.utils import (
     staticImageURL,
 )
 from starlight.django_translated import t
+from starlight.settings import SMARTPHONE_GAME_PER_LANGUAGE, SMARTPHONE_GAME
 from starlight.utils import (
     getElementsCuteForm,
     getSchoolsCuteForm,
@@ -517,6 +518,7 @@ class StageGirlCollection(MainItemCollection):
 
 class StaffCollection(MainItemCollection):
     queryset = models.Staff.objects.all()
+    plural_name = 'staff'
     title = _('Staff')
     plural_title = ('Staff')
     navbar_link_list = 'revuestarlight'
@@ -529,7 +531,7 @@ class StaffCollection(MainItemCollection):
         display_style = 'table'
         display_style_table_fields = ['role', 'name', 'm_description']
         show_item_buttons_as_icons = True
-        show_section_header_on_change = 't_category'
+        show_section_header_on_change = 'i_category'
         ajax_pagination_callback = 'loadStaff'
 
         def table_fields(self, item, *args, **kwargs):
@@ -544,15 +546,24 @@ class StaffCollection(MainItemCollection):
             return []
 
         # Show voice actresses before all staff
+        # 1st school = anime staff, go before staff
+        # Other schools = game only staff, go staff
 
-        before_template = 'include/staffAllVoiceActresses'
+        before_template = 'include/staffAllVoiceActressesAnime'
+        after_template = 'include/staffAllVoiceActressesGame'
 
         def extra_context(self, context):
             super(StaffCollection.ListView, self).extra_context(context)
-            context['voice_actresses_section_header'] = _('Cast')
-            context['all_voice_actresses'] = models.VoiceActress.objects.prefetch_related(
-                'stagegirls').order_by('name')
-            for item in context['all_voice_actresses']:
+            context['anime_voice_actresses_section_header'] = string_concat(_('Anime'), ' - ', _('Cast'))
+            context['game_voice_actresses_section_header'] = string_concat(
+                SMARTPHONE_GAME_PER_LANGUAGE.get(
+                    context['request'].LANGUAGE_CODE, SMARTPHONE_GAME,
+                ), ' - ', _('Cast'),
+            )
+            context['anime_voice_actresses'] = []
+            context['game_voice_actresses'] = []
+            for item in models.VoiceActress.objects.prefetch_related(
+                    'stagegirls').order_by('stagegirls__school_id').distinct():
                 stage_girls = list(item.stagegirls.all())
                 item.table_fields = OrderedDict([
                     ('role', {
@@ -579,6 +590,10 @@ class StaffCollection(MainItemCollection):
                         'value': (False, item.t_m_staff_description),
                     } if item.m_staff_description else {}),
                 ])
+                if stage_girls and stage_girls[0].school_id == 1:
+                    context['anime_voice_actresses'].append(item)
+                else:
+                    context['game_voice_actresses'].append(item)
 
     class ItemView(MainItemCollection.ItemView):
         enabled = False

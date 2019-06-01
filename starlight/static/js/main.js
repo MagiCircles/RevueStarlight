@@ -35,27 +35,29 @@ function loadUsersFilters() {
 }
 
 function loadStaff() {
-    $('[data-field="description"]:not(.loaded)').each(function() {
+    $('[data-field="description"]').each(function() {
         let descriptionTr = $(this);
-        let descriptionContent = descriptionTr.find('.long-text-value');
-        if (descriptionContent.length) {
-            let icon = $('<a href="#show" style="display: block;"></a>');
-            descriptionContent.hide();
-            descriptionTr.append(icon);
-            icon.click(function(e) {
-                e.preventDefault();
-                icon.hide();
-                descriptionContent.show();
-                return false;
-            });
-            descriptionContent.click(function(e) {
-                e.preventDefault();
+        if (!descriptionTr.data('loaded-quote')) {
+            let descriptionContent = descriptionTr.find('.long-text-value');
+            if (descriptionContent.length) {
+                let icon = $('<a href="#show" style="display: block;"></a>');
                 descriptionContent.hide();
-                icon.show();
-                return false;
-            });
+                descriptionTr.append(icon);
+                icon.click(function(e) {
+                    e.preventDefault();
+                    icon.hide();
+                    descriptionContent.show();
+                    return false;
+                });
+                descriptionContent.click(function(e) {
+                    e.preventDefault();
+                    descriptionContent.hide();
+                    icon.show();
+                    return false;
+                });
+            }
+            descriptionTr.data('loaded-quote', true);
         }
-        descriptionTr.addClass('.loaded');
     });
 
 }
