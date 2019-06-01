@@ -253,6 +253,17 @@ class VoiceActressFilterForm(MagiFiltersForm):
         ]
 
 ############################################################
+# School
+
+class SchoolForm(AutoForm):
+    class Meta(AutoForm.Meta):
+        model = models.School
+        tinypng_on_save = [
+            'white_image',
+            'monochrome_image',
+        ]
+
+############################################################
 # Stage girl
 
 class StageGirlForm(AutoForm):
@@ -292,18 +303,11 @@ class StageGirlFilterForm(MagiFiltersForm):
         ('birthday', _('Birthday')),
     ]
 
-    school = forms.ChoiceField(label=_('School'))
-
-    def __init__(self, *args, **kwargs):
-        super(StageGirlFilterForm, self).__init__(*args, **kwargs)
-        if 'school' in self.fields:
-            self.fields['school'].choices = getSchoolChoices()
-
     class Meta(MagiFiltersForm.Meta):
         model = models.StageGirl
         fields = [
             'search',
-            'school', 'i_year',
+            'i_year',
             'i_astrological_sign',
             'ordering', 'reverse_order',
         ]

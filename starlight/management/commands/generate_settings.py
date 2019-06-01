@@ -34,6 +34,7 @@ def generate_settings():
     staff_configurations, latest_news = getStaffConfigurations()
 
     print 'Show a banner for current and upcoming birthdays of characters'
+
     def get_name_image_url_from_character(character):
         try:
             card = models.Card.objects.filter(stage_girl=character).all().order_by('-i_rarity', '-number')[0]
@@ -77,6 +78,7 @@ def generate_settings():
         (school.pk, {
             'name': school.name,
             'names': school.names,
+            'white_image': school.white_image_url or school.image_url,
             'image': school.image_url,
         })
         for school in models.School.objects.all().order_by('name')

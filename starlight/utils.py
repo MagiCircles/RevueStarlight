@@ -76,6 +76,18 @@ def getVoiceActressURLFromPk(pk):
     voiceactress = django_settings.VOICE_ACTRESSES[int(pk)]
     return u'/voiceactress/{}/{}/'.format(pk, tourldash(getTranslatedName(voiceactress)))
 
+def getSchoolNameFromPk(pk):
+    return getTranslatedName(django_settings.SCHOOLS[int(pk)])
+
+def getSchoolImageFromPk(pk):
+    return django_settings.SCHOOLS[int(pk)]['image']
+
+def getSchoolURLFromPk(pk, ajax=False):
+    school = django_settings.SCHOOLS[int(pk)]
+    return u'{}/school/{}/{}'.format(
+        '/ajax' if ajax else '', pk,
+        '' if ajax else '{}/'.format(tourldash(getSchoolNameFromPk(pk))))
+
 ############################################################
 # CuteForm utils
 
@@ -90,9 +102,9 @@ def getElementsCuteForm(model=None):
         'transform': CuteFormTransform.ImagePath,
     }
 
-def getSchoolsCuteForm():
+def getSchoolsCuteForm(white=False):
     return {
-        'to_cuteform': lambda _k, _v: django_settings.SCHOOLS[_k]['image'],
+        'to_cuteform': lambda _k, _v: django_settings.SCHOOLS[_k]['white_image' if white else 'image'],
     }
 
 def getStageGirlsCuteForm():
@@ -105,7 +117,7 @@ def getStageGirlsCuteForm():
         },
     }
 
-def mergeSchoolStageGirlCuteForm(filter_cuteform, ):
+def mergeSchoolStageGirlCuteForm(filter_cuteform):
     mergedFieldCuteForm(filter_cuteform, {
         'title': string_concat(_('School'), '/', _('Stage girl')),
         'extra_settings': {

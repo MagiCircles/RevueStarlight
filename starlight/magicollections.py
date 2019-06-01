@@ -331,7 +331,7 @@ class VoiceActressCollection(MainItemCollection):
         'i_blood': {
             'type': CuteFormType.HTML,
         },
-        'school': getSchoolsCuteForm(),
+        'school': getSchoolsCuteForm(white=True),
     }
 
     def to_fields(self, view, item, *args, **kwargs):
@@ -407,6 +407,7 @@ class SchoolCollection(SubItemCollection):
     queryset = models.School.objects.all()
     title = _('School')
     plural_title = _('Schools')
+    form_class = forms.SchoolForm
 
     icon = 'school'
     translated_fields = ('name', 'm_description')
@@ -419,6 +420,10 @@ class SchoolCollection(SubItemCollection):
     }
 
     class ItemView(SubItemCollection.ItemView):
+        fields_exclude = [
+            'white_image',
+            'monochrome_image',
+        ]
         fields_prefetched_together = ['students']
 
     class ListView(SubItemCollection.ListView):
@@ -428,7 +433,7 @@ class SchoolCollection(SubItemCollection):
 # Stage Girl Collection
 
 class StageGirlCollection(MainItemCollection):
-    queryset = models.StageGirl.objects.all().select_related('school')
+    queryset = models.StageGirl.objects.all()
     title = _('Stage girl')
     plural_title = _('Stage girls')
     navbar_link_list = 'revuestarlight'
@@ -473,7 +478,6 @@ class StageGirlCollection(MainItemCollection):
     filter_cuteform = {
         'i_astrological_sign': {
         },
-        'school': getSchoolsCuteForm(),
         'i_year': {
             'type': CuteFormType.HTML,
         },
@@ -492,7 +496,7 @@ class StageGirlCollection(MainItemCollection):
         per_line = 5
         page_size = 25
         filter_form = forms.StageGirlFilterForm
-        show_section_header_on_change = 'school'
+        show_section_header_on_change = 'school_id'
 
     class ItemView(MainItemCollection.ItemView):
         fields_preselected = ['voice_actress', 'school']

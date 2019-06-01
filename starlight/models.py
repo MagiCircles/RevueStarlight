@@ -33,6 +33,9 @@ from starlight.django_translated import t
 from starlight.utils import (
     displayNameHTML,
     getMaxStatistic,
+    getSchoolImageFromPk,
+    getSchoolNameFromPk,
+    getSchoolURLFromPk,
 )
 
 ############################################################
@@ -431,6 +434,9 @@ class School(MagiModel):
     image = models.ImageField(_('Image'), upload_to=uploadItem('school'), null=True)
     _original_image = models.ImageField(null=True, upload_to=uploadTiny('school'))
 
+    monochrome_image = models.ImageField(upload_to=uploadItem('school'), null=True)
+    white_image = models.ImageField(upload_to=uploadItem('school'), null=True)
+
     m_description = models.TextField(_('Description'), null=True)
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_descriptions = models.TextField(_('Description'), null=True)
@@ -607,10 +613,10 @@ class StageGirl(MagiModel):
     @property
     def display_section_header(self):
         return mark_safe(u'<a href="{url}" data-ajax-url="{ajax_url}" data-ajax-title="{title}"><img src="{image}" alt="{title}" height="50"> {title}'.format(
-            image=self.school.image_url,
-            title=self.school,
-            url=self.school.item_url,
-            ajax_url=self.school.ajax_item_url,
+            image=getSchoolImageFromPk(self.school_id),
+            title=getSchoolNameFromPk(self.school_id),
+            url=getSchoolURLFromPk(self.school_id),
+            ajax_url=getSchoolURLFromPk(self.school_id, ajax=True),
         ))
 
     @property
