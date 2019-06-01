@@ -305,7 +305,6 @@ class VoiceActressCollection(MainItemCollection):
     navbar_link_title = _('Cast')
     icon = 'voice-actress'
     translated_fields = ('name', 'specialty', 'hobbies', 'm_description', 'm_staff_description')
-    multipart = True
 
     fields_icons = {
         'name': 'id',
@@ -411,7 +410,6 @@ class SchoolCollection(SubItemCollection):
 
     icon = 'school'
     translated_fields = ('name', 'm_description')
-    multipart = True
 
     fields_icons = {
         'name': 'school',
@@ -439,7 +437,6 @@ class StageGirlCollection(MainItemCollection):
     navbar_link_list = 'revuestarlight'
     icon = 'idol'
     form_class = forms.StageGirlForm
-    multipart = True
     translated_fields = [
         'name',
         'weapon',
@@ -617,7 +614,6 @@ class ActCollection(SubItemCollection):
     plural_title = _('Acts')
     icon = 'skill'
     translated_fields = ('name', 'description')
-    multipart = True
 
     class ListView(SubItemCollection.ListView):
         per_line = 1
@@ -632,7 +628,6 @@ class ActCollection(SubItemCollection):
 class BaseCardCollection(MainItemCollection):
     enabled = False
     navbar_link_list = 'relive'
-    multipart = True
 
     translated_fields = [
         'name',
