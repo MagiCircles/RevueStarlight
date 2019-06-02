@@ -620,7 +620,7 @@ class SongCollection(MainItemCollection):
 # Act Collection
 
 class ActCollection(SubItemCollection):
-    main_collection = 'card'
+    main_collections = ['card', 'memoir']
     main_many2many = True
     main_related = 'acts'
 

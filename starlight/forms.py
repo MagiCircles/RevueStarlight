@@ -322,10 +322,9 @@ class StageGirlFilterForm(MagiFiltersForm):
 # Base card
 
 class BaseCardForm(AutoForm):
-
     acts = forms.ModelMultipleChoiceField(
         queryset=models.Act.objects.all().order_by('i_type', 'name'),
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple, required=False,
     )
 
 class BaseCardFilterForm(MagiFiltersForm):
