@@ -756,6 +756,9 @@ class Act(MagiModel):
 
     cost = models.PositiveIntegerField('AP', default=1)
 
+    unlock_at_rank = models.PositiveIntegerField(null=True)
+    display_unlock_at_rank = property(lambda _s: _('Unlock at rank {rank}').format(rank=_s.unlock_at_rank))
+
     j_details = models.TextField(null=True)
 
     ############################################################
@@ -785,14 +788,15 @@ class Act(MagiModel):
     # Unicode
 
     def __unicode__(self):
-        return u'{}] {} - {}'.format(
+        return u'{}]{} {} - {}'.format(
             unicode(self.t_type)[0],
+            u'🔒{}'.format(self.unlock_at_rank) if self.unlock_at_rank else '',
             self.t_name,
             summarize(self.t_description, max_length=(80 - len(unicode(self.t_name)))),
         )
 
     class Meta(MagiModel.Meta):
-        unique_together = (('name', 'description'), )
+        unique_together = (('name', 'description', 'unlock_at_rank'), )
 
 ############################################################
 # Abstract: Base card

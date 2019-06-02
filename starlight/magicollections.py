@@ -727,9 +727,9 @@ class BaseCardCollection(MainItemCollection):
         ajax_callback = 'loadBaseCard'
 
         def get_queryset(self, queryset, parameters, request):
-            # Order acts by type, cost
+            # Order acts by type, unlock_at_rank, cost
             queryset = queryset.prefetch_related(Prefetch(
-                'acts', queryset=models.Act.objects.order_by('i_type', 'cost'),
+                'acts', queryset=models.Act.objects.order_by('i_type', 'unlock_at_rank', 'cost'),
             ))
             queryset = super(BaseCardCollection.ItemView, self).get_queryset(queryset, parameters, request)
             return queryset

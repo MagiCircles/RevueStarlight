@@ -2,7 +2,7 @@
 {% if not parent_item %}
 <p><span class="label label-default">{{ act.t_type }}</span></p>
 {% endif %}
-<div class="panel panel-{% if parent_item %}{{ parent_item.element }}{% else %}default{% endif %} act act-{{ act.type }}{% if act.show_top_details %} act-with-top-details{% endif %}">
+<div class="panel panel-{% if parent_item %}{{ parent_item.element }}{% else %}default{% endif %} act act-{{ act.type }}{% if act.show_top_details %} act-with-top-details{% endif %}{% if act.unlock_at_rank %} unlock-at-rank{% endif %}">
   {% if act.show_title %}
   {% if act.show_top_details %}
   <div class="act-top">
@@ -27,6 +27,9 @@
       <div class="col-xs-10">
         {% endif %}
         {{ act.t_description }}
+        {% if act.unlock_at_rank %}
+        <p class="text-right"><strong>{{ act.display_unlock_at_rank }}</strong></p>
+        {% endif %}
         {% if act.image %}
       </div>
     </div>
