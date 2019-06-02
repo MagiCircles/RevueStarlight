@@ -662,6 +662,11 @@ class BaseCardCollection(MainItemCollection):
             'transform': CuteFormTransform.Flaticon,
         },
         'stage_girl': getStageGirlsCuteForm(),
+        'version': {
+            'to_cuteform': lambda _k, _v: models.VERSIONS[_k]['image'],
+            'image_folder': 'language',
+            'transform': CuteFormTransform.ImagePath,
+        },
     }
     mergeSchoolStageGirlCuteForm(filter_cuteform)
 
@@ -716,7 +721,7 @@ class BaseCardCollection(MainItemCollection):
         return fields
 
     class ListView(MainItemCollection.ListView):
-        default_ordering = '-release_date'
+        default_ordering = '-jp_release_date'
         show_collect_button = True
         show_item_buttons_as_icons = True
         item_buttons_classes = ['btn', 'btn-link-main', 'btn-lines']

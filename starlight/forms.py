@@ -340,7 +340,7 @@ class BaseCardFilterForm(MagiFiltersForm):
         'name', 'd_names',
     ]
     ordering_fields = [
-        ('release_date', _('Release date')),
+        ('jp_release_date', _('Release date')),
         ('number', _('Number')),
     ] + [
         (
@@ -351,6 +351,13 @@ class BaseCardFilterForm(MagiFiltersForm):
     merge_fields = [
         ('school', 'stage_girl'),
     ]
+
+    version = forms.ChoiceField(label=_('Version'), choices=models.VERSION_CHOICES)
+    version_filter = MagiFilter(to_queryset=(
+        lambda form, queryset, request, value: queryset.filter(**{
+            u'{}release_date__isnull'.format(models.VERSIONS[value]['prefix']): False
+        })
+    ))
 
     stage_girl = forms.ChoiceField(label=_('Stage girl'), choices=getStageGirlChoices())
 
@@ -432,7 +439,8 @@ class CardFilterForm(BaseCardFilterForm):
             'search',
             'stage_girl', 'school',
             'i_rarity', 'i_element',
-            'type', 'i_damage', 'i_position',
+            'type', 'version',
+            'i_damage', 'i_position',
             'c_roles',
             'resists_against', 'weak_against',
         ]
@@ -456,9 +464,10 @@ class MemoirFilterForm(BaseCardFilterForm):
         model = models.Memoir
         fields = [
             'search',
-            'stage_girl', 'school',
             'i_rarity',
             'type',
+            'version',
+            'stage_girl', 'school',
         ]
 
 ############################################################
