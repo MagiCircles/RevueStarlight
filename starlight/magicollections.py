@@ -742,6 +742,27 @@ class BaseCardCollection(MainItemCollection):
 
         return fields
 
+    def buttons_per_item(self, view, request, context, item):
+        buttons = super(BaseCardCollection, self).buttons_per_item(view, request, context, item)
+
+        # Show a button to test if the art looks good on the homepage
+        if (request.user.is_authenticated()
+            and request.user.hasPermission('manage_main_items')):
+            if item.art:
+                buttons[u'preview_art'] = {
+                    'classes': view.item_buttons_classes + ['staff-only'],
+                    'show': True,
+                    'url': u'/?preview={}'.format(
+                        getattr(item, u'art_2x_url')
+                        or getattr(item, u'art_original_url'),
+                    ),
+                    'icon': 'home',
+                    'title': u'Preview art on homepage',
+                    'has_permissions': True,
+                    'open_in_new_window': True,
+                }
+        return buttons
+
     class ListView(MainItemCollection.ListView):
         default_ordering = '-jp_release_date'
         show_collect_button = True

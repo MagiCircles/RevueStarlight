@@ -56,7 +56,7 @@ TO_ATTRIBUTES = {
     3: 'snow',
     4: 'cloud',
     5: 'moon',
-    6: 'cosmos',
+    6: 'space',
     7: 'dream',
 }
 
