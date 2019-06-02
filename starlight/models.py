@@ -123,18 +123,18 @@ ELEMENTS = OrderedDict([
         'color': '#F3608A',
         'light_color': '#FFCED7',
         'resists_against': ['moon'],
-        'weak_against': ['cosmos', 'dream'],
+        'weak_against': ['space', 'dream'],
     }),
     ('moon', {
         'translation': _('Moon'),
         'japanese': u'月',
         'color': '#F9AA12',
         'light_color': '#FBFEC8',
-        'resists_against': ['cosmos'],
+        'resists_against': ['space'],
         'weak_against': ['cloud', 'dream'],
     }),
-    ('cosmos', {
-        'translation': _('Cosmos'),
+    ('space', {
+        'translation': _('Space'),
         'japanese': u'宙',
         'color': '#794A92',
         'light_color': '#E5D4FF',
@@ -147,7 +147,7 @@ ELEMENTS = OrderedDict([
         'color': '#38495A',
         'light_color': '#BDD5DE',
         'resists_against': [],
-        'weak_against': ['flower', 'wind', 'snow', 'cloud', 'moon', 'cosmos'],
+        'weak_against': ['flower', 'wind', 'snow', 'cloud', 'moon', 'space'],
     }),
 ])
 
