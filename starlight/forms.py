@@ -336,7 +336,7 @@ class BaseCardFilterForm(MagiFiltersForm):
         ('number', _('Number')),
     ] + [
         (
-            u'base_{}'.format(_statistic),
+            u'delta_{}'.format(_statistic),
             models.BaseCard._meta.get_field(u'base_{}'.format(_statistic)).verbose_name,
         ) for _statistic in models.BaseCard.STATISTICS_FIELDS
     ]
