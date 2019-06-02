@@ -748,6 +748,13 @@ class Act(MagiModel):
     DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_descriptions = models.TextField(_('Description'), null=True)
 
+    m_tips = models.TextField(
+        _('Tips'), null=True,
+        help_text='Extra details not present in the game that can be good to know for players.',
+    )
+    M_TIPSS_CHOICES = ALL_ALT_LANGUAGES
+    d_m_tipss = models.TextField(_('Tips'), null=True)
+
     image = models.ImageField(_('Image'), upload_to=uploadItem('act'), null=True)
     _original_image = models.ImageField(null=True, upload_to=uploadTiny('act'))
 
@@ -849,6 +856,16 @@ class BaseCard(MagiModel):
     cost = property(getInfoFromChoices('rarity', RARITIES, 'cost'))
 
     limited = models.BooleanField(_('Limited'), default=False)
+
+    ############################################################
+    # Fan made details
+
+    m_tips = models.TextField(
+        _('Tips'), null=True,
+        help_text='Extra details not present in the game that can be good to know for players.',
+    )
+    M_TIPSS_CHOICES = ALL_ALT_LANGUAGES
+    d_m_tipss = models.TextField(_('Tips'), null=True)
 
     ############################################################
     # Images
@@ -1113,6 +1130,9 @@ class Card(BaseCard):
     )
     i_position = models.PositiveIntegerField(_('Position'), choices=i_choices(POSITION_CHOICES), default=1)
     position_image = property(lambda _s: staticImageURL(_s.i_position, folder='i_position', extension='png'))
+
+    ############################################################
+    # Fan made details
 
     ROLES_CHOICES = (
         ('anti-tank', _('Anti-tank')),

@@ -35,5 +35,10 @@
     </div>
     {% endif %}
   </div>
-</div><br>
+</div>{% if act.m_tips %}
+<div class="act-tips">
+  <i class="text-{% if parent_item %}{{ parent_item.element }}{% else %}muted{% endif %} flaticon-idea"></i>
+  <div class="to-markdown">{{ act.t_m_tips }}</div>
+</div>
+{% endif %}<br>
 {% endwith %}

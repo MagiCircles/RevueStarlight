@@ -628,7 +628,11 @@ class ActCollection(SubItemCollection):
     title = _('Act')
     plural_title = _('Acts')
     icon = 'skill'
-    translated_fields = ('name', 'description')
+    translated_fields = [
+        'name',
+        'description',
+        'm_tips',
+    ]
 
     class ListView(SubItemCollection.ListView):
         per_line = 1
@@ -647,6 +651,7 @@ class BaseCardCollection(MainItemCollection):
 
     translated_fields = [
         'name',
+        'm_tips',
     ]
 
     filter_cuteform = {
@@ -667,6 +672,7 @@ class BaseCardCollection(MainItemCollection):
         'art': 'pictures',
         'icon': 'pictures',
         'release_date': 'date',
+        'tips': 'idea',
     }
     fields_icons.update({
         _statistic: 'hp' if '_hp' in _statistic else 'statistics'
@@ -846,13 +852,14 @@ class CardCollection(BaseCardCollection):
             'position',
             'cost',
             'limited',
-            'roles',
             'description',
             'profile',
             'message',
             'statistics',
             'acts',
             'release_date',
+            'roles',
+            'tips',
             'icon',
             'art',
             'transparent',
@@ -977,6 +984,8 @@ class MemoirCollection(BaseCardCollection):
             'explanation',
             'statistics',
             'acts',
+            'release_date',
+            'tips',
             'icon',
             'art',
             'transparent',
