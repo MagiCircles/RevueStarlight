@@ -343,11 +343,11 @@ class VoiceActress(MagiModel):
     height = models.PositiveIntegerField(_('Height'), null=True, default=None)
     display_height = property(lambda _s: u'{} cm'.format(_s.height))
 
-    specialty = models.CharField(_('Specialty'), max_length=100, null=True)
+    specialty = models.CharField(_('Specialty'), max_length=600, null=True)
     SPECIALTYS_CHOICES = ALL_ALT_LANGUAGES
     d_specialtys = models.TextField(_('Specialty'), null=True)
 
-    hobbies = models.CharField(_('Hobbies'), max_length=100, null=True)
+    hobbies = models.CharField(_('Hobbies'), max_length=600, null=True)
     HOBBIESS_CHOICES = ALL_ALT_LANGUAGES
     d_hobbiess = models.TextField(_('Hobbies'), null=True)
 
@@ -412,7 +412,7 @@ class VoiceActressLink(MagiModel):
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Platform'), null=True)
 
-    url = models.CharField(_('URL'), max_length=100)
+    url = models.CharField(_('URL'), max_length=600)
 
     ############################################################
     # Views utils
@@ -530,7 +530,7 @@ class StageGirl(MagiModel):
     # todo: department, class?
 
     weapon = models.CharField(
-        _('Weapon'), max_length=100, null=True,
+        _('Weapon'), max_length=200, null=True,
         help_text='Example: Possibility of Puberty',
     )
     WEAPONS_CHOICES = ALL_ALT_LANGUAGES
@@ -551,15 +551,15 @@ class StageGirl(MagiModel):
     LEAST_FAVORITE_FOODS_CHOICES = ALL_ALT_LANGUAGES
     d_least_favorite_foods = models.TextField(_('Disliked food'), null=True)
 
-    likes = models.CharField(_('Likes'), max_length=100, null=True)
+    likes = models.CharField(_('Likes'), max_length=150, null=True)
     LIKESS_CHOICES = ALL_ALT_LANGUAGES
     d_likess = models.TextField(_('Likes'), null=True)
 
-    dislikes = models.CharField(_('Dislikes'), max_length=100, null=True)
+    dislikes = models.CharField(_('Dislikes'), max_length=150, null=True)
     DISLIKESS_CHOICES = ALL_ALT_LANGUAGES
     d_dislikess = models.TextField(_('Dislikes'), null=True)
 
-    hobbies = models.CharField(_('Hobbies'), max_length=100, null=True)
+    hobbies = models.CharField(_('Hobbies'), max_length=200, null=True)
     HOBBIESS_CHOICES = ALL_ALT_LANGUAGES
     d_hobbiess = models.TextField(_('Hobbies'), null=True)
 
@@ -671,11 +671,11 @@ class Staff(MagiModel):
     d_names = models.TextField(_('Name'), null=True)
     japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
 
-    role = models.CharField(_('Role'), max_length=100, db_index=True)
+    role = models.CharField(_('Role'), max_length=150, db_index=True)
     ROLES_CHOICES = ALL_ALT_LANGUAGES
     d_roles = models.TextField(_('Role'), null=True)
 
-    social_media_url = models.CharField(_('Social media'), max_length=100, null=True)
+    social_media_url = models.CharField(_('Social media'), max_length=600, null=True)
 
     importance = models.IntegerField(
         'Importance', default=0, db_index=True,
@@ -744,7 +744,7 @@ class Act(MagiModel):
     NAMES_CHOICES = ALL_ALT_LANGUAGES
     d_names = models.TextField(_('Title'), null=True)
 
-    description = models.CharField(_('Description'), max_length=100)
+    description = models.CharField(_('Description'), max_length=600)
     DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_descriptions = models.TextField(_('Description'), null=True)
 
