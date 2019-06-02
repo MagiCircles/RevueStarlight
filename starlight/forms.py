@@ -333,6 +333,7 @@ class BaseCardFilterForm(MagiFiltersForm):
         'name', 'd_names',
     ]
     ordering_fields = [
+        ('release_date', _('Release date')),
         ('number', _('Number')),
     ] + [
         (

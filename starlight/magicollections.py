@@ -666,6 +666,7 @@ class BaseCardCollection(MainItemCollection):
         'acts': 'skill',
         'art': 'pictures',
         'icon': 'pictures',
+        'release_date': 'date',
     }
     fields_icons.update({
         _statistic: 'hp' if '_hp' in _statistic else 'statistics'
@@ -693,7 +694,7 @@ class BaseCardCollection(MainItemCollection):
         return fields
 
     class ListView(MainItemCollection.ListView):
-        default_ordering = 'number'
+        default_ordering = '-release_date'
         show_collect_button = True
         show_item_buttons_as_icons = True
         item_buttons_classes = ['btn', 'btn-link-main', 'btn-lines']
@@ -711,7 +712,10 @@ class BaseCardCollection(MainItemCollection):
         ]
 
     class ItemView(MainItemCollection.ItemView):
-        fields_exclude = ['number'] + models.BaseCard.ALL_STATISTICS_FIELDS
+        fields_exclude = [
+            'number',
+            'show_art_on_homepage',
+        ] + models.BaseCard.ALL_STATISTICS_FIELDS
         fields_prefetched_together = ['acts']
         ajax_callback = 'loadBaseCard'
 
@@ -841,6 +845,7 @@ class CardCollection(BaseCardCollection):
             'message',
             'statistics',
             'acts',
+            'release_date',
             'icon',
             'art',
             'transparent',

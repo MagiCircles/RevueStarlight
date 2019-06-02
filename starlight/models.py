@@ -804,6 +804,7 @@ class BaseCard(MagiModel):
     # Basic details: Rarity, ...
 
     number = models.PositiveIntegerField(_('ID'), unique=True, primary_key=True)
+    release_date = models.DateField(_('Release date'), null=True, db_index=True)
 
     name = models.CharField(_('Title'), max_length=100, null=True)
     NAMES_CHOICES = ALL_ALT_LANGUAGES
