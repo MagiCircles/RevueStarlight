@@ -855,7 +855,8 @@ class BaseCard(MagiModel):
 
     cost = property(getInfoFromChoices('rarity', RARITIES, 'cost'))
 
-    limited = models.BooleanField(_('Limited'), default=False)
+    is_limited = models.BooleanField(_('Limited'), default=False)
+    is_event = models.BooleanField(_('Event'), default=False)
 
     ############################################################
     # Fan made details
@@ -1046,14 +1047,20 @@ class BaseCard(MagiModel):
         ('permanent', {
             'icon': 'chest',
             'translation': _('Permanent'),
-            'filter': lambda _q: _q.filter(limited=False),
-            'is': lambda _s: not _s.limited,
+            'filter': lambda _q: _q.filter(is_limited=False),
+            'is': lambda _s: not _s.is_limited,
         }),
         ('limited', {
             'icon': 'hourglass',
             'translation': _('Limited'),
-            'filter': lambda _q: _q.filter(limited=True),
-            'is': lambda _s: _s.limited,
+            'filter': lambda _q: _q.filter(is_limited=True),
+            'is': lambda _s: _s.is_limited,
+        }),
+        ('event', {
+            'icon': 'event',
+            'translation': _('Event'),
+            'filter': lambda _q: _q.filter(is_event=True),
+            'is': lambda _s: _s.is_event,
         }),
     ])
 
@@ -1195,20 +1202,6 @@ class Card(BaseCard):
         }
 
     ############################################################
-    # Type
-
-    TYPES = BaseCard.TYPES.copy()
-    TYPES.update(OrderedDict([
-        # todo when we add event database
-        # ('event', {
-        #     'icon': 'event',
-        #     'translation': _('Event'),
-        #     'filter': lambda _q: _q.filter(event__isnull=False),
-        #     'is': lambda _s: bool(_s.event_id),
-        # }),
-    ]))
-
-    ############################################################
     # Cache totals
 
     _cache_total_collectedcards_days = 1
@@ -1293,15 +1286,15 @@ class Memoir(BaseCard):
     ############################################################
     # Type
 
-    TYPES = BaseCard.TYPES.copy()
-    TYPES.update(OrderedDict([
+    TYPES = OrderedDict([
         ('upgrade', {
             'icon': 'idolized',
             'translation': _('Upgrade'),
             'filter': lambda _q: _q.filter(is_upgrade=True),
             'is': lambda _s: _s.is_upgrade,
         }),
-    ]))
+    ])
+    TYPES.update(BaseCard.TYPES)
 
     ############################################################
     # Cache totals
