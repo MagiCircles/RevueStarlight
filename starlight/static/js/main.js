@@ -35,6 +35,29 @@ function loadBaseCardForm() {
 
 }
 
+function loadActForm() {
+    let form = $('[data-form-name="add_act"], [data-form-name="edit_act"]');
+    let targetField = form.find('#id_i_target');
+    let otherTargetField = form.find('#id_other_target');
+    function otherTargetToggler(animation) {
+        if (targetField.val() == 'other') {
+            otherTargetField.closest('.form-group').show(animation);
+        } else {
+            otherTargetField.val('');
+            otherTargetField.closest('.form-group').hide(animation);
+        }
+    }
+    if (otherTargetField.val() != '') {
+        targetField.val('other');
+        targetField.closest('.form-group').find('.cuteform-elt').removeClass('cuteform-selected');
+        targetField.closest('.form-group').find('[data-cuteform-val="other"]').addClass('cuteform-selected');
+    }
+    otherTargetToggler();
+    targetField.change(function(e) {
+        otherTargetToggler('fast');
+    });
+}
+
 function loadAccountsFilters() {
     loadAccounts();
     let form = $('[id="filter-form-account"]');

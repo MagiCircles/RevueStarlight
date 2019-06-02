@@ -632,7 +632,15 @@ class ActCollection(SubItemCollection):
         'name',
         'description',
         'm_tips',
+        'other_target',
     ]
+    form_class = forms.ActForm
+
+    filter_cuteform = {
+        'i_target': {
+            'type': CuteFormType.HTML,
+        },
+    }
 
     class ListView(SubItemCollection.ListView):
         per_line = 1
@@ -641,6 +649,12 @@ class ActCollection(SubItemCollection):
 
     class ItemView(SubItemCollection.ItemView):
         template = custom_item_template
+
+    class AddView(SubItemCollection.AddView):
+        ajax_callback = 'loadActForm'
+
+    class EditView(SubItemCollection.EditView):
+        ajax_callback = 'loadActForm'
 
 ############################################################
 # BaseCard Collection

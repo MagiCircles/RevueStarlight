@@ -26,7 +26,16 @@
       </div>
       <div class="col-xs-10">
         {% endif %}
-        {{ act.t_description }}
+        <p>{{ act.t_description }}</p>
+        {% if act.bound_break_value %}
+        <p><strong>{{ act.display_bound_break_value }}</strong></p>
+        {% endif %}
+        {% if act.has_target %}
+        <p><strong>{{ act.display_target }}</strong></p>
+        {% endif %}
+        {% if act.hits > 1 %}
+        <p><strong>{{ act.display_hits }}</strong></p>
+        {% endif %}
         {% if act.unlock_at_rank %}
         <p class="text-right"><strong>{{ act.display_unlock_at_rank }}</strong></p>
         {% endif %}

@@ -766,6 +766,26 @@ class Act(MagiModel):
     unlock_at_rank = models.PositiveIntegerField(null=True)
     display_unlock_at_rank = property(lambda _s: _('Unlock at rank {rank}').format(rank=_s.unlock_at_rank))
 
+    hits = models.PositiveIntegerField('How many hits?', default=1)
+    display_hits = property(lambda _s: _('Hits {number_of_times} times').format(number_of_times=_s.hits))
+
+    TARGET_CHOICES = (
+        ('single', _('Front enemy')),
+        ('group', _('Front group of enemies')),
+        ('all', _('All enemies')),
+    )
+    i_target = models.PositiveIntegerField(_('Target'), choices=i_choices(TARGET_CHOICES), null=True)
+    other_target = models.CharField(_('Target'), max_length=100, null=True)
+    OTHER_TARGETS_CHOICES = ALL_ALT_LANGUAGES
+    d_other_targets = models.TextField(_('Target'), null=True)
+    display_target = property(lambda _s: u'{}: {}'.format(
+        _('Target'), _s.t_other_target if _s.other_target else _s.t_target))
+    has_target = property(lambda _s: _s.i_target is not None or _s.other_target)
+
+    bound_break_value = models.PositiveIntegerField(null=True)
+    display_bound_break_value = property(lambda _s: u'{}: {}%'.format(
+        _('After bound break'), _s.bound_break_value))
+
     j_details = models.TextField(null=True)
 
     ############################################################

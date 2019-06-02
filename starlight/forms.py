@@ -15,6 +15,7 @@ from magi.forms import (
     UserFilterForm as _UserFilterForm,
     UserPreferencesForm as _UserPreferencesForm,
 )
+from magi.item_model import i_choices
 from magi.utils import (
     birthdayOrderingQueryset,
     getStaffConfiguration,
@@ -319,6 +320,23 @@ class StageGirlFilterForm(MagiFiltersForm):
 ############################################################
 
 ############################################################
+# Act
+
+class ActForm(AutoForm):
+    i_target = forms.ChoiceField(label=_('Target'), choices=BLANK_CHOICE_DASH + i_choices(
+        models.Act.TARGET_CHOICES
+    ) + [
+        ('other', _('Other'))
+    ])
+
+    def clean_i_target(self):
+        i_target = self.cleaned_data.get('i_target')
+        return None if i_target == 'other' else i_target
+
+    class Meta(AutoForm.Meta):
+        model = models.Act
+
+############################################################
 # Base card
 
 class BaseCardForm(AutoForm):
@@ -334,11 +352,14 @@ class BaseCardForm(AutoForm):
             instance.save()
         return instance
 
-
 class BaseCardFilterForm(MagiFiltersForm):
     search_fields = [
-        'name', 'd_names',
+        'name', 'd_names', 'acts__name', 'acts__d_names',
     ]
+    search_fields_labels = {
+        'acts__name': _('Acts'),
+        'acts__d_names': '',
+    }
     ordering_fields = [
         ('jp_release_date', _('Release date')),
         ('number', _('Number')),
@@ -410,9 +431,16 @@ class CardFilterForm(BaseCardFilterForm):
         'profile', 'd_profiles',
         'message', 'd_messages',
     ]
-    search_fields_labels = {
+    search_fields_labels = BaseCardFilterForm.search_fields_labels.copy()
+    search_fields_labels.update({
         '_cache_j_stage_girl': _('Stage girl'),
-    }
+    })
+    merge_fields = BaseCardFilterForm.merge_fields + [
+        {
+            'label': _('Target'),
+            'fields': ('act_target', 'act_other_target'),
+        },
+    ]
 
     school_filter = MagiFilter(selector='stagegirl__school', distinct=True)
 
@@ -433,6 +461,18 @@ class CardFilterForm(BaseCardFilterForm):
     weak_against = forms.ChoiceField(label=_('Weak against'), choices=models.ELEMENT_CHOICES)
     weak_against_filter = MagiFilter(selector='i_element', to_value=_against_to_value('weak', 'resists'))
 
+    act_hits = forms.BooleanField(label=_('Hits more than once'))
+    act_hits_filter = MagiFilter(selector='acts__hits__gt', to_value=lambda _v: 1, multiple=False, distinct=True)
+
+    act_target = forms.ChoiceField(label=_('Target'), choices=i_choices(models.Act.TARGET_CHOICES))
+    act_target_filter = MagiFilter(selector='acts__i_target')
+
+    act_other_target = forms.ChoiceField(choices=[('other', _('Other'))])
+    act_other_target_filter = MagiFilter(
+        selector='acts__other_target__isnull', to_value=lambda _v: False,
+        multiple=False, distinct=True,
+    )
+
     class Meta(BaseCardFilterForm.Meta):
         model = models.Card
         fields = [
@@ -443,6 +483,8 @@ class CardFilterForm(BaseCardFilterForm):
             'i_damage', 'i_position',
             'c_roles',
             'resists_against', 'weak_against',
+            'act_hits',
+            'act_target',
         ]
 
 ############################################################
