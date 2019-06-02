@@ -343,11 +343,11 @@ class VoiceActress(MagiModel):
     height = models.PositiveIntegerField(_('Height'), null=True, default=None)
     display_height = property(lambda _s: u'{} cm'.format(_s.height))
 
-    specialty = models.CharField(_('Specialty'), max_length=600, null=True)
+    specialty = models.CharField(_('Specialty'), max_length=191, null=True)
     SPECIALTYS_CHOICES = ALL_ALT_LANGUAGES
     d_specialtys = models.TextField(_('Specialty'), null=True)
 
-    hobbies = models.CharField(_('Hobbies'), max_length=600, null=True)
+    hobbies = models.CharField(_('Hobbies'), max_length=191, null=True)
     HOBBIESS_CHOICES = ALL_ALT_LANGUAGES
     d_hobbiess = models.TextField(_('Hobbies'), null=True)
 
@@ -412,7 +412,7 @@ class VoiceActressLink(MagiModel):
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Platform'), null=True)
 
-    url = models.CharField(_('URL'), max_length=600)
+    url = models.CharField(_('URL'), max_length=191)
 
     ############################################################
     # Views utils
@@ -675,7 +675,7 @@ class Staff(MagiModel):
     ROLES_CHOICES = ALL_ALT_LANGUAGES
     d_roles = models.TextField(_('Role'), null=True)
 
-    social_media_url = models.CharField(_('Social media'), max_length=600, null=True)
+    social_media_url = models.CharField(_('Social media'), max_length=191, null=True)
 
     importance = models.IntegerField(
         'Importance', default=0, db_index=True,
@@ -744,7 +744,7 @@ class Act(MagiModel):
     NAMES_CHOICES = ALL_ALT_LANGUAGES
     d_names = models.TextField(_('Title'), null=True)
 
-    description = models.CharField(_('Description'), max_length=600)
+    description = models.CharField(_('Description'), max_length=191)
     DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_descriptions = models.TextField(_('Description'), null=True)
 

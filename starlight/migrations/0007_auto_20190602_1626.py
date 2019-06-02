@@ -176,7 +176,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='act',
             name='description',
-            field=models.CharField(max_length=600, verbose_name='Description'),
+            field=models.CharField(max_length=191, verbose_name='Description'),
             preserve_default=True,
         ),
         migrations.AlterField(
@@ -200,7 +200,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='staff',
             name='social_media_url',
-            field=models.CharField(max_length=600, null=True, verbose_name='Social media'),
+            field=models.CharField(max_length=191, null=True, verbose_name='Social media'),
             preserve_default=True,
         ),
         migrations.AlterField(
@@ -230,19 +230,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='voiceactress',
             name='hobbies',
-            field=models.CharField(max_length=600, null=True, verbose_name='Hobbies'),
+            field=models.CharField(max_length=191, null=True, verbose_name='Hobbies'),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='voiceactress',
             name='specialty',
-            field=models.CharField(max_length=600, null=True, verbose_name='Specialty'),
+            field=models.CharField(max_length=191, null=True, verbose_name='Specialty'),
             preserve_default=True,
         ),
         migrations.AlterField(
             model_name='voiceactresslink',
             name='url',
-            field=models.CharField(max_length=600, verbose_name='URL'),
+            field=models.CharField(max_length=191, verbose_name='URL'),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
