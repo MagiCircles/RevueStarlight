@@ -1396,9 +1396,10 @@ class BaseCollectedCard(AccountAsOwnerModel):
     ############################################################
     # Views utils
 
-    image = property(lambda _s: _s.item_parent.icon or _s.item_parent.image)
-    image_url = property(lambda _s: _s.item_parent.icon_url or _s.item_parent.image_url)
-    http_image_url = property(lambda _s: _s.item_parent.http_icon_url or _s.item_parent.http_image_url)
+    image = property(lambda _s: _s.item_parent.icon or _s.item_parent.image or _s.item_parent.art)
+    image_url = property(lambda _s: _s.item_parent.icon_url or _s.item_parent.image_url or _s.item_parent.art_url)
+    http_image_url = property(lambda _s: _s.item_parent.http_icon_url
+                              or _s.item_parent.http_image_url or _s.item_parent.http_art_url)
 
     art = property(lambda _s: _s.item_parent.art)
     art_url = property(lambda _s: _s.item_parent.art_url)

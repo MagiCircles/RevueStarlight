@@ -245,6 +245,14 @@ class AccountCollection(_AccountCollection):
             'to_cuteform': lambda _k, _v: models.Account.OS_CHOICES[_k].lower(),
             'transform': CuteFormTransform.FlaticonWithText,
         },
+        'center': {
+            'to_cuteform': lambda _k, _v: _v.image_url,
+            'title': _('Center'),
+            'extra_settings': {
+                'modal': 'true',
+                'modal-text': 'true',
+            },
+        }
     })
 
     fields_icons = {
