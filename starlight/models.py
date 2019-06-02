@@ -896,6 +896,23 @@ class BaseCard(MagiModel):
     delta_agility = models.PositiveIntegerField(string_concat(u'Δ ', _('Agility')), null=True)
 
     ############################################################
+    # Statistics cache
+
+    _cache_j_statistics_ranks = models.TextField(null=True)
+    _cache_statistics_ranks_update_on_none = True
+
+    def to_cache_statistics_ranks(self):
+        return {
+            statistic: (
+                type(self).objects.filter(**{
+                    u'delta_{}__gt'.format(statistic):
+                    getattr(self, u'delta_{}'.format(statistic))
+                }).values(u'delta_{}'.format(statistic)).distinct().count() + 1
+            ) if getattr(self, u'delta_{}'.format(statistic)) else None
+            for statistic in self.STATISTICS_FIELDS
+        }
+
+    ############################################################
     # Statistics utils
 
     STATISTICS_FIELDS = ['hp', 'act_power', 'normal_defense', 'special_defense', 'agility']
@@ -917,6 +934,17 @@ class BaseCard(MagiModel):
             self.get_statistic(statistic, prefix) / getMaxStatistic(statistic)
         ) * 100
 
+    def display_statistic_rank(self, statistic):
+        rank = self.cached_statistics_ranks[statistic]
+        return (
+            u'#{}'.format(rank)
+            if rank > 3
+            else u'<img class="statistic-rank" src="{url}" alt="{rank}">'.format(
+                    url=staticImageURL(u'medal{}'.format(4 - rank), folder='badges', extension='png'),
+                    rank=rank,
+            )
+        )
+
     def display_statistic(self, statistic, prefix):
         field_name = u'{}{}'.format(prefix, statistic)
         value = self.get_statistic(statistic, prefix)
@@ -925,8 +953,9 @@ class BaseCard(MagiModel):
         return u"""
 	<div class="row">
 	  <div class="col-xs-4 text-left"><span class="stat-label-{statistic}">{verbose_name}</span></div>
+	  <div class="col-xs-2 text-center"><a href="{rank_url}" target="_blank">{rank}</a></div>
 	  <div class="col-xs-2 text-right">{value}</div>
-	  <div class="col-xs-6">
+	  <div class="col-xs-4">
 	    <div class="progress">
 	      <div class="progress-bar progress-bar-{element} progress-bar-striped"
 		   role="progressbar"
@@ -941,6 +970,9 @@ class BaseCard(MagiModel):
             verbose_name=self._meta.get_field(field_name).verbose_name,
             value=value,
             percent=self.statistic_percent(statistic, prefix),
+            rank_url=u'/{}s/?ordering=delta_{}&reverse_order=on'.format(
+                type(self).collection_name, statistic),
+            rank=self.display_statistic_rank(statistic),
         )
 
     @property

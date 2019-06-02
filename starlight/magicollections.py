@@ -691,6 +691,13 @@ class BaseCardCollection(MainItemCollection):
             setSubField(fields, 'limited', key='verbose_name', value=_('Permanent'))
             setSubField(fields, 'limited', key='value', value=True)
 
+        # Show rank under stats when ordering by stat
+        for statistic in models.BaseCard.STATISTICS_FIELDS:
+            field_name = u'delta_{}'.format(statistic)
+            setSubField(fields, field_name, key='type', value='text_annotation')
+            setSubField(fields, field_name, key='annotation', value=(
+                lambda f: mark_safe(item.display_statistic_rank(statistic))))
+
         return fields
 
     class ListView(MainItemCollection.ListView):

@@ -327,6 +327,14 @@ class BaseCardForm(AutoForm):
         widget=forms.CheckboxSelectMultiple, required=False,
     )
 
+    def save(self, commit=False):
+        instance = super(BaseCardForm, self).save(commit=False)
+        instance.update_cache('statistics_ranks')
+        if commit:
+            instance.save()
+        return instance
+
+
 class BaseCardFilterForm(MagiFiltersForm):
     search_fields = [
         'name', 'd_names',
