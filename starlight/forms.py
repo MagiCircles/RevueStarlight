@@ -344,6 +344,15 @@ class BaseCardForm(AutoForm):
         queryset=models.Act.objects.all().order_by('i_type', 'name'),
         widget=forms.CheckboxSelectMultiple, required=False,
     )
+    def __init__(self, *args, **kwargs):
+        super(BaseCardForm, self).__init__(*args, **kwargs)
+
+        # Limit to rarities
+        if 'i_rarity' in self.fields:
+            self.fields['i_rarity'].choices = [
+                (k, v) for k, v in self.fields['i_rarity'].choices
+                if k in self.Meta.model.LIMIT_TO_RARITIES
+            ]
 
     def save(self, commit=False):
         instance = super(BaseCardForm, self).save(commit=False)
