@@ -74,7 +74,7 @@ function loadBaseCard() {
         }
         function iconToggler() {
             all_icons.hide();
-            rank_selector.find('img').prop('src', static_url + 'img/' + (all_rarities.includes(7) ? '' : 'memoir_') + 'rank/' + current_rank + '.png');
+            rank_selector.find('img').prop('src', static_url + 'img/' + (all_ranks.includes(7) ? '' : 'memoir_') + 'rank/' + current_rank + '.png');
             rank_selector.find('img').prop('alt', current_rank);
             if (all_rarities.length > 0) {
                 rarity_selector.find('img').prop('src', static_url + 'img/small_rarity/' + current_rarity + '.png');
