@@ -946,6 +946,22 @@ class BaseCard(MagiModel):
     delta_special_defense = models.PositiveIntegerField(string_concat(u'Δ ', _('Special defense')), null=True)
     delta_agility = models.PositiveIntegerField(string_concat(u'Δ ', _('Agility')), null=True)
 
+    min_level_hp = models.PositiveIntegerField(string_concat(u'Min level ', _('HP')), null=True)
+    min_level_act_power = models.PositiveIntegerField(string_concat(u'Min level ', _('ACT Power')), null=True)
+    min_level_normal_defense = models.PositiveIntegerField(
+        string_concat(u'Min level ', _('Normal defense')), null=True)
+    min_level_special_defense = models.PositiveIntegerField(
+        string_concat(u'Min level ', _('Special defense')), null=True)
+    min_level_agility = models.PositiveIntegerField(string_concat(u'Min level ', _('Agility')), null=True)
+
+    max_level_hp = models.PositiveIntegerField(string_concat(u'Max level ', _('HP')), null=True)
+    max_level_act_power = models.PositiveIntegerField(string_concat(u'Max level ', _('ACT Power')), null=True)
+    max_level_normal_defense = models.PositiveIntegerField(
+        string_concat(u'Max level ', _('Normal defense')), null=True)
+    max_level_special_defense = models.PositiveIntegerField(
+        string_concat(u'Max level ', _('Special defense')), null=True)
+    max_level_agility = models.PositiveIntegerField(string_concat(u'Max level ', _('Agility')), null=True)
+
     ############################################################
     # Statistics cache
 
@@ -968,8 +984,10 @@ class BaseCard(MagiModel):
 
     STATISTICS_FIELDS = ['hp', 'act_power', 'normal_defense', 'special_defense', 'agility']
     STATISTICS_PREFIXES = OrderedDict([
-        ('base_', _('Base')),
-        ('delta_', u'Δ'),
+        ('base_', lambda: _('Base')),
+        ('min_level_', lambda: _('Level {level}').format(level=1)),
+        ('delta_', lambda: u'Δ'),
+        ('max_level_', lambda: _('Level {level}').format(level=80)),
     ])
     ALL_STATISTICS_FIELDS = [
         u'{}{}'.format(_prefix, _statistic)
@@ -979,6 +997,24 @@ class BaseCard(MagiModel):
 
     def get_statistic(self, statistic, prefix):
         return getattr(self, u'{}{}'.format(prefix, statistic)) or 0
+
+    def has_any_statistic(self, prefix='delta_'):
+        for statistic in self.STATISTICS_FIELDS:
+            if self.get_statistic(statistic, prefix):
+                return True
+        return False
+
+    def get_statistics_prefixes_to_display(self):
+        statistics_prefixes = OrderedDict([
+            (prefix, verbose_name())
+            for prefix, verbose_name in self.STATISTICS_PREFIXES.items()
+            if self.has_any_statistic(prefix=prefix)
+        ])
+        if 'min_level_' in statistics_prefixes and 'base_' in statistics_prefixes:
+            del(statistics_prefixes['base_'])
+        if 'max_level_' in statistics_prefixes and 'delta_' in statistics_prefixes:
+            del(statistics_prefixes['delta_'])
+        return statistics_prefixes
 
     def statistic_percent(self, statistic, prefix):
         return (
@@ -1028,6 +1064,7 @@ class BaseCard(MagiModel):
 
     @property
     def display_statistics(self):
+        statistics_prefixes = self.get_statistics_prefixes_to_display()
         return u"""
   <div class="card-statistics">
     <div class="btn-group" data-toggle="buttons" data-control-tabs="card-{card_number}">
@@ -1049,11 +1086,11 @@ class BaseCard(MagiModel):
                 element=self.element,
                 active='active' if i == 1 else '',
                 checked='checked' if i == 1 else '',
-                width=100 / len(self.STATISTICS_PREFIXES),
+                width=100 / len(statistics_prefixes),
                 card_number=self.number,
                 prefix=prefix[:-1],
                 verbose_name=verbose_name,
-            ) for i, (prefix, verbose_name) in enumerate(self.STATISTICS_PREFIXES.items())]),
+            ) for i, (prefix, verbose_name) in enumerate(statistics_prefixes.items())]),
             tabs=u''.join([u"""
             <div class="tab-pane {active}" data-tab="card-{card_number}-{prefix}">
             {statistics}
@@ -1066,7 +1103,7 @@ class BaseCard(MagiModel):
                     self.display_statistic(statistic, prefix)
                     for statistic in self.STATISTICS_FIELDS
                 ] if s]),
-            ) for i, (prefix, verbose_name) in enumerate(self.STATISTICS_PREFIXES.items())]),
+            ) for i, (prefix, verbose_name) in enumerate(statistics_prefixes.items())]),
         )
 
     ############################################################
