@@ -1211,6 +1211,64 @@ class Card(BaseCard):
     _tthumbnail_transparent = models.ImageField(null=True, upload_to=uploadTthumb('card/transparent'))
     _2x_transparent = models.ImageField(null=True, upload_to=upload2x('card/transparent'))
 
+    rank1_rarity2_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank1_rarity3_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank1_rarity4_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank1_rarity5_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank1_rarity6_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank2_rarity2_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank2_rarity3_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank2_rarity4_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank2_rarity5_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank2_rarity6_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank3_rarity2_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank3_rarity3_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank3_rarity4_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank3_rarity5_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank3_rarity6_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank4_rarity2_icon = property(lambda _s: _s.rank3_rarity2_icon)
+    rank4_rarity3_icon = property(lambda _s: _s.rank3_rarity3_icon)
+    rank4_rarity4_icon = property(lambda _s: _s.rank3_rarity4_icon)
+    rank4_rarity5_icon = property(lambda _s: _s.rank3_rarity5_icon)
+    rank4_rarity6_icon = property(lambda _s: _s.rank3_rarity6_icon)
+    rank5_rarity2_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank5_rarity3_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank5_rarity4_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank5_rarity5_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank5_rarity6_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank6_rarity2_icon = property(lambda _s: _s.rank5_rarity2_icon)
+    rank6_rarity3_icon = property(lambda _s: _s.rank5_rarity3_icon)
+    rank6_rarity4_icon = property(lambda _s: _s.rank5_rarity4_icon)
+    rank6_rarity5_icon = property(lambda _s: _s.rank5_rarity5_icon)
+    rank6_rarity6_icon = property(lambda _s: _s.rank5_rarity6_icon)
+    rank7_rarity3_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank7_rarity4_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank7_rarity5_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+    rank7_rarity6_icon = models.ImageField(upload_to=uploadItem('card/icon'), null=True)
+
+    def get_icon(self, rank=7, rarity=None, prefix='', suffix=''):
+        if rarity is None:
+            rarity = self.rarity
+        if rank == 7 and rarity == self.rarity:
+            return getattr(self, '{prefix}icon{suffix}'.format(prefix=prefix, suffix=suffix))
+        if rarity < self.rarity:
+            return None
+        return getattr(self, u'{prefix}rank{rank}_rarity{rarity}_icon{suffix}'.format(
+            rank=rank, rarity=rarity, prefix=prefix, suffix=suffix))
+
+    def get_all_icons(self, prefix='', suffix=''):
+        icons = []
+        for rank in range(1, 7 + 1):
+            for rarity in range(self.rarity, 6 + 1):
+                icon = self.get_icon(rank=rank, rarity=rarity, prefix=prefix, suffix=suffix)
+                if icon:
+                    icons.append({
+                        'rarity': rarity,
+                        'rank': rank,
+                        'icon': icon,
+                    })
+        return icons
+
     live2d_model_package = models.FileField(upload_to=uploadItem('card/live2d'), null=True)
 
     ############################################################
@@ -1313,6 +1371,31 @@ class Memoir(BaseCard):
     d_explanations = models.TextField(_('Explanation'), null=True)
 
     ############################################################
+    # Images
+
+    rank1_icon = models.ImageField(upload_to=uploadItem('memoir/icon'), null=True)
+    rank2_icon = models.ImageField(upload_to=uploadItem('memoir/icon'), null=True)
+    rank3_icon = models.ImageField(upload_to=uploadItem('memoir/icon'), null=True)
+    rank4_icon = models.ImageField(upload_to=uploadItem('memoir/icon'), null=True)
+    rank5_icon = property(lambda _s: _s.icon)
+
+    def get_icon(self, rank=5, prefix='', suffix=''):
+        if rank == 5:
+            return getattr(self, u'{prefix}icon{suffix}'.format(prefix=prefix, suffix=suffix))
+        return getattr(self, u'{prefix}rank{rank}_icon{suffix}'.format(rank=rank, prefix=prefix, suffix=suffix))
+
+    def get_all_icons(self, prefix='', suffix=''):
+        icons = []
+        for rank in range(1, 5 + 1):
+            icon = self.get_icon(rank=rank, prefix=prefix, suffix=suffix)
+            if icon:
+                icons.append({
+                    'rank': rank,
+                    'icon': icon,
+                })
+        return icons
+
+    ############################################################
     # Type
 
     TYPES = OrderedDict([
@@ -1396,10 +1479,12 @@ class BaseCollectedCard(AccountAsOwnerModel):
     ############################################################
     # Views utils
 
-    image = property(lambda _s: _s.item_parent.icon or _s.item_parent.image or _s.item_parent.art)
-    image_url = property(lambda _s: _s.item_parent.icon_url or _s.item_parent.image_url or _s.item_parent.art_url)
-    http_image_url = property(lambda _s: _s.item_parent.http_icon_url
-                              or _s.item_parent.http_image_url or _s.item_parent.http_art_url)
+    def get_image(self, prefix='', suffix=''):
+        raise NotImplementedError('Collected cards require a get_image method.')
+
+    image = property(lambda _s: _s.get_image())
+    image_url = property(lambda _s: _s.get_image(suffix='_url'))
+    http_image_url = property(lambda _s: _s.get_image(prefix='http_', suffix='_url'))
 
     art = property(lambda _s: _s.item_parent.art)
     art_url = property(lambda _s: _s.item_parent.art_url)
@@ -1439,11 +1524,21 @@ class CollectedCard(BaseCollectedCard):
     rarity_image = property(lambda _s: staticImageURL(_s.i_rarity, folder='i_rarity', extension='png'))
     small_rarity_image = property(lambda _s: staticImageURL(_s.i_rarity, folder='small_rarity', extension='png'))
 
-    rank = models.PositiveIntegerField(_('Rank'), default=1, validators=[
+    rank = models.PositiveIntegerField(_('Rank'), default=7, validators=[
         MinValueValidator(1),
         MaxValueValidator(7),
     ])
     rank_image = property(lambda _s: staticImageURL(_s.rank, folder='rank', extension='png'))
+
+    ############################################################
+    # Views utils
+
+    def get_image(self, prefix='', suffix=''):
+        return (
+            self.item_parent.get_icon(rank=self.rank, rarity=self.rarity, prefix=prefix, suffix=suffix)
+            or getattr(self.item_parent, u'{prefix}image{suffix}'.format(prefix=prefix, suffix=suffix))
+            or getattr(self.item_parent, u'{prefix}art{suffix}'.format(prefix=prefix, suffix=suffix))
+        )
 
 ############################################################
 # Collected memoir
@@ -1452,3 +1547,19 @@ class CollectedMemoir(BaseCollectedCard):
     collection_name = 'collectedmemoir'
     item_parent_name = 'memoir'
     memoir = models.ForeignKey(Memoir, related_name='collectedmemoirs')
+
+    ############################################################
+    # Views utils
+
+    @property
+    def rank(self):
+        if self.max_leveled == False:
+            return 1
+        return 5
+
+    def get_image(self, prefix='', suffix=''):
+        return (
+            self.item_parent.get_icon(rank=self.rank, prefix=prefix, suffix=suffix)
+            or getattr(self.item_parent, u'{prefix}image{suffix}'.format(prefix=prefix, suffix=suffix))
+            or getattr(self.item_parent, u'{prefix}art{suffix}'.format(prefix=prefix, suffix=suffix))
+        )

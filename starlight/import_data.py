@@ -1,9 +1,17 @@
 from __future__ import print_function
+import cStringIO
 from collections import OrderedDict
+from wand.image import Image
+from wand.exceptions import BlobError
+from magi import urls # loads context
 from magi.import_data import (
     import_generic_item,
     save_item,
     import_data as magi_import_data,
+)
+from magi.utils import (
+    saveLocalImageToModel,
+    localImageToImageFile,
 )
 from starlight import models
 
@@ -214,3 +222,170 @@ def import_data(local=False, to_import=None, log_function=print):
         None, IMPORT_CONFIGURATION, results_location=None,
         local=local, to_import=to_import, log_function=log_function,
     )
+
+# This is a temporary feature which in the future will be
+# replaced by images downloaded directly from the API.
+def import_images(to_import=None):
+    if not to_import or 'cards' in to_import:
+        for card in models.Card.objects.all():
+            print('Importing images for card #{} {}'.format(card.number, card))
+            needs_save = []
+            # Art
+            art_data = None
+            if not card.art or 'reload' in to_import:
+                path = u'starlight/static/extracts/dress/cg/{}/image.png'.format(card.number)
+                art_data, art = saveLocalImageToModel(card, 'art', path, return_data=True)
+                if art is None:
+                    print('  Art file not found:', path)
+                else:
+                    needs_save.append('art')
+            # Icon
+            for rank in [1, 2, 3, 5, 7]:
+                for rarity in [1, 2, 3, 4, 5, 6]:
+                    if rarity < card.rarity:
+                        continue
+                    elif rarity == card.rarity and rank == 7:
+                        field_name = 'icon'
+                    else:
+                        field_name = 'rank{rank}_rarity{rarity}_icon'.format(rank=rank, rarity=rarity)
+                    if not getattr(card, field_name) or 'reload' in to_import:
+                        if generate_card_icon(card, field_name, rank, rarity) is not None:
+                            needs_save.append(field_name)
+            # Transparent
+            if not card.transparent or 'reload' in to_import:
+                path =u'starlight/static/extracts/battle/model/{n}/cutin/cutin_special_{n}.png'.format(n=card.number)
+                transparent = saveLocalImageToModel(card, 'transparent', path)
+                if transparent is None:
+                    print('  Transparent file not found:', path)
+                else:
+                    needs_save.append('transparent')
+            # Image
+            if not card.image or 'art' in needs_save:
+                if generate_card(card, art_data=art_data) is not None:
+                    needs_save.append('card')
+
+            if needs_save:
+                card.save()
+                print('  Saved:', needs_save)
+    if not to_import or 'memoirs' in to_import:
+        for memoir in models.Memoir.objects.all():
+            print('Importing images for memoir #{} {}'.format(memoir.number, memoir))
+            needs_save = []
+            # Art
+            art_data = None
+            if not memoir.art or 'reload' in to_import:
+                path = u'starlight/static/extracts/equip/cg/{}/image.png'.format(memoir.number)
+                art_data, art = saveLocalImageToModel(memoir, 'art', path, return_data=True)
+                if art is None:
+                    print('  Art file not found:', path)
+                else:
+                    needs_save.append('art')
+            # Icon
+            for rank in [1, 2, 3, 4, 5]:
+                if rank == 5:
+                    field_name = 'icon'
+                else:
+                    field_name = 'rank{rank}_icon'.format(rank=rank)
+                if not getattr(memoir, field_name) or 'reload' in to_import:
+                    if generate_memoir_icon(memoir, field_name, rank) is not None:
+                        needs_save.append(field_name)
+            # Image
+            if not memoir.image or 'art' in needs_save:
+                if generate_memoir(memoir, art_data=art_data) is not None:
+                    needs_save.append('memoir')
+
+            if needs_save:
+                memoir.save()
+                print('  Saved:', needs_save)
+
+def generate_card(card, art_data=None):
+    art_field = getattr(card, 'art')
+    if not art_data:
+        art_data = art_field.read()
+    art_image = Image(file=cStringIO.StringIO(art_data))
+
+    try:
+        border_image = Image(filename='starlight/static/extracts/cards_elements/card_border.png')
+        element_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.element))
+        rarity_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.rarity))
+        position_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.position))
+    except BlobError:
+        print('  Cards layer image(s) not found.')
+        return None
+
+    art_image.resize(width=border_image.width, height=border_image.height)
+    art_image.composite(border_image, left=0, top=0)
+    art_image.composite(element_image, left=(art_image.width - element_image.width), top=0)
+    art_image.composite(position_image, top=element_image.height, left=(art_image.width - position_image.width - 18))
+    art_image.composite(rarity_image, top=(art_image.height - rarity_image.height - 22), left=22)
+
+    art_image.save(filename='tmp.png')
+
+    return saveLocalImageToModel(card, 'image', 'tmp.png')
+
+def generate_card_icon(card, field_name, rank, rarity):
+    try:
+        icon_image = Image(filename=u'starlight/static/extracts/large/1_{}.png'.format(card.number))
+        border_image = Image(filename=u'starlight/static/extracts/cards_elements/card_icon_rank{}.png'.format(rank))
+        position_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.position))
+        element_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.element))
+        rarity_image = Image(filename=u'starlight/static/extracts/cards_elements/icon_rarity{}.png'.format(rarity))
+    except BlobError:
+        print('  Icon base or layer image(s) not found.')
+        return None
+    icon_image.composite(border_image, left=0, top=0)
+    position_image.transform(resize='x20')
+    icon_image.composite(position_image, top=34, left=4)
+    element_image.resize(width=37, height=37)
+    icon_image.composite(element_image, top=1, left=1)
+    icon_image.composite(
+        rarity_image, top=(icon_image.height - rarity_image.height) - 2,
+        left=(icon_image.width / 2) - (rarity_image.width / 2),
+    )
+
+    icon_image.save(filename='tmp.png')
+
+    return saveLocalImageToModel(card, field_name, 'tmp.png')
+
+def generate_memoir(memoir, art_data=None):
+    art_field = getattr(memoir, 'art')
+    if not art_data:
+        art_data = art_field.read()
+    art_image = Image(file=cStringIO.StringIO(art_data))
+
+    try:
+        border_image = Image(filename='starlight/static/extracts/cards_elements/memoir_border.png')
+        rarity_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(memoir.rarity))
+    except BlobError:
+        print('  Memoir layer image(s) not found.')
+        return None
+
+    art_image.resize(width=border_image.width, height=border_image.height)
+    art_image.composite(border_image, left=0, top=0)
+    rarity_image.transform(resize='x73')
+    art_image.composite(rarity_image, top=(art_image.height - rarity_image.height - 19), left=20)
+
+    art_image.save(filename='tmp.png')
+
+    return saveLocalImageToModel(memoir, 'image', 'tmp.png')
+
+def generate_memoir_icon(memoir, field_name, rank):
+    try:
+        icon_image = Image(filename=u'starlight/static/extracts/large/2_{}.png'.format(memoir.number))
+        border_image = Image(filename=u'starlight/static/extracts/cards_elements/memoir_icon_rank{}.png'.format(
+            rank))
+        rarity_image = Image(filename=u'starlight/static/extracts/cards_elements/icon_rarity{}.png'.format(
+        memoir.rarity))
+    except BlobError:
+        print('  Icon base or layer image(s) not found.')
+        return None
+
+    icon_image.composite(border_image, left=0, top=0)
+    icon_image.composite(
+        rarity_image, top=(icon_image.height - rarity_image.height) - 2,
+        left=(icon_image.width / 2) - (rarity_image.width / 2),
+    )
+
+    icon_image.save(filename='tmp.png')
+
+    return saveLocalImageToModel(memoir, field_name, 'tmp.png')

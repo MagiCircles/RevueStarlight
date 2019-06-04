@@ -768,6 +768,7 @@ class BaseCardCollection(MainItemCollection):
         show_collect_button = True
         show_item_buttons_as_icons = True
         item_buttons_classes = ['btn', 'btn-link-main', 'btn-lines']
+        item_padding = 0
 
         alt_views = MainItemCollection.ListView.alt_views + [
             ('icons', {
@@ -820,6 +821,25 @@ class BaseCardCollection(MainItemCollection):
 
             fields = super(BaseCardCollection.ItemView, self).to_fields(
                 item, *args, extra_fields=extra_fields, **kwargs)
+
+            # Icons
+            setSubField(fields, 'icon', key='type', value='images')
+            setSubField(fields, 'icon', key='images', value=[
+                {
+                    'value': icon['icon'],
+                    'verbose_name': u'{} - {} {} {}'.format(
+                        unicode(item),
+                        (models.BaseCard.get_verbose_i('rarity', icon['rarity'])
+                         if 'rarity' in icon else ''),
+                        _('Rank'), icon['rank'],
+                    ),
+                    'attributes': { k: v for k, v in {
+                        'data-rarity': icon.get('rarity', None),
+                        'data-rank': icon['rank'],
+                    }.items() if v },
+                } for icon in item.get_all_icons(suffix='_url')
+            ])
+
             return fields
 
     class AddView(MainItemCollection.AddView):
@@ -922,6 +942,12 @@ class CardCollection(BaseCardCollection):
             'icon',
             'art',
             'transparent',
+        ]
+
+        fields_exclude = BaseCardCollection.ItemView.fields_exclude + [
+            'rank{rank}_rarity{rarity}_icon'.format(rank=rank, rarity=rarity)
+            for rank in range(1, 7 + 1)
+            for rarity in range(2, 6 + 1)
         ]
 
         def to_fields(self, item, extra_fields=None, *args, **kwargs):
@@ -1059,6 +1085,11 @@ class MemoirCollection(BaseCardCollection):
                 'type': CuteFormType.YesNo,
             },
         })
+
+        fields_exclude = BaseCardCollection.ItemView.fields_exclude + [
+            'rank{rank}_icon'.format(rank=rank)
+            for rank in range(1, 5 + 1)
+        ]
 
         def to_fields(self, item, *args, **kwargs):
             fields = super(MemoirCollection.ItemView, self).to_fields(
