@@ -928,6 +928,7 @@ class BaseCard(MagiModel):
     }
 
     top_image = property(lambda _s: _s.image_url or _s.art_url or _s.icon_url)
+    top_image_hd = property(lambda _s: _s.image_2x_url or _s.image_original_url or _s.art_url or _s.icon_url)
 
     ############################################################
     # Statistics fields
