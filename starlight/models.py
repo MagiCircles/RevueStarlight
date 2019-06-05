@@ -1022,7 +1022,11 @@ class BaseCard(MagiModel):
         ) * 100
 
     def display_statistic_rank(self, statistic):
-        rank = self.cached_statistics_ranks[statistic]
+        if not self.cached_statistics_ranks:
+            return ''
+        rank = self.cached_statistics_ranks.get(statistic, None)
+        if not rank:
+            return ''
         return (
             u'#{}'.format(rank)
             if rank > 3
