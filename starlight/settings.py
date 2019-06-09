@@ -100,7 +100,7 @@ SITE_IMAGE_PER_LANGUAGE = {
 # Contact & Social
 
 # todo CONTACT_EMAIL = ''
-# todo CONTACT_REDDIT = ''
+CONTACT_REDDIT = 'Ragefire2b'
 # todo CONTACT_FACEBOOK = ''
 
 FEEDBACK_FORM = 'https://forms.gle/6aRWq6zNhPBz9UGHA'
