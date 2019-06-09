@@ -900,6 +900,7 @@ class BaseCard(MagiModel):
 
     is_limited = models.BooleanField(_('Limited'), default=False)
     is_event = models.BooleanField(_('Event'), default=False)
+    is_seasonal = models.BooleanField(_('Seasonal'), default=False)
 
     ############################################################
     # Fan made details
@@ -1138,6 +1139,12 @@ class BaseCard(MagiModel):
             'translation': _('Event'),
             'filter': lambda _q: _q.filter(is_event=True),
             'is': lambda _s: _s.is_event,
+        }),
+        ('seasonal', {
+            'icon': 'scout-box',
+            'translation': _('Seasonal'),
+            'filter': lambda _q: _q.filter(is_seasonal=True),
+            'is': lambda _s: _s.is_seasonal,
         }),
     ])
 
@@ -1425,6 +1432,7 @@ class Memoir(BaseCard):
     cost = property(lambda _s: None if _s.is_upgrade else _s.cost_per_rarity)
 
     is_upgrade = models.BooleanField(_('Upgrade'), default=False)
+    is_vs_revue_reward = models.BooleanField(_('VS. Revue reward'), default=False)
 
     sell_price = models.PositiveIntegerField(_('Selling price'), null=True)
 
@@ -1469,6 +1477,12 @@ class Memoir(BaseCard):
             'translation': _('Upgrade'),
             'filter': lambda _q: _q.filter(is_upgrade=True),
             'is': lambda _s: _s.is_upgrade,
+        }),
+        ('vs_revue_reward', {
+            'icon': 'leaderboard',
+            'translation': _('VS. Revue reward'),
+            'filter': lambda _q: _q.filter(is_vs_revue_reward=True),
+            'is': lambda _s: _s.is_vs_revue_reward,
         }),
     ])
     TYPES.update(BaseCard.TYPES)
