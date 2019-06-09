@@ -360,26 +360,41 @@ html {
         text-align: left;
         a {
             border: 4px dashed fade(white, 10%);
-            border-top: 0;
-            border-left: 0;
+            border-top-width: 0;
+            border-left-width: 0;
+            border-right-width: 0;
         }
-        td:last-child a {
-            border-right: 0;
-        }
-        [data-link^="favorite_voiceactress"],
-        [data-link^="favorite_character"] {
-            img {
-                @size: 45px;
-                width: @size;
-                height: @size;
-                margin: -((@size - 24) / 2);
-                border-radius: 50%;
+        &:last-child {
+            tr:last-child td:last-child a {
+                border-bottom-width: 0;
             }
         }
     }
-    .table-buttons:last-child {
-        tr a {
-            border-bottom: 0;
+}
+@media (min-width: 768px) {
+    .profile-tabs {
+        .table-buttons {
+            a {
+                border-right-width: 4px;
+            }
+            td:last-child a {
+                border-right-width: 0;
+            }
+            [data-link^="favorite_voiceactress"],
+            [data-link^="favorite_character"] {
+                img {
+                    @size: 45px;
+                    width: @size;
+                    height: @size;
+                    margin: -((@size - 24) / 2);
+                    border-radius: 50%;
+                }
+            }
+        }
+        .table-buttons:last-child {
+            tr a {
+                border-bottom-width: 0;
+            }
         }
     }
 }
