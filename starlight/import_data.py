@@ -290,7 +290,15 @@ def import_images(to_import=None):
                     print('  Art file not found:', path)
                 else:
                     needs_save.append('art')
-            # Icon
+            # Base icon
+            if not card.base_icon or 'reload' in to_import:
+                path = u'starlight/static/extracts/large/1_{}.png'.format(card.number)
+                icon = saveLocalImageToModel(card, 'base_icon', path)
+                if icon is None:
+                    print('  Icon file not found:', path)
+                else:
+                    needs_save.append('base_icon')
+            # Generated icons
             for rank in [1, 2, 3, 5, 7]:
                 for rarity in [1, 2, 3, 4, 5, 6]:
                     if rarity < card.rarity:
@@ -331,7 +339,15 @@ def import_images(to_import=None):
                     print('  Art file not found:', path)
                 else:
                     needs_save.append('art')
-            # Icon
+            # Base icon
+            if not memoir.base_icon or 'reload' in to_import:
+                path = u'starlight/static/extracts/large/2_{}.png'.format(memoir.number)
+                icon = saveLocalImageToModel(memoir, 'base_icon', path)
+                if icon is None:
+                    print('  Icon file not found:', path)
+                else:
+                    needs_save.append('base_icon')
+            # Generated icons
             for rank in [1, 2, 3, 4, 5]:
                 if rank == 5:
                     field_name = 'icon'

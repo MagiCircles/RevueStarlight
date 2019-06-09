@@ -791,6 +791,7 @@ class BaseCardCollection(MainItemCollection):
         fields_exclude = [
             'number',
             'show_art_on_homepage',
+            'base_icon',
         ] + models.BaseCard.ALL_STATISTICS_FIELDS
         fields_prefetched_together = ['acts']
         ajax_callback = 'loadBaseCard'

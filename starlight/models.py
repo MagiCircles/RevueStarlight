@@ -918,6 +918,11 @@ class BaseCard(MagiModel):
     _original_image = models.ImageField(null=True, upload_to=uploadTiny('card'))
     _2x_image = models.ImageField(null=True, upload_to=upload2x('card'))
 
+    base_icon = models.ImageField(
+        'Base icon',
+        help_text='Icon without border, as originally extracted from the game',
+        upload_to=uploadItem('card/icon'), null=True,
+    )
     icon = models.ImageField(_('Icon'), upload_to=uploadItem('card/icon'), null=True)
     _original_icon = models.ImageField(null=True, upload_to=uploadTiny('card/icon'))
 
