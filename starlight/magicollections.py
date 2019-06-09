@@ -1201,6 +1201,7 @@ def to_CollectedCardCollection(cls):
         fields_images = {
             'rarity': 'rarity.png',
             'rank': 'rank.png',
+            'card': 'red_dresses.png',
         }
 
         fields_icons = cls.fields_icons.copy()
@@ -1211,6 +1212,8 @@ def to_CollectedCardCollection(cls):
         def to_fields(self, view, item, *args, **kwargs):
             fields = super(_CollectedCardCollection, self).to_fields(
                 view, item, *args, **kwargs)
+            setSubField(fields, 'card', key='icon', value=None)
+            setSubField(fields, 'card', key='image_for_link', value=item.card.base_icon_url)
 
             # Show rarity as images
             setSubField(fields, 'rarity', key='type', value='image')
@@ -1230,5 +1233,14 @@ def to_CollectedCardCollection(cls):
 def to_CollectedMemoirCollection(cls):
     cls = to_BaseCollectedCardCollection(cls)
     class _CollectedMemoirCollection(cls):
-        pass
+        fields_images = {
+            'memoir': 'red_memoirs.png',
+        }
+
+        def to_fields(self, view, item, *args, **kwargs):
+            fields = super(_CollectedMemoirCollection, self).to_fields(view, item, *args, **kwargs)
+            setSubField(fields, 'memoir', key='icon', value=None)
+            setSubField(fields, 'memoir', key='image_for_link', value=item.memoir.base_icon_url)
+            return fields
+
     return _CollectedMemoirCollection

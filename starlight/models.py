@@ -1578,7 +1578,7 @@ class BaseCollectedCard(AccountAsOwnerModel):
 class CollectedCard(BaseCollectedCard):
     collection_name = 'collectedcard'
     item_parent_name = 'card'
-    card = models.ForeignKey(Card, related_name='collectedcards')
+    card = models.ForeignKey(Card, related_name='collectedcards', verbose_name=_('Card'))
 
     max_bonded = models.NullBooleanField(_('Max bonded'))
 
@@ -1611,7 +1611,7 @@ class CollectedCard(BaseCollectedCard):
 class CollectedMemoir(BaseCollectedCard):
     collection_name = 'collectedmemoir'
     item_parent_name = 'memoir'
-    memoir = models.ForeignKey(Memoir, related_name='collectedmemoirs')
+    memoir = models.ForeignKey(Memoir, related_name='collectedmemoirs', verbose_name=_('Memoir'))
 
     ############################################################
     # Views utils
