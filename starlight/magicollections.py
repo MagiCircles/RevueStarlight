@@ -450,10 +450,12 @@ class StageGirlCollection(MainItemCollection):
         'name',
         'weapon',
         'weapon_type',
+        'school_department',
         'favorite_food',
         'least_favorite_food',
         'likes', 'dislikes',
         'hobbies',
+        'introduction',
         'm_description',
     ]
 
@@ -461,6 +463,7 @@ class StageGirlCollection(MainItemCollection):
         'name': 'id',
         'voice_actress': 'voice-actress',
         'school': 'school',
+        'school_department': 'school',
         'birthday': 'event',
         'color': 'palette',
         'year': 'education',
@@ -470,7 +473,8 @@ class StageGirlCollection(MainItemCollection):
         'likes': 'heart',
         'dislikes': 'heart-empty',
         'hobbies': 'hobbies',
-        'description': 'id',
+        'introduction': 'id',
+        'description': 'about',
         'video': 'film',
         'fans': 'heart',
     }

@@ -511,6 +511,12 @@ class StageGirl(MagiModel):
         db_index=True,
     )
 
+    school_department = models.CharField(
+        _('Department'), max_length=100, null=True,
+    )
+    SCHOOL_DEPARTMENTS_CHOICES = ALL_ALT_LANGUAGES
+    d_school_departments = models.TextField(_('Department'), null=True)
+
     YEAR_CHOICES = _to_year_choices()
     i_year = models.PositiveIntegerField(_('School year'), choices=i_choices(YEAR_CHOICES), null=True)
     to_year_choices = classmethod(lambda _s: _to_year_choices())
@@ -526,8 +532,6 @@ class StageGirl(MagiModel):
         lambda _s: staticImageURL(_s.i_astrological_sign, folder='i_astrological_sign', extension='png'))
 
     color = ColorField(_('Color'), null=True)
-
-    # todo: department, class?
 
     weapon = models.CharField(
         _('Weapon'), max_length=200, null=True,
@@ -562,6 +566,10 @@ class StageGirl(MagiModel):
     hobbies = models.CharField(_('Hobbies'), max_length=200, null=True)
     HOBBIESS_CHOICES = ALL_ALT_LANGUAGES
     d_hobbiess = models.TextField(_('Hobbies'), null=True)
+
+    introduction = models.TextField(_('Introduction'), help_text='In-game introduction', null=True)
+    INTRODUCTIONS_CHOICES = ALL_ALT_LANGUAGES
+    d_introductions = models.TextField(_('Introduction'), help_text='In-game introduction', null=True)
 
     m_description = models.TextField(_('Description'), null=True)
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES

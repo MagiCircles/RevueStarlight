@@ -1,5 +1,5 @@
 from __future__ import print_function
-import cStringIO
+import cStringIO, datetime
 from collections import OrderedDict
 from wand.image import Image
 from wand.exceptions import BlobError
@@ -12,6 +12,7 @@ from magi.import_data import (
 from magi.utils import (
     saveLocalImageToModel,
     localImageToImageFile,
+    getAstrologicalSign,
 )
 from starlight import models
 
@@ -116,6 +117,19 @@ def mapTranslatedValues(field_name):
         }
     return _f
 
+def updateOrCreateFk(model, new_field_name):
+    def _f(v):
+        item, created = model.objects.get_or_create(name=v['en'], defaults={ 'owner_id': 1 })
+        if v.get('ja', None):
+            item.add_d('names', 'ja', v['ja'])
+        if v.get('kr', None):
+            item.add_d('names', 'kr', v['kr'])
+        if v.get('zh_hant', None):
+            item.add_d('names', 'zh-hant', v['zh_hant'])
+        item.save()
+        return (new_field_name, item)
+    return _f
+
 def mapSkills(skills):
     added_acts = []
     for skill_name, details in skills.items():
@@ -149,13 +163,50 @@ def mapSkills(skills):
                 added_acts.append(item)
     return ('acts', added_acts)
 
+def stageGirlCallback(details, item, unique_data, data):
+    # Swap name
+    unique_data['name'] = TO_CHARACTER_NAME_SWAPPED[item['id']]
+    # Birthday
+    try:
+        data['birthday'] = datetime.date(2017, item['birth_month'], item['birth_day'])
+        data['i_astrological_sign'] = models.StageGirl.get_i(
+            'astrological_sign',
+            getAstrologicalSign(data['birthday'].month, data['birthday'].day),
+        )
+    except ValueError:
+        pass
+
 IMPORT_CONFIGURATION = OrderedDict()
 
+IMPORT_CONFIGURATION['stagegirls'] = {
+    'model': models.StageGirl,
+    'unique_fields': [
+        'name',
+    ],
+    'mapping': {
+        'name': mapTranslatedValues('name'),
+        'department_1': updateOrCreateFk(models.School, 'school'),
+        'likes': mapTranslatedValues('likes'),
+        'dislikes': mapTranslatedValues('dislikes'),
+        'like_food': mapTranslatedValues('favorite_food'),
+        'dislike_food': mapTranslatedValues('least_favorite_food'),
+        'introduction': mapTranslatedValues('introduction'),
+        'department_2': mapTranslatedValues('school_department'),
+        'cv': updateOrCreateFk(models.VoiceActress, 'voice_actress'),
+    },
+    'ignored_fields': [
+        'id',
+        'first_name', 'last_name', 'cv_fist', 'cv_last', 'name_ruby', # Already in name
+        'birth_day', 'birth_month', # Handled in stageGirlCallback
+        'school_id', # Handled in department_1
+    ],
+    'callback': stageGirlCallback,
+}
 IMPORT_CONFIGURATION['cards'] = {
     'model': models.Card,
     'unique_fields': [
         'number',
-    ],
+   ],
     'mapping': {
         'id': 'number',
         'character_id': lambda v: ('stage_girl', models.StageGirl.objects.get_or_create(
