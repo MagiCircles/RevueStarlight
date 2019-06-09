@@ -983,23 +983,6 @@ class BaseCard(MagiModel):
     max_level_agility = models.PositiveIntegerField(string_concat(u'Max level ', _('Agility')), null=True)
 
     ############################################################
-    # Statistics cache
-
-    _cache_j_statistics_ranks = models.TextField(null=True)
-    _cache_statistics_ranks_update_on_none = True
-
-    def to_cache_statistics_ranks(self):
-        return {
-            statistic: (
-                type(self).objects.filter(**{
-                    u'delta_{}__gt'.format(statistic):
-                    getattr(self, u'delta_{}'.format(statistic))
-                }).values(u'delta_{}'.format(statistic)).distinct().count() + 1
-            ) if getattr(self, u'delta_{}'.format(statistic)) else None
-            for statistic in self.STATISTICS_FIELDS
-        }
-
-    ############################################################
     # Statistics utils
 
     STATISTICS_FIELDS = ['hp', 'act_power', 'normal_defense', 'special_defense', 'agility']
@@ -1042,7 +1025,7 @@ class BaseCard(MagiModel):
         ) * 100
 
     def display_statistic_rank(self, statistic):
-        if not self.cached_statistics_ranks:
+        if not getattr(self, 'cached_statistics_ranks', None):
             return ''
         rank = self.cached_statistics_ranks.get(statistic, None)
         if not rank:
@@ -1061,12 +1044,13 @@ class BaseCard(MagiModel):
         value = self.get_statistic(statistic, prefix)
         if not value:
             return None
+        rank = self.display_statistic_rank(statistic)
         return u"""
 	<div class="row">
 	  <div class="col-xs-4 text-left"><span class="stat-label-{statistic}">{verbose_name}</span></div>
-	  <div class="col-xs-2 text-center"><a href="{rank_url}" target="_blank">{rank}</a></div>
+	  {rank}
 	  <div class="col-xs-2 text-right">{value}</div>
-	  <div class="col-xs-4">
+	  <div class="col-xs-{stat_size}">
 	    <div class="progress">
 	      <div class="progress-bar progress-bar-{element} progress-bar-striped"
 		   role="progressbar"
@@ -1081,9 +1065,12 @@ class BaseCard(MagiModel):
             verbose_name=self._meta.get_field(field_name).verbose_name,
             value=value,
             percent=self.statistic_percent(statistic, prefix),
-            rank_url=u'/{}s/?ordering=delta_{}&reverse_order=on'.format(
-                type(self).collection_name, statistic),
-            rank=self.display_statistic_rank(statistic),
+            rank=u'<div class="col-xs-2 text-center"><a href="{rank_url}" target="_blank">{rank}</a></div>'.format(
+                rank=rank,
+                rank_url=u'/{}s/?ordering=delta_{}&reverse_order=on'.format(
+                    type(self).collection_name, statistic),
+            ) if rank else '',
+            stat_size=4 if rank else 6,
         )
 
     @property
@@ -1331,6 +1318,23 @@ class Card(BaseCard):
         return icons
 
     live2d_model_package = models.FileField(upload_to=uploadItem('card/live2d'), null=True)
+
+    ############################################################
+    # Statistics cache
+
+    _cache_j_statistics_ranks = models.TextField(null=True)
+    _cache_statistics_ranks_update_on_none = True
+
+    def to_cache_statistics_ranks(self):
+        return {
+            statistic: (
+                type(self).objects.filter(**{
+                    u'delta_{}__gt'.format(statistic):
+                    getattr(self, u'delta_{}'.format(statistic))
+                }).values(u'delta_{}'.format(statistic)).distinct().count() + 1
+            ) if getattr(self, u'delta_{}'.format(statistic)) else None
+            for statistic in self.STATISTICS_FIELDS
+        }
 
     ############################################################
     # Cache stage girl
