@@ -132,5 +132,5 @@ def mergeSchoolStageGirlCuteForm(filter_cuteform):
 ############################################################
 # Max statistics
 
-def getMaxStatistic(statistic):
-    return django_settings.MAX_STATISTICS.get(statistic, None)
+def getMaxStatistic(collection_name, statistic):
+    return django_settings.MAX_STATISTICS.get(collection_name, {}).get(statistic, None)
