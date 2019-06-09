@@ -602,7 +602,7 @@ class StaffCollection(MainItemCollection):
                         'value': (False, item.t_m_staff_description),
                     } if item.m_staff_description else {}),
                 ])
-                if stage_girls and stage_girls[0].school_id == 1:
+                if stage_girls and stage_girls[0].school_id in [1, 5]:
                     context['anime_voice_actresses'].append(item)
                 else:
                     context['game_voice_actresses'].append(item)
