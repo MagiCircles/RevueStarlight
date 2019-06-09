@@ -1,4 +1,4 @@
-import datetime
+import datetime, random
 from collections import OrderedDict
 from django.conf import settings as django_settings
 from django.core.management.base import BaseCommand, CommandError
@@ -140,7 +140,7 @@ def generate_settings():
         & (Q(transparent__isnull=True) | Q(transparent='')),
     ).exclude(
         show_art_on_homepage=False,
-    ).order_by('-number')
+    )
 
     is_character_birthday = False
     birthday_today_stage_girls_id = models.StageGirl.objects.filter(
@@ -150,7 +150,12 @@ def generate_settings():
         filtered_cards = cards.filter(stage_girl_id__in=birthday_today_stage_girls_id)[:20]
         is_character_birthday = True
     else:
-        filtered_cards = None
+        filtered_cards = []
+        for version in models.VERSIONS.values():
+            filtered_cards += list(cards.filter(**{
+                u'{}release_date__isnull'.format(version['prefix']): False
+            }).order_by('-{}release_date'.format(version['prefix']), '-i_rarity')[:10])
+        random.shuffle(filtered_cards)
 
     if filtered_cards:
         filtered_cards = filtered_cards[:20]
