@@ -113,6 +113,7 @@ HASHTAGS = ['スタァライト', 'RevueStarlight', 'Starira', 'RevueStarlightRe
 # Homepage
 
 HOMEPAGE_BACKGROUND = 'background_gradient.png'
+HOMEPAGE_BACKGROUND = 'background.png'
 HOMEPAGE_ART_GRADIENT = True
 
 HOMEPAGE_ART_SIDE = 'right'

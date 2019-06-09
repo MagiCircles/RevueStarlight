@@ -4,6 +4,10 @@
     background-image: url('{{ static_url }}img/texture.png');
 }
 
+.current-activity_list.homepage, .current-prelaunch.homepage {
+    background-image: url('{{ static_url }}img/background_gradient.png');
+}
+
 [data-field="acts"] h3.acts-title {
     background: #D3D2D7 url('{{ static_url }}img/act_title.png') no-repeat bottom right;
 }
