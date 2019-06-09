@@ -796,9 +796,9 @@ class Act(MagiModel):
         _('Target'), _s.t_other_target if _s.other_target else _s.t_target))
     has_target = property(lambda _s: _s.i_target is not None or _s.other_target)
 
-    bound_break_value = models.PositiveIntegerField(null=True)
+    bound_break_value = models.FloatField(null=True)
     display_bound_break_value = property(lambda _s: u'{}: {}%'.format(
-        _('After bound break'), _s.bound_break_value))
+        _('After full bound break'), _s.bound_break_value))
 
     j_details = models.TextField(null=True)
 
