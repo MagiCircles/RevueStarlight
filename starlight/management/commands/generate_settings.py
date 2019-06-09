@@ -35,20 +35,24 @@ def generate_settings():
 
     print 'Show a banner for current and upcoming birthdays of characters'
 
-    def get_name_image_url_from_character(character):
+    def get_name_image_url_from_stagegirl(stagegirl):
+        if stagegirl.birthday_banner:
+            return stagegirl.first_name, stagegirl.birthday_banner_url, stagegirl.item_url
         try:
-            card = models.Card.objects.filter(stage_girl=character).all().order_by('-i_rarity', '-number')[0]
+            card = models.Card.objects.filter(stage_girl=stagegirl).all().order_by('-i_rarity', '-number')[0]
         except IndexError:
             return (None, None, None)
-        return character.first_name, card.art_original_url, character.item_url
+        return stagegirl.first_name, card.art_original_url, stagegirl.item_url
     latest_news = getCharactersBirthdays(
         models.StageGirl.objects.all(),
-        get_name_image_url_from_character,
+        get_name_image_url_from_stagegirl,
         latest_news=latest_news,
         days_after=12, days_before=1,
         field_name='birthday',
     )
     def get_name_image_url_from_voice_actress(voice_actress):
+        if voice_actress.birthday_banner:
+            return voice_actress.first_name, voice_actress.birthday_banner_url, voice_actress.item_url
         return voice_actress.t_name, voice_actress.image_url, voice_actress.item_url
     latest_news = getCharactersBirthdays(
         models.VoiceActress.objects.all(),

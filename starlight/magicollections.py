@@ -369,7 +369,7 @@ class VoiceActressCollection(MainItemCollection):
     class ItemView(MainItemCollection.ItemView):
         fields_prefetched = ['stagegirls']
         fields_prefetched_together = ['links']
-        fields_exclude = ['m_staff_description']
+        fields_exclude = ['m_staff_description', 'birthday_banner']
         comments_enabled = False
 
         def to_fields(self, item, prefetched_together=None, *args, **kwargs):

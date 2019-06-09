@@ -361,6 +361,9 @@ class VoiceActress(MagiModel):
 
     video = YouTubeVideoField(_('Video'), null=True)
 
+    birthday_banner = models.ImageField(upload_to=uploadItem('voiceactress/birthday'), null=True)
+    _original_birthday_banner = models.ImageField(null=True, upload_to=uploadTiny('voiceactress/birthday'))
+
     ############################################################
     # Reverse relations
 
@@ -576,6 +579,9 @@ class StageGirl(MagiModel):
     d_m_descriptions = models.TextField(_('Description'), null=True)
 
     video = YouTubeVideoField(_('Video'), null=True)
+
+    birthday_banner = models.ImageField(upload_to=uploadItem('stagegirl/birthday'), null=True)
+    _original_birthday_banner = models.ImageField(null=True, upload_to=uploadTiny('stagegirl/birthday'))
 
     ############################################################
     # Images settings
