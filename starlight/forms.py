@@ -433,7 +433,6 @@ class CardForm(BaseCardForm):
     def save(self, commit=False):
         instance = super(CardForm, self).save(commit=False)
         instance.update_cache('statistics_ranks')
-        instance.update_cache('stage_girl')
         if commit:
             instance.save()
         return instance
@@ -443,14 +442,15 @@ class CardForm(BaseCardForm):
 
 class CardFilterForm(BaseCardFilterForm):
     search_fields = BaseCardFilterForm.search_fields + [
-        '_cache_j_stage_girl',
+        'stage_girl__name', 'stage_girl__d_names',
         'description', 'd_descriptions',
         'profile', 'd_profiles',
         'message', 'd_messages',
     ]
     search_fields_labels = BaseCardFilterForm.search_fields_labels.copy()
     search_fields_labels.update({
-        '_cache_j_stage_girl': _('Stage girl'),
+        'stage_girl__name': _('Stage girl'),
+        'stage_girl__d_names': '',
     })
     merge_fields = BaseCardFilterForm.merge_fields + [
         {

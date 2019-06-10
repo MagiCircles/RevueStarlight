@@ -20,6 +20,7 @@ from magi.abstract_models import (
 )
 from magi.item_model import MagiModel, i_choices, getInfoFromChoices
 from magi.utils import (
+    AttrDict,
     ColorField,
     getAge,
     getStaffConfiguration,
@@ -40,6 +41,8 @@ from starlight.utils import (
     getSchoolImageFromPk,
     getSchoolNameFromPk,
     getSchoolURLFromPk,
+    getStageGirlImageFromPk,
+    getStageGirlNamesFromPk,
 )
 
 ############################################################
@@ -1377,22 +1380,21 @@ class Card(BaseCard):
             for statistic in self.STATISTICS_FIELDS
         }
 
-    ############################################################
+    # ############################################################
     # Cache stage girl
 
-    _cache_stage_girl_update_on_none = True
     _cached_stage_girl_collection_name = 'stagegirl'
-    _cache_j_stage_girl = models.TextField(null=True)
 
-    def to_cache_stage_girl(self):
+    @property
+    def cached_stage_girl(self):
         if not self.stage_girl_id:
             return None
-        return {
+        d = {
             'id': self.stage_girl_id,
-            'name': self.stage_girl.name,
-            'names': self.stage_girl.names or {},
-            'image_url': unicode(self.stage_girl.small_image_url),
+            'image_url': getStageGirlImageFromPk(self.stage_girl_id),
         }
+        d.update(getStageGirlNamesFromPk(self.stage_girl_id))
+        return AttrDict(self.cached_json_extra('stage_girl', d))
 
     ############################################################
     # Cache totals

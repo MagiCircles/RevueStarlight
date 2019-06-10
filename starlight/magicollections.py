@@ -493,13 +493,6 @@ class StageGirlCollection(MainItemCollection):
         },
     }
 
-    def after_save(self, request, instance, type=None):
-        super(StageGirlCollection, self).after_save(request, instance, type=type)
-        # Update cards caches when stage girls get edited
-        for card in instance.cards.all():
-            card.force_update_cache('stage_girl')
-        return instance
-
     class ListView(MainItemCollection.ListView):
         show_items_names = True
         default_ordering = 'school'
