@@ -698,8 +698,6 @@ class BaseCardCollection(MainItemCollection):
 
     fields_icons = {
         'name': 'id',
-        'is_limited': 'hourglass',
-        'is_event': 'event',
         'acts': 'skill',
         'art': 'pictures',
         'icon': 'pictures',
@@ -716,27 +714,34 @@ class BaseCardCollection(MainItemCollection):
         'rarity': 'rarity.png',
     }
 
-    def to_fields(self, view, item, exclude_fields=None, *args, **kwargs):
+    def to_fields(self, view, item, exclude_fields=None, extra_fields=None, icons=None, *args, **kwargs):
         if exclude_fields is None: exclude_fields = []
+        if extra_fields is None: extra_fields = []
+        if icons is None: icons = {}
 
-        # Hide event when card is not event
-        if item.is_event:
-            exclude_fields += ['is_limited']
-        else:
-            exclude_fields += ['is_event']
+        # Set icons based on types + don't show types when value is False
+        for type, details in self.queryset.model.TYPES.items():
+            field_name = u'is_{}'.format(type)
+            if details['is'](item):
+                icons[field_name] = details['icon']
+                if details.get('not_a_real_field', False):
+                    extra_fields.append((field_name, {
+                        'type': 'bool',
+                        'verbose_name': details['translation'],
+                        'value': True,
+                        'icon': details['icon'],
+                    }))
+                elif not getattr(item, field_name):
+                    exclude_fields.append(field_name)
+            else:
+                exclude_fields.append(field_name)
 
         fields = super(BaseCardCollection, self).to_fields(
-            view, item, *args, exclude_fields=exclude_fields, **kwargs)
+            view, item, *args, exclude_fields=exclude_fields, extra_fields=extra_fields, icons=icons, **kwargs)
 
         # Show rarity as images
         setSubField(fields, 'rarity', key='type', value='image')
         setSubField(fields, 'rarity', key='value', value=item.rarity_image)
-
-        # Limited / permanent
-        if not item.is_limited:
-            setSubField(fields, 'is_limited', key='icon', value='chest')
-            setSubField(fields, 'is_limited', key='verbose_name', value=_('Permanent'))
-            setSubField(fields, 'is_limited', key='value', value=True)
 
         # Show rank under stats when ordering by stat
         for statistic in models.BaseCard.STATISTICS_FIELDS:
@@ -935,8 +940,10 @@ class CardCollection(BaseCardCollection):
             'damage',
             'position',
             'cost',
-            'is_limited',
-            'is_event',
+        ] + [
+            u'is_{}'.format(_type)
+            for _type in models.Card.TYPES
+        ] + [
             'description',
             'profile',
             'message',
@@ -1031,7 +1038,6 @@ class MemoirCollection(BaseCardCollection):
     fields_icons.update({
         'explanation': 'about',
         'sell_price': 'money',
-        'is_upgrade': 'idolized',
         'stage_girls': 'idol',
     })
 
@@ -1070,9 +1076,10 @@ class MemoirCollection(BaseCardCollection):
         fields_order = [
             'name',
             'rarity',
-            'is_upgrade',
-            'is_limited',
-            'is_event',
+        ] + [
+            u'is_{}'.format(_type)
+            for _type in models.Memoir.TYPES
+        ] + [
             'cost',
             'sell_price',
             'explanation',

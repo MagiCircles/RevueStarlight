@@ -1125,14 +1125,15 @@ class BaseCard(MagiModel):
         ('permanent', {
             'icon': 'chest',
             'translation': _('Permanent'),
-            'filter': lambda _q: _q.filter(is_limited=False),
-            'is': lambda _s: not _s.is_limited,
+            'filter': lambda _q: _q.filter(is_limited=False, is_event=False, is_seasonal=False),
+            'is': lambda _s: not _s.is_limited and not _s.is_event and not _s.is_seasonal,
+            'not_a_real_field': True,
         }),
         ('limited', {
             'icon': 'hourglass',
             'translation': _('Limited'),
-            'filter': lambda _q: _q.filter(is_limited=True),
-            'is': lambda _s: _s.is_limited,
+            'filter': lambda _q: _q.filter(Q(is_limited=True) | Q(is_seasonal=True) | Q(is_event=True)),
+            'is': lambda _s: _s.is_limited or _s.is_seasonal or _s.is_event,
         }),
         ('event', {
             'icon': 'event',
