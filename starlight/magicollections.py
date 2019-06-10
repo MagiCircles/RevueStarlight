@@ -806,8 +806,12 @@ class BaseCardCollection(MainItemCollection):
             queryset = super(BaseCardCollection.ItemView, self).get_queryset(queryset, parameters, request)
             return queryset
 
-        def to_fields(self, item, extra_fields=None, *args, **kwargs):
+        def to_fields(self, item, extra_fields=None, exclude_fields=None, *args, **kwargs):
             if extra_fields is None: extra_fields = []
+            if exclude_fields is None: exclude_fields = []
+
+            # Exclude all alt icons fields
+            exclude_fields += item.ALL_ALT_ICONS_FIELDS
 
             # Cost
             if item.cost:
@@ -830,7 +834,7 @@ class BaseCardCollection(MainItemCollection):
                 }))
 
             fields = super(BaseCardCollection.ItemView, self).to_fields(
-                item, *args, extra_fields=extra_fields, **kwargs)
+                item, *args, extra_fields=extra_fields, exclude_fields=exclude_fields, **kwargs)
 
             # Icons
             setSubField(fields, 'icon', key='type', value='images')
@@ -955,12 +959,6 @@ class CardCollection(BaseCardCollection):
             'icon',
             'art',
             'transparent',
-        ]
-
-        fields_exclude = BaseCardCollection.ItemView.fields_exclude + [
-            'rank{rank}_rarity{rarity}_icon'.format(rank=rank, rarity=rarity)
-            for rank in range(1, 7 + 1)
-            for rarity in range(2, 6 + 1)
         ]
 
         def to_fields(self, item, extra_fields=None, *args, **kwargs):
@@ -1100,11 +1098,6 @@ class MemoirCollection(BaseCardCollection):
             },
         })
 
-        fields_exclude = BaseCardCollection.ItemView.fields_exclude + [
-            'rank{rank}_icon'.format(rank=rank)
-            for rank in range(1, 5 + 1)
-        ]
-
         def to_fields(self, item, *args, **kwargs):
             fields = super(MemoirCollection.ItemView, self).to_fields(
                 item, *args, **kwargs)
@@ -1183,7 +1176,6 @@ def to_BaseCollectedCardCollection(cls):
                 return request.GET.get('view') == 'icons'
 
     return _BaseCollectedCardCollection
-
 
 ############################################################
 # Collected card Collection

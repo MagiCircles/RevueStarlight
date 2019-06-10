@@ -365,6 +365,36 @@ class BaseCardForm(AutoForm):
                 if k in self.Meta.model.LIMIT_TO_RARITIES
             ]
 
+        # When uploading a new art of base_icon, delete all current generated derived images
+        if not self.is_creating:
+            self.previous_art = unicode(self.instance.art)
+            self.previous_base_icon = unicode(self.instance.base_icon)
+
+        # Fields that are auto-generated are indicat
+        if 'image' in self.fields:
+            self.fields['image'].help_text = 'This image will be automatically generated from the art. You don\'t need to upload your own.'
+        for field_name in ['icon'] + self.Meta.model.ALL_ALT_ICONS_FIELDS:
+            if field_name in self.fields:
+                self.fields[field_name].help_text = 'This image will be automatically generated from the base icon. You don\'t need to upload your own.'
+
+    def save(self, commit=False):
+        instance = super(BaseCardForm, self).save(commit=False)
+
+        # When uploading a new art of base_icon, delete all current generated derived images
+        if not self.is_creating:
+            if self.previous_art != unicode(instance.art):
+                instance.image = None
+                instance._original_image = None
+                instance._2x_image = None
+            if self.previous_base_icon != unicode(instance.base_icon):
+                instance.icon = None
+                for field_name in instance.ALL_ALT_ICONS_FIELDS:
+                    setattr(instance, field_name, None)
+
+        if commit:
+            instance.save()
+        return instance
+
 class BaseCardFilterForm(MagiFiltersForm):
     search_fields = [
         'name', 'd_names', 'acts__name', 'acts__d_names',

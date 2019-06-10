@@ -949,6 +949,10 @@ class BaseCard(MagiModel):
     icon = models.ImageField(_('Icon'), upload_to=uploadItem('card/icon'), null=True)
     _original_icon = models.ImageField(null=True, upload_to=uploadTiny('card/icon'))
 
+    @property
+    def ALL_ALT_ICONS_FIELDS(self):
+        raise NotImplementedError('Collected cards require ALL_ALT_ICONS_FIELDS.')
+
     art = models.ImageField(_('Art'), upload_to=uploadItem('card/art'), null=True)
     _original_art = models.ImageField(null=True, upload_to=uploadTiny('card/art'))
     _tthumbnail_art = models.ImageField(null=True, upload_to=uploadTthumb('card/art'))
@@ -1356,6 +1360,15 @@ class Card(BaseCard):
                     })
         return icons
 
+    ALL_ALT_ICONS_FIELDS = [
+        'rank1_rarity2_icon', 'rank1_rarity3_icon', 'rank1_rarity4_icon', 'rank1_rarity5_icon',
+        'rank1_rarity6_icon', 'rank2_rarity2_icon', 'rank2_rarity3_icon', 'rank2_rarity4_icon',
+        'rank2_rarity5_icon', 'rank2_rarity6_icon', 'rank3_rarity2_icon', 'rank3_rarity3_icon',
+        'rank3_rarity4_icon', 'rank3_rarity5_icon', 'rank3_rarity6_icon', 'rank5_rarity2_icon',
+        'rank5_rarity3_icon', 'rank5_rarity4_icon', 'rank5_rarity5_icon', 'rank5_rarity6_icon',
+        'rank7_rarity3_icon', 'rank7_rarity4_icon', 'rank7_rarity5_icon', 'rank7_rarity6_icon',
+    ]
+
     live2d_model_package = models.FileField(upload_to=uploadItem('card/live2d'), null=True)
 
     ############################################################
@@ -1508,6 +1521,10 @@ class Memoir(BaseCard):
                     'icon': icon,
                 })
         return icons
+
+    ALL_ALT_ICONS_FIELDS = [
+        'rank1_icon', 'rank2_icon', 'rank3_icon', 'rank4_icon',
+    ]
 
     ############################################################
     # Type
