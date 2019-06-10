@@ -489,7 +489,7 @@ class CardFilterForm(BaseCardFilterForm):
         },
     ]
 
-    school_filter = MagiFilter(selector='stagegirl__school', distinct=True)
+    school_filter = MagiFilter(selector='stage_girl__school', distinct=True)
 
     def _against_to_value(against, opposite):
         def _f(value):
