@@ -714,7 +714,8 @@ class BaseCardCollection(MainItemCollection):
         'rarity': 'rarity.png',
     }
 
-    def to_fields(self, view, item, exclude_fields=None, extra_fields=None, icons=None, *args, **kwargs):
+    def to_fields(self, view, item, exclude_fields=None, extra_fields=None, icons=None,
+                  only_fields=None, *args, **kwargs):
         if exclude_fields is None: exclude_fields = []
         if extra_fields is None: extra_fields = []
         if icons is None: icons = {}
@@ -725,19 +726,21 @@ class BaseCardCollection(MainItemCollection):
             if details['is'](item):
                 icons[field_name] = details['icon']
                 if details.get('not_a_real_field', False):
-                    extra_fields.append((field_name, {
-                        'type': 'bool',
-                        'verbose_name': details['translation'],
-                        'value': True,
-                        'icon': details['icon'],
-                    }))
+                    if not only_fields or field_name in only_fields:
+                        extra_fields.append((field_name, {
+                            'type': 'bool',
+                            'verbose_name': details['translation'],
+                            'value': True,
+                            'icon': details['icon'],
+                        }))
                 elif not getattr(item, field_name):
                     exclude_fields.append(field_name)
             else:
                 exclude_fields.append(field_name)
 
         fields = super(BaseCardCollection, self).to_fields(
-            view, item, *args, exclude_fields=exclude_fields, extra_fields=extra_fields, icons=icons, **kwargs)
+            view, item, *args, exclude_fields=exclude_fields,
+            extra_fields=extra_fields, only_fields=only_fields, icons=icons, **kwargs)
 
         # Show rarity as images
         setSubField(fields, 'rarity', key='type', value='image')
