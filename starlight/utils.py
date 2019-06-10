@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _, string_concat
 from magi.utils import (
     CuteFormTransform,
     FAVORITE_CHARACTERS_IMAGES,
+    FAVORITE_CHARACTERS_NAMES,
     getTranslatedName,
     globalContext,
     listUnique,
@@ -39,6 +40,8 @@ def displayNames(item):
 
 def displayNameHTML(item):
     names = displayNames(item)
+    if not names:
+        return ''
     return mark_safe(u'<span>{}</span>{}'.format(
         names[0],
         u'<br><small class="text-muted">{}</small>'.format(
@@ -49,17 +52,33 @@ def displayNameHTML(item):
 ############################################################
 # Form choices utils
 
-def getSchoolChoices():
+def getSchoolChoices(without_other=False):
     return BLANK_CHOICE_DASH + [
         (school_id, getTranslatedName(school_details))
         for school_id, school_details in django_settings.SCHOOLS.items()
+        if not without_other or (without_other and school_details['name'] != 'Other')
     ]
+
+def getStageGirlNamesFromPk(pk):
+    return {
+        'name': FAVORITE_CHARACTERS_NAMES.get(pk, None),
+        'names': django_settings.STAGE_GIRLS_NAMES.get(pk, {}),
+    }
+
+def getStageGirlNameFromPk(pk):
+    return getTranslatedName(getStageGirlNamesFromPk(pk))
+
+def getStageGirlImageFromPk(pk):
+    return (
+        FAVORITE_CHARACTERS_IMAGES.get(pk, None)
+        or staticImageURL('default/default_stagegirl.png')
+    )
 
 def getStageGirlChoices():
     return [
-        (id, full_name) for (id, full_name, image) in getattr(
-            django_settings, 'FAVORITE_CHARACTERS', [],
-        )]
+        (pk, getStageGirlNameFromPk(pk))
+        for pk in FAVORITE_CHARACTERS_NAMES.keys()
+    ]
 
 def getVoiceActressChoices():
     return BLANK_CHOICE_DASH + [

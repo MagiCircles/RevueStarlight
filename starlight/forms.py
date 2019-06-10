@@ -232,7 +232,7 @@ class VoiceActressFilterForm(MagiFiltersForm):
     def __init__(self, *args, **kwargs):
         super(VoiceActressFilterForm, self).__init__(*args, **kwargs)
         if 'school' in self.fields:
-            self.fields['school'].choices = getSchoolChoices()
+            self.fields['school'].choices = getSchoolChoices(without_other=True)
 
     def filter_queryset(self, queryset, parameters, request, *args, **kwargs):
         queryset = super(VoiceActressFilterForm, self).filter_queryset(
@@ -383,7 +383,14 @@ class BaseCardFilterForm(MagiFiltersForm):
         ) for _statistic in models.BaseCard.STATISTICS_FIELDS
     ]
     merge_fields = [
-        ('school', 'stage_girl'),
+        OrderedDict([
+            ('school', {
+                'choices': lambda: getSchoolChoices(),
+            }),
+            ('stage_girl', {
+                'choices': lambda: getStageGirlChoices(),
+            }),
+        ]),
     ]
 
     version = forms.ChoiceField(label=_('Version'), choices=models.VERSION_CHOICES)
@@ -404,10 +411,6 @@ class BaseCardFilterForm(MagiFiltersForm):
 
     def __init__(self, *args, **kwargs):
         super(BaseCardFilterForm, self).__init__(*args, **kwargs)
-
-        # Set school choices with translations
-        if 'school' in self.fields:
-            self.fields['school'].choices = getSchoolChoices()
 
         # Set type choices
         if 'type' in self.fields:

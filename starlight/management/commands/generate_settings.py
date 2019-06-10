@@ -85,6 +85,12 @@ def generate_settings():
         stage_girl.small_image_url,
     ) for stage_girl in all_stage_girls]
 
+    print 'Cache stage girls names'
+    stage_girls_names = OrderedDict([
+        (stage_girl.pk, stage_girl.names)
+        for stage_girl in all_stage_girls
+    ])
+
     print 'Cache schools'
     all_schools = OrderedDict([
         (school.pk, {
@@ -93,7 +99,7 @@ def generate_settings():
             'white_image': school.white_image_url or school.image_url,
             'image': school.image_url,
         })
-        for school in models.School.objects.all().order_by('name')
+        for school in models.School.objects.all().order_by('id')
     ])
 
     print 'Cache voice actresses'
@@ -193,6 +199,7 @@ def generate_settings():
         'IS_CHARACTER_BIRTHDAY': is_character_birthday,
         'STAFF_CONFIGURATIONS': staff_configurations,
         'FAVORITE_CHARACTERS': favorite_characters,
+        'STAGE_GIRLS_NAMES': stage_girls_names,
         'SCHOOLS': all_schools,
         'VOICE_ACTRESSES': all_voiceactresses,
         'MAX_STATISTICS': max_statistics,

@@ -136,6 +136,7 @@ PASSWORD_EMAIL = 'password@schoolido.lu'
 AWS_SES_RETURN_PATH = 'contact@schoolido.lu'
 
 FAVORITE_CHARACTERS = []
+STAGE_GIRLS_NAMES = {}
 STAFF_CONFIGURATIONS = {}
 SCHOOLS = {}
 VOICE_ACTRESSES = {}
