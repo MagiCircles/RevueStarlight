@@ -146,7 +146,7 @@ def mergeSchoolStageGirlCuteForm(filter_cuteform):
         },
     }, OrderedDict ([
         ('school', lambda k, v: getSchoolImageFromPk(k)),
-        ('stage_girl', lambda k, v: getStageGirlImageFromPk(k)),
+        ('stage_girl', lambda k, v: getStageGirlImageFromPk(int(k))),
     ]))
 
 ############################################################

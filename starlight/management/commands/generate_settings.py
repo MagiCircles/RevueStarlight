@@ -78,7 +78,7 @@ def generate_settings():
     # } for event in recent_events]
 
     print 'Get the characters'
-    all_stage_girls = models.StageGirl.objects.all().order_by('name')
+    all_stage_girls = models.StageGirl.objects.all().order_by('school')
     favorite_characters = [(
         stage_girl.pk,
         stage_girl.name,
