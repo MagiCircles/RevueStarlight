@@ -1078,8 +1078,8 @@ class BaseCard(MagiModel):
             percent=self.statistic_percent(statistic, prefix),
             rank=u'<div class="col-xs-2 text-center"><a href="{rank_url}" target="_blank">{rank}</a></div>'.format(
                 rank=rank,
-                rank_url=u'/{}s/?ordering=delta_{}&reverse_order=on'.format(
-                    type(self).collection_name, statistic),
+                rank_url=u'/{}s/?i_rarity={}&ordering=delta_{}&reverse_order=on'.format(
+                    type(self).collection_name, self.i_rarity, statistic),
             ) if rank else '',
             stat_size=4 if rank else 6,
         )
@@ -1346,9 +1346,14 @@ class Card(BaseCard):
     _cache_statistics_ranks_update_on_none = True
 
     def to_cache_statistics_ranks(self):
+        """
+        Rank is calculated per rarity and per statistic
+        """
         return {
             statistic: (
-                type(self).objects.filter(**{
+                type(self).objects.filter(
+                    i_rarity=self.i_rarity
+                ).filter(**{
                     u'delta_{}__gt'.format(statistic):
                     getattr(self, u'delta_{}'.format(statistic))
                 }).values(u'delta_{}'.format(statistic)).distinct().count() + 1
