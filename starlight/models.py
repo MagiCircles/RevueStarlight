@@ -389,8 +389,8 @@ class VoiceActress(MagiModel):
 
     display_name = property(displayNameHTML)
 
-    top_image_list = property(lambda _s: _s.image_thumbnail_url)
-    image_for_prefetched = property(lambda _s: _s.image_thumbnail_url)
+    top_image_list = property(lambda _s: _s.image_thumbnail_url or staticImageURL('default/default.png'))
+    image_for_prefetched = top_image_list
 
     ############################################################
     # Unicode
@@ -461,6 +461,11 @@ class School(MagiModel):
             'max_per_line': None,
         },
     ]
+
+    ############################################################
+    # Views utils
+
+    top_image = property(lambda _s: _s.image_url or staticImageURL('default/default_school.png'))
 
     ############################################################
     # Unicode
@@ -628,7 +633,7 @@ class StageGirl(MagiModel):
 
     display_name = property(displayNameHTML)
 
-    image_for_prefetched = property(lambda _s: _s.small_image_url)
+    image_for_prefetched = property(lambda _s: _s.small_image_url or staticImageURL('default/default_stagegirl.png'))
 
     @property
     def display_section_header(self):
@@ -641,7 +646,7 @@ class StageGirl(MagiModel):
 
     @property
     def top_image_list(self):
-        return self.square_image_url
+        return self.square_image_url or staticImageURL('default/default.png')
 
     @property
     def top_html_item(self):
@@ -651,9 +656,13 @@ class StageGirl(MagiModel):
                 unicode(self),
                 css_classes,
             ) for (image, css_classes) in [
-                (getattr(self, 'uniform_image_url'), 'uniform'),
-                (getattr(self, 'image_url'), 'revue'),
-            ] if image
+                (_i, _c) for _i, _c in [
+                    (getattr(self, 'uniform_image_url'), 'uniform'),
+                    (getattr(self, 'image_url'), 'revue'),
+                ] if _i
+            ] or [
+                (staticImageURL('default/default.png'), '')
+            ]
         ])
 
     ############################################################
@@ -957,8 +966,9 @@ class BaseCard(MagiModel):
         },
     }
 
-    top_image = property(lambda _s: _s.image_url or _s.art_url or _s.icon_url)
-    top_image_hd = property(lambda _s: _s.image_2x_url or _s.image_original_url or _s.art_url or _s.icon_url)
+    top_image = property(lambda _s: _s.image_url or _s.art_url or staticImageURL('default/default_card.png'))
+    top_image_hd = property(lambda _s: _s.image_2x_url or _s.image_original_url
+                            or _s.art_url or staticImageURL('default/default_card.png'))
 
     ############################################################
     # Statistics fields
@@ -1087,6 +1097,8 @@ class BaseCard(MagiModel):
     @property
     def display_statistics(self):
         statistics_prefixes = self.get_statistics_prefixes_to_display()
+        if not statistics_prefixes:
+            return None
         return u"""
   <div class="card-statistics">
     <div class="btn-group" data-toggle="buttons" data-control-tabs="card-{card_number}">
@@ -1178,11 +1190,15 @@ class BaseCard(MagiModel):
     ############################################################
     # Views utils
 
+    default_image = property(lambda _s: staticImageURL('default/default_card.png'))
+    default_icon = property(lambda _s: staticImageURL('default/default.png'))
+    image_for_prefetched = property(lambda _s: _s.icon_url or _s.base_icon_url or _s.default_icon)
+
     @property
     def top_image_list(self):
         if self.request.GET.get('view', None) == 'icons':
-            return self.icon_url
-        return self.image_url
+            return self.icon_url or self.default_icon
+        return self.image_url or self.default_image
 
     ############################################################
     # Reverse relations
@@ -1399,6 +1415,11 @@ class Card(BaseCard):
     ]
 
     ############################################################
+    # Views utils
+
+    default_icon = property(lambda _s: staticImageURL('default/default_card_icon.png'))
+
+    ############################################################
     # Unicode
 
     def __unicode__(self):
@@ -1541,6 +1562,8 @@ class Memoir(BaseCard):
     t_description = property(lambda _s: _s.t_profile)
     element = 'flower'
 
+    default_icon = property(lambda _s: staticImageURL('default/default_memoir_icon.png'))
+
     ############################################################
     # Unicode
 
@@ -1633,8 +1656,8 @@ class CollectedCard(BaseCollectedCard):
     def get_image(self, prefix='', suffix=''):
         return (
             self.item_parent.get_icon(rank=self.rank, rarity=self.rarity, prefix=prefix, suffix=suffix)
-            or getattr(self.item_parent, u'{prefix}image{suffix}'.format(prefix=prefix, suffix=suffix))
-            or getattr(self.item_parent, u'{prefix}art{suffix}'.format(prefix=prefix, suffix=suffix))
+            or getattr(self.item_parent, u'{prefix}base_icon{suffix}'.format(prefix=prefix, suffix=suffix))
+            or staticImageURL('default/default_card_icon.png')
         )
 
 ############################################################
@@ -1657,6 +1680,6 @@ class CollectedMemoir(BaseCollectedCard):
     def get_image(self, prefix='', suffix=''):
         return (
             self.item_parent.get_icon(rank=self.rank, prefix=prefix, suffix=suffix)
-            or getattr(self.item_parent, u'{prefix}image{suffix}'.format(prefix=prefix, suffix=suffix))
-            or getattr(self.item_parent, u'{prefix}art{suffix}'.format(prefix=prefix, suffix=suffix))
+            or getattr(self.item_parent, u'{prefix}base_icon{suffix}'.format(prefix=prefix, suffix=suffix))
+            or staticImageURL('default/default_memoir_icon.png')
         )

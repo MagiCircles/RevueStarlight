@@ -10,6 +10,7 @@ from magi.utils import (
     globalContext,
     listUnique,
     mergedFieldCuteForm,
+    staticImageURL,
     tourldash,
 )
 
@@ -80,7 +81,7 @@ def getSchoolNameFromPk(pk):
     return getTranslatedName(django_settings.SCHOOLS[int(pk)])
 
 def getSchoolImageFromPk(pk):
-    return django_settings.SCHOOLS[int(pk)]['image']
+    return django_settings.SCHOOLS[int(pk)]['image'] or staticImageURL('default/default_school.png')
 
 def getSchoolURLFromPk(pk, ajax=False):
     school = django_settings.SCHOOLS[int(pk)]
@@ -104,12 +105,12 @@ def getElementsCuteForm(model=None):
 
 def getSchoolsCuteForm(white=False):
     return {
-        'to_cuteform': lambda _k, _v: django_settings.SCHOOLS[_k]['white_image' if white else 'image'],
+        'to_cuteform': lambda k, v: getSchoolImageFromPk(k),
     }
 
 def getStageGirlsCuteForm():
     return {
-        'to_cuteform': lambda k, v: FAVORITE_CHARACTERS_IMAGES[k],
+        'to_cuteform': lambda k, v: getStageGirlImageFromPk(k),
         'title': _('Stage girl'),
         'extra_settings': {
             'modal': 'true',
@@ -125,8 +126,8 @@ def mergeSchoolStageGirlCuteForm(filter_cuteform):
             'modal-text': 'true',
         },
     }, OrderedDict ([
-        ('school', lambda k, v: django_settings.SCHOOLS[int(k)]['image']),
-        ('stage_girl', lambda k, v: FAVORITE_CHARACTERS_IMAGES[int(k)]),
+        ('school', lambda k, v: getSchoolImageFromPk(k)),
+        ('stage_girl', lambda k, v: getStageGirlImageFromPk(k)),
     ]))
 
 ############################################################
