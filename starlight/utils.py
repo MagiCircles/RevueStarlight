@@ -85,8 +85,8 @@ def getSchoolImageFromPk(pk):
 def getSchoolURLFromPk(pk, ajax=False):
     school = django_settings.SCHOOLS[int(pk)]
     return u'{}/school/{}/{}'.format(
-        '/ajax' if ajax else '', pk,
-        '' if ajax else '{}/'.format(tourldash(getSchoolNameFromPk(pk))))
+        u'/ajax' if ajax else u'', pk,
+        u'' if ajax else u'{}/'.format(tourldash(getSchoolNameFromPk(pk))))
 
 ############################################################
 # CuteForm utils
