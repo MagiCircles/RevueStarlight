@@ -611,8 +611,8 @@ class StageGirl(MagiModel):
     # Reverse relations
 
     reverse_related = [
-        { 'field_name': 'cards', 'verbose_name': _('Cards') },
-        { 'field_name': 'memoirs', 'verbose_name': _('Memoirs') },
+        { 'field_name': 'cards', 'verbose_name': _('Cards'), 'filter_field_name': 'stage_girl' },
+        { 'field_name': 'memoirs', 'verbose_name': _('Memoirs'), 'filter_field_name': 'stage_girl' },
         {
             'field_name': 'fans',
             'url': 'users',
@@ -1380,7 +1380,7 @@ class Card(BaseCard):
             for statistic in self.STATISTICS_FIELDS
         }
 
-    # ############################################################
+    ############################################################
     # Cache stage girl
 
     _cached_stage_girl_collection_name = 'stagegirl'

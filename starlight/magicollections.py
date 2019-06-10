@@ -434,6 +434,7 @@ class SchoolCollection(SubItemCollection):
         fields_prefetched_together = ['students']
 
     class ListView(SubItemCollection.ListView):
+        default_ordering = 'id'
         show_items_names = True
 
 ############################################################
@@ -504,7 +505,7 @@ class StageGirlCollection(MainItemCollection):
     class ItemView(MainItemCollection.ItemView):
         fields_preselected = ['voice_actress', 'school']
         fields_prefetched_together = ['cards', 'memoirs']
-        fields_exclude = ['small_image', 'uniform_image', 'square_image', 'weapon_type']
+        fields_exclude = ['small_image', 'uniform_image', 'square_image', 'weapon_type', 'birthday_banner']
 
         def to_fields(self, item, prefetched_together=None, *args, **kwargs):
             if prefetched_together is None: prefetched_together = []
@@ -818,13 +819,15 @@ class BaseCardCollection(MainItemCollection):
                 }))
 
             # Statistics
-            extra_fields.append(('statistics', {
-                'verbose_name': _('Statistics'),
-                'icon': 'statistics',
-                'type': 'html',
-                'value': item.display_statistics,
-                'spread_across': True
-            }))
+            display_statistics = item.display_statistics
+            if display_statistics:
+                extra_fields.append(('statistics', {
+                    'verbose_name': _('Statistics'),
+                    'icon': 'statistics',
+                    'type': 'html',
+                    'value': item.display_statistics,
+                    'spread_across': True
+                }))
 
             fields = super(BaseCardCollection.ItemView, self).to_fields(
                 item, *args, extra_fields=extra_fields, **kwargs)
