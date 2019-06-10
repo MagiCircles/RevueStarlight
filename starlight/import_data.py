@@ -19,8 +19,8 @@ from starlight import models
 TO_STATISTICS = {
     'hp': 'hp',
     'atk': 'act_power',
-    'pdef': 'special_defense',
-    'mdef': 'normal_defense',
+    'pdef': 'normal_defense',
+    'mdef': 'special_defense',
     'agi': 'agility',
 }
 
