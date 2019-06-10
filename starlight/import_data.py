@@ -97,6 +97,13 @@ MEMOIR_TYPE_TO_UPGRADE = {
     2: True,
 }
 
+TO_VOICE_ACTRESS = {
+    'Ayasa Ito': 'Ayasa Itou',
+    'Emiri Kato': 'Emiri Katou',
+    'Hotaru Nomoto': 'Nomoto Hotaru', # swapped for some reason?
+    'Hinata Sato': 'Hinata Satou',
+}
+
 def mapStatistics(prefix):
     def _f(v):
         return {
@@ -118,7 +125,7 @@ def mapTranslatedValues(field_name):
         }
     return _f
 
-def updateOrCreateFk(model, new_field_name, default_name=None):
+def updateOrCreateFk(model, new_field_name, default_name=None, transform_name=None):
     def _f(v):
         name = v.get('en', None)
         if not name:
@@ -126,6 +133,8 @@ def updateOrCreateFk(model, new_field_name, default_name=None):
                 name = default_name
             else:
                 return (new_field_name, None)
+        if transform_name:
+            name = transform_name(name)
         item, created = model.objects.get_or_create(name=name, defaults={ 'owner_id': 1 })
         if v.get('ja', None):
             item.add_d('names', 'ja', v['ja'])
@@ -173,6 +182,7 @@ def mapSkills(skills):
 def stageGirlCallback(details, item, unique_data, data):
     # Swap name
     unique_data['name'] = TO_CHARACTER_NAME_SWAPPED[item['id']]
+
     # Birthday
     try:
         data['birthday'] = datetime.date(2017, item['birth_month'], item['birth_day'])
@@ -199,7 +209,10 @@ IMPORT_CONFIGURATION['stagegirls'] = {
         'dislike_food': mapTranslatedValues('least_favorite_food'),
         'introduction': mapTranslatedValues('introduction'),
         'department_2': mapTranslatedValues('school_department'),
-        'cv': updateOrCreateFk(models.VoiceActress, 'voice_actress'),
+        'cv': updateOrCreateFk(
+            models.VoiceActress, 'voice_actress',
+            transform_name=lambda _name: u' '.join(reversed(TO_VOICE_ACTRESS.get(
+                _name, _name).split(' ')))),
     },
     'ignored_fields': [
         'id',
