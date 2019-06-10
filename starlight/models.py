@@ -868,18 +868,26 @@ class BaseCard(MagiModel):
         (1, {
             'translation': u'★',
             'cost': getStaffConfiguration('rarity_1_cost', 2),
+            'min_level': 30,
+            'max_level': 50,
         }),
         (2, {
             'translation': u'★★',
             'cost': getStaffConfiguration('rarity_2_cost', 6),
+            'min_level': 40,
+            'max_level': 60,
         }),
         (3, {
             'translation': u'★★★',
             'cost': getStaffConfiguration('rarity_3_cost', 9),
+            'min_level': 50,
+            'max_level': 70,
         }),
         (4, {
             'translation': u'★★★★',
             'cost': getStaffConfiguration('rarity_4_cost', 12),
+            'min_level': 60,
+            'max_level': 80,
         }),
         (5, {
             'translation': u'★★★★★',
@@ -897,6 +905,8 @@ class BaseCard(MagiModel):
     small_rarity_image = property(lambda _s: staticImageURL(_s.i_rarity, folder='small_rarity', extension='png'))
 
     cost = property(getInfoFromChoices('rarity', RARITIES, 'cost'))
+    max_level = property(getInfoFromChoices('rarity', RARITIES, 'max_level'))
+    min_level = property(getInfoFromChoices('rarity', RARITIES, 'min_level'))
 
     is_limited = models.BooleanField(_('Limited'), default=False)
     is_event = models.BooleanField(_('Event'), default=False)
@@ -988,10 +998,10 @@ class BaseCard(MagiModel):
 
     STATISTICS_FIELDS = ['hp', 'act_power', 'normal_defense', 'special_defense', 'agility']
     STATISTICS_PREFIXES = OrderedDict([
-        ('base_', lambda: _('Base')),
-        ('min_level_', lambda: _('Level {level}').format(level=1)),
-        ('delta_', lambda: u'Δ'),
-        ('max_level_', lambda: _('Level {level}').format(level=80)),
+        ('base_', lambda _s: _('Base')),
+        ('min_level_', lambda _s: _('Level {level}').format(level=_s.min_level)),
+        ('delta_', lambda _s: u'Δ'),
+        ('max_level_', lambda _s: _('Level {level}').format(level=_s.max_level)),
     ])
     ALL_STATISTICS_FIELDS = [
         u'{}{}'.format(_prefix, _statistic)
@@ -1010,7 +1020,7 @@ class BaseCard(MagiModel):
 
     def get_statistics_prefixes_to_display(self):
         statistics_prefixes = OrderedDict([
-            (prefix, verbose_name())
+            (prefix, verbose_name(self))
             for prefix, verbose_name in self.STATISTICS_PREFIXES.items()
             if self.has_any_statistic(prefix=prefix)
         ])
@@ -1063,7 +1073,7 @@ class BaseCard(MagiModel):
         """.format(
             statistic=statistic,
             element=self.element,
-            verbose_name=self._meta.get_field(field_name).verbose_name,
+            verbose_name=self._meta.get_field(u'base_{}'.format(statistic)).verbose_name,
             value=value,
             percent=self.statistic_percent(statistic, prefix),
             rank=u'<div class="col-xs-2 text-center"><a href="{rank_url}" target="_blank">{rank}</a></div>'.format(
@@ -1197,6 +1207,8 @@ class Card(BaseCard):
     # Basic details: Element, damage, position, ...
 
     LIMIT_TO_RARITIES = [2, 3, 4]
+
+    max_level = 80
 
     stage_girl = models.ForeignKey(StageGirl, verbose_name=_('Stage girl'), related_name='%(class)ss')
 
