@@ -58,6 +58,7 @@ TO_CHARACTER_NAME_SWAPPED = {
     _id: u' '.join(reversed(_name.split(' ')))
     for _id, _name in TO_CHARACTER.items()
 }
+TO_CHARACTER_NAME_SWAPPED[403] = u'Liu Mei Fan'
 
 TO_ATTRIBUTES = {
     1: 'flower',
