@@ -347,19 +347,23 @@ class BaseCardForm(AutoForm):
     def __init__(self, *args, **kwargs):
         super(BaseCardForm, self).__init__(*args, **kwargs)
 
+        # Change help text of stats for min level / max level
+        if not self.is_creating:
+            for statistic in models.BaseCard.STATISTICS_FIELDS:
+                for field_prefix in ['min_level', 'max_level']:
+                    field_name = u'{}_{}'.format(field_prefix, statistic)
+                    if field_name in self.fields:
+                        self.fields[field_name].help_text = u'At level {level} (for rarity {rarity})'.format(
+                            level=getattr(self.instance, field_prefix),
+                            rarity=self.instance.t_rarity,
+                        )
+
         # Limit to rarities
         if 'i_rarity' in self.fields:
             self.fields['i_rarity'].choices = [
                 (k, v) for k, v in self.fields['i_rarity'].choices
                 if k in self.Meta.model.LIMIT_TO_RARITIES
             ]
-
-    def save(self, commit=False):
-        instance = super(BaseCardForm, self).save(commit=False)
-        instance.update_cache('statistics_ranks')
-        if commit:
-            instance.save()
-        return instance
 
 class BaseCardFilterForm(MagiFiltersForm):
     search_fields = [
@@ -425,6 +429,7 @@ class BaseCardFilterForm(MagiFiltersForm):
 class CardForm(BaseCardForm):
     def save(self, commit=False):
         instance = super(CardForm, self).save(commit=False)
+        instance.update_cache('statistics_ranks')
         instance.update_cache('stage_girl')
         if commit:
             instance.save()
