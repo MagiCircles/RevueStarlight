@@ -117,9 +117,15 @@ def mapTranslatedValues(field_name):
         }
     return _f
 
-def updateOrCreateFk(model, new_field_name):
+def updateOrCreateFk(model, new_field_name, default_name=None):
     def _f(v):
-        item, created = model.objects.get_or_create(name=v['en'], defaults={ 'owner_id': 1 })
+        name = v.get('en', None)
+        if not name:
+            if default_name:
+                name = default_name
+            else:
+                return (new_field_name, None)
+        item, created = model.objects.get_or_create(name=name, defaults={ 'owner_id': 1 })
         if v.get('ja', None):
             item.add_d('names', 'ja', v['ja'])
         if v.get('kr', None):
@@ -185,7 +191,7 @@ IMPORT_CONFIGURATION['stagegirls'] = {
     ],
     'mapping': {
         'name': mapTranslatedValues('name'),
-        'department_1': updateOrCreateFk(models.School, 'school'),
+        'department_1': updateOrCreateFk(models.School, 'school', default_name='Other'),
         'likes': mapTranslatedValues('likes'),
         'dislikes': mapTranslatedValues('dislikes'),
         'like_food': mapTranslatedValues('favorite_food'),
