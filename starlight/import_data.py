@@ -417,7 +417,6 @@ def generate_card_icon(card, field_name, rank, rarity, base_icon_data=None):
         base_icon_image = Image(file=cStringIO.StringIO(base_icon_data))
     except (BlobError, ValueError):
         print('  Base icon not saved in card.')
-        fewrger
         return base_icon_data, None
 
     try:
