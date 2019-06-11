@@ -38,7 +38,7 @@ COLOR = '#1A1D24'
 ############################################################
 # Prelaunch details
 
-LAUNCH_DATE = datetime.datetime(2019, 06, 11, 4, 0, 0, tzinfo=pytz.UTC)
+LAUNCH_DATE = True
 
 PRELAUNCH_ENABLED_PAGES = DEFAULT_PRELAUNCH_ENABLED_PAGES
 PRELAUNCH_ENABLED_PAGES += [
