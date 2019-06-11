@@ -1,4 +1,6 @@
+from __future__ import division
 from collections import OrderedDict
+from math import floor
 from django.conf import settings as django_settings
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.safestring import mark_safe
@@ -152,5 +154,33 @@ def mergeSchoolStageGirlCuteForm(filter_cuteform):
 ############################################################
 # Max statistics
 
-def getMaxStatistic(collection_name, statistic):
-    return django_settings.MAX_STATISTICS.get(collection_name, {}).get(statistic, None)
+def getMaxStatistic(collection_name, statistic, prefix, default=0):
+    prefix = {
+        'base_': 'delta_',
+        'min_level_': 'max_level_',
+    }.get(prefix, prefix)
+    return (
+        django_settings.MAX_STATISTICS.get(collection_name, {}).get(prefix, {}).get(statistic, None)
+        or default
+    )
+
+############################################################
+# Statistics formulas
+
+def memoirStatisticFormula(base, delta, level):
+    if base is None or delta is None:
+        return None
+    return base + floor((delta * (level - 1)) / 1000)
+
+def calculateMemoirStatistics(memoir):
+    for statistic in memoir.STATISTICS_FIELDS:
+        setattr(memoir, u'min_level_{}'.format(statistic), memoirStatisticFormula(
+            base=getattr(memoir, u'base_{}'.format(statistic)),
+            delta=getattr(memoir, u'delta_{}'.format(statistic)),
+            level=memoir.min_level,
+        ))
+        setattr(memoir, u'max_level_{}'.format(statistic), memoirStatisticFormula(
+            base=getattr(memoir, u'base_{}'.format(statistic)),
+            delta=getattr(memoir, u'delta_{}'.format(statistic)),
+            level=memoir.max_level,
+        ))

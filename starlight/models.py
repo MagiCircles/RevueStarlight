@@ -1048,9 +1048,8 @@ class BaseCard(MagiModel):
         return statistics_prefixes
 
     def statistic_percent(self, statistic, prefix):
-        return (
-            self.get_statistic(statistic, prefix) / getMaxStatistic(self.collection_name, statistic)
-        ) * 100
+        value = self.get_statistic(statistic, prefix)
+        return (value / getMaxStatistic(self.collection_name, statistic, prefix, default=value)) * 100
 
     def display_statistic_rank(self, statistic):
         if not getattr(self, 'cached_statistics_ranks', None):

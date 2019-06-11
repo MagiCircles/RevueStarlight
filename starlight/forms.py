@@ -24,6 +24,7 @@ from magi.utils import (
 from starlight import settings
 from starlight import models
 from starlight.utils import (
+    calculateMemoirStatistics,
     getSchoolChoices,
     getVoiceActressChoices,
     getStageGirlChoices,
@@ -538,6 +539,16 @@ class CardFilterForm(BaseCardFilterForm):
 # Memoir
 
 class MemoirForm(BaseCardForm):
+    def save(self, commit=False):
+        instance = super(MemoirForm, self).save(commit=False)
+
+        # Auto calculate min_level and max_level from base and delta
+        calculateMemoirStatistics(instance)
+
+        if commit:
+            instance.save()
+        return instance
+
     class Meta(BaseCardForm.Meta):
         model = models.Memoir
 

@@ -15,6 +15,13 @@ from magi.utils import (
     getAstrologicalSign,
 )
 from starlight import models
+from starlight.utils import (
+    calculateMemoirStatistics,
+)
+
+############################################################
+# API Import
+############################################################
 
 TO_STATISTICS = {
     'hp': 'hp',
@@ -193,6 +200,12 @@ def stageGirlCallback(details, item, unique_data, data):
     except ValueError:
         pass
 
+def memoirCallbackEnd():
+    # Auto calculate min_level and max_level from base and delta
+    for memoir in models.Memoir.objects.all():
+        calculateMemoirStatistics(memoir)
+        memoir.save()
+
 IMPORT_CONFIGURATION = OrderedDict()
 
 IMPORT_CONFIGURATION['stagegirls'] = {
@@ -222,6 +235,7 @@ IMPORT_CONFIGURATION['stagegirls'] = {
     ],
     'callback': stageGirlCallback,
 }
+
 IMPORT_CONFIGURATION['cards'] = {
     'model': models.Card,
     'unique_fields': [
@@ -286,6 +300,7 @@ IMPORT_CONFIGURATION['memoirs'] = {
         # Todo: what is this?
         'material_exp',
     ],
+    'callback_end': memoirCallbackEnd,
 }
 
 def import_data(local=False, to_import=None, log_function=print):
@@ -293,6 +308,11 @@ def import_data(local=False, to_import=None, log_function=print):
         None, IMPORT_CONFIGURATION, results_location=None,
         local=local, to_import=to_import, log_function=log_function,
     )
+
+
+############################################################
+# Local images import
+############################################################
 
 # This is a temporary feature which in the future will be
 # replaced by images downloaded directly from the API.

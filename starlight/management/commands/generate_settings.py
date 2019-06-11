@@ -116,13 +116,13 @@ def generate_settings():
     try:
         max_statistics = {
             model.collection_name: {
-                statistic: getattr(
-                    models.Card.objects.extra(select={
-                        'highest': 'CASE WHEN IFNULL(delta_{s}, 0) > IFNULL(max_level_{s}, 0) THEN delta_{s} ELSE max_level_{s} END'.format(
-                            s=statistic,
-                        )
-                    }).order_by(u'-highest')[0], 'highest')
-                for statistic in models.Card.STATISTICS_FIELDS
+                prefix: {
+                    statistic: getattr(model.objects.order_by(u'-{prefix}{statistic}'.format(
+                        prefix=prefix, statistic=statistic,
+                    ))[0], u'{prefix}{statistic}'.format(
+                        prefix=prefix, statistic=statistic,
+                    )) for statistic in model.STATISTICS_FIELDS
+                } for prefix in ['delta_', 'max_level_']
             } for model in (models.Card, models.Memoir)
         }
     except IndexError:
