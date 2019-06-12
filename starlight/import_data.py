@@ -119,17 +119,22 @@ def mapStatistics(prefix):
         }
     return _f
 
-def mapTranslatedValues(field_name):
+def mapTranslatedValues(field_name, external_japanese_field=False):
     def _f(v):
-        return {
-            field_name: v.get('en', None) or v.get('ja', None) or None,
-            u'd_{}s'.format(field_name): {
-                _l: _t for _l, _t in {
-                    'ja': v.get('ja', None) or None,
-                    'kr': v.get('ko', None) or None,
-                    'zh-hant': v.get('zh_hant', None) or None,
-                }.items() if _t } or None,
+        d = {
+            field_name: v.get('en', None),
+            u'd_{}s'.format(field_name): {},
         }
+        if v.get('ko', None):
+            d[u'd_{}s'.format(field_name)]['kr'] = unicode(v['ko'])
+        if v.get('zh_hant', None):
+            d[u'd_{}s'.format(field_name)]['zh-hant'] = unicode(v['zh_hant'])
+        if v.get('ja', None):
+            if external_japanese_field:
+                d[u'japanese_{}'.format(field_name)] = unicode(v['ja'])
+            else:
+                d[u'd_{}s'.format(field_name)]['ja'] = unicode(v['ja'])
+        return d
     return _f
 
 def updateOrCreateFk(model, new_field_name, default_name=None, transform_name=None):
@@ -153,35 +158,60 @@ def updateOrCreateFk(model, new_field_name, default_name=None, transform_name=No
         return (new_field_name, item)
     return _f
 
+def findAct(model, unique_data, data):
+    # First try to get it from the internal id
+    try:
+        return model.objects.filter(internal_id=unique_data['internal_id'])[0]
+    except IndexError:
+        pass
+    # Then from Japanese name + details
+    if data['japanese_name']:
+        filters = { k: v for k, v in data.items() if k in ['japanese_name', 'japanese_description'] }
+    # Finally from English name + details (shouldn't happen)
+    else:
+        filters = { k: v for k, v in data.items() if k in ['name', 'description'] }
+    try:
+        return model.objects.filter(**filters)[0]
+    except IndexError:
+        pass
+    return None
+
+ACT_IMPORT_CONFIGURATION = {
+    'model': models.Act,
+    'find_existing_item': findAct,
+    'unique_fields': [
+        'internal_id',
+    ],
+    'fields': [
+        'i_type',
+        'cost',
+    ],
+    'mapping': {
+        'id': 'internal_id',
+        'name': mapTranslatedValues('name', external_japanese_field=True),
+        'description': mapTranslatedValues('description', external_japanese_field=True),
+    },
+    'dont_erase_existing_value_fields': [
+        'name',
+        'japanese_name',
+        'description',
+        'japanese_description',
+    ],
+    'ignored_fields': [
+        'attribute_id', # same as card
+        'icon_id',
+        'sequence_id',
+    ],
+}
+
 def mapSkills(skills):
     added_acts = []
-    for skill_name, details in skills.items():
-        details['i_type'] = TO_SKILL_TYPE[skill_name]
-        if details['i_type']:
-            act_unique_data, act_data, not_in_fields = import_generic_item({
-                'model': models.Act,
-                'unique_fields': [
-                    'name',
-                    'description',
-                ],
-                'fields': [
-                    'i_type',
-                    'cost',
-                ],
-                'mapping': {
-                    'name': mapTranslatedValues('name'),
-                    'description': mapTranslatedValues('description'),
-                    'details': 'j_details',
-                },
-                'ignored_fields': [
-                    'id',
-                    'attribute_id', # same as card
-                    'icon_id',
-                    'sequence_id',
-                ],
-            }, details)
+    for skill_name, item in skills.items():
+        item['i_type'] = TO_SKILL_TYPE[skill_name]
+        if item['i_type']:
+            act_unique_data, act_data, not_in_fields = import_generic_item(ACT_IMPORT_CONFIGURATION, item)
             print('- Ignored:', not_in_fields)
-            item = save_item(models.Act, act_unique_data, act_data, print, unique_together=True)
+            item = save_item(ACT_IMPORT_CONFIGURATION, act_unique_data, act_data, print)
             if item:
                 added_acts.append(item)
     return ('acts', added_acts)
@@ -257,6 +287,12 @@ IMPORT_CONFIGURATION['cards'] = {
         'profile': mapTranslatedValues('profile'),
         'get_message': mapTranslatedValues('message'),
     },
+    'dont_erase_existing_value_fields': [
+        'name',
+        'description',
+        'profile',
+        'message',
+    ],
     'ignored_fields': [
         'cost', # value can be determined by rarity
 
@@ -294,6 +330,10 @@ IMPORT_CONFIGURATION['memoirs'] = {
         'profile': mapTranslatedValues('explanation'),
         'skills': mapSkills, # todo: not in JSON atm
     },
+    'dont_erase_existing_value_fields': [
+        'name',
+        'profile',
+    ],
     'ignored_fields': [
         'cost', # value can be determined by rarity
 
