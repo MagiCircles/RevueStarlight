@@ -503,10 +503,10 @@ class CardFilterForm(BaseCardFilterForm):
             return elements_to_filter
         return _f
 
-    resists_against = forms.ChoiceField(label=_('Resists against'), choices=models.ELEMENT_CHOICES)
+    resists_against = forms.ChoiceField(label=_('Effective against'), choices=models.ELEMENT_CHOICES)
     resists_against_filter = MagiFilter(selector='i_element', to_value=_against_to_value('resists', 'weak'))
 
-    weak_against = forms.ChoiceField(label=_('Weak against'), choices=models.ELEMENT_CHOICES)
+    weak_against = forms.ChoiceField(label=_('Less effective against'), choices=models.ELEMENT_CHOICES)
     weak_against_filter = MagiFilter(selector='i_element', to_value=_against_to_value('weak', 'resists'))
 
     act_hits = forms.BooleanField(label=_('Hits more than once'))

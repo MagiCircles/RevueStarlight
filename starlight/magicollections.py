@@ -966,9 +966,9 @@ class CardCollection(BaseCardCollection):
 
             # Resists / Weak
 
-            for field_name, verbose_name in [
-                    ('resists', _('Resists against')),
-                    ('weak', _('Weak against')),
+            for field_name, verbose_name, image in [
+                    ('resists', _('Effective against'), 'weak'),
+                    ('weak', _('Less effective against'), 'resists'),
             ]:
                 images = []
                 for element in getattr(item, u'elements_{}_against'.format(field_name)):
@@ -985,14 +985,14 @@ class CardCollection(BaseCardCollection):
                     })
                 if images:
                     extra_fields.append((field_name, {
-                        'image': staticImageURL(field_name, extension='png'),
+                        'image': staticImageURL(image, extension='png'),
                         'verbose_name': verbose_name,
                         'type': 'images_links',
                         'images': images,
                     }))
                 else:
                     extra_fields.append((field_name, {
-                        'image': staticImageURL(field_name, extension='png'),
+                        'image': staticImageURL(image, extension='png'),
                         'verbose_name': verbose_name,
                         'type': 'text',
                         'value': _('None'),
