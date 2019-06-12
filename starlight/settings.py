@@ -158,7 +158,7 @@ ACCOUNT_TAB_ORDERING = [
     'collectedmemoir',
 ]
 
-MAX_LEVEL_BEFORE_SCREENSHOT_REQUIRED = 50
+MAX_LEVEL_BEFORE_SCREENSHOT_REQUIRED = 70
 
 ############################################################
 # Donators
