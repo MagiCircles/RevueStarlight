@@ -217,6 +217,7 @@ class ActivityCollection(_ActivityCollection):
 # Account Collection
 
 class AccountCollection(_AccountCollection):
+    title = _('Relive account')
     navbar_link_list = 'relive'
     icon = 'trophy'
     form_class = forms.AccountForm
