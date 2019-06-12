@@ -145,12 +145,7 @@ class AccountForm(_AccountForm):
 
         # Show a button to skip adding an account for users who only care about the license
         if 'advanced' not in self.request.GET and self.is_creating:
-            self.otherbuttons = mark_safe('<a href="/" class="btn btn-link-secondary">{}</a>'.format(
-                _('I don\'t play {game}').format(
-                    game=settings.SMARTPHONE_GAME_PER_LANGUAGE.get(
-                        self.request.LANGUAGE_CODE, settings.SMARTPHONE_GAME),
-                ),
-            ))
+            self.otherbuttons = mark_safe('<a href="/" class="btn btn-link-secondary">{}</a>'.format(_('Skip')))
 
         # Fix show friend ID label to say ID
         if 'show_friend_id' in self.fields:
