@@ -88,6 +88,16 @@ class UserPreferencesForm(_UserPreferencesForm):
             for nth in range(1, 4)
         ])
 
+    def clean(self):
+        super(UserPreferencesForm, self).clean()
+        favorites = [
+            v for (k, v) in self.cleaned_data.items()
+            if k.startswith('d_extra-favorite_voiceactress') and v
+        ]
+        if favorites and len(favorites) != len(set(favorites)):
+            raise forms.ValidationError(_('All your favorites must be unique'))
+        return self.cleaned_data
+
 ############################################################
 # Activity
 
