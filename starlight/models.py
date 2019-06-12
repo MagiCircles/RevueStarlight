@@ -66,6 +66,10 @@ ALL_ALT_LANGUAGES = [
     l for l in django_settings.LANGUAGES
     if l[0] != 'en'
 ]
+ALL_ALT_LANGUAGES_EXCEPT_JAPANESE = [
+    l for l in django_settings.LANGUAGES
+    if l[0] not in ['en', 'ja']
+]
 
 ############################################################
 # Versions
@@ -736,6 +740,8 @@ class Act(MagiModel):
     collection_name = 'act'
     owner = models.ForeignKey(User, related_name='added_acts')
 
+    internal_id = models.PositiveIntegerField('Internal ID', null=True)
+
     TYPES = OrderedDict([
         ('basic', {
             'translation': _('Basic'),
@@ -766,12 +772,15 @@ class Act(MagiModel):
     TYPE_CHOICES = [(_name, _info['translation']) for _name, _info in TYPES.items()]
     i_type = models.PositiveIntegerField(_('Type'), choices=i_choices(TYPE_CHOICES))
 
-    name = models.CharField(_('Title'), max_length=100, db_index=True)
-    NAMES_CHOICES = ALL_ALT_LANGUAGES
+    name = models.CharField(_('Title'), max_length=100, db_index=True, null=True)
+    japanese_name = models.CharField(string_concat(_('Title'), ' (', t['Japanese'], ')'), max_length=100, null=True)
+    NAMES_CHOICES = ALL_ALT_LANGUAGES_EXCEPT_JAPANESE
     d_names = models.TextField(_('Title'), null=True)
 
-    description = models.CharField(_('Description'), max_length=191)
-    DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
+    description = models.CharField(_('Description'), max_length=191, null=True)
+    japanese_description = models.CharField(string_concat(
+        _('Description'), ' (', t['Japanese'], ')'), max_length=191, null=True)
+    DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES_EXCEPT_JAPANESE
     d_descriptions = models.TextField(_('Description'), null=True)
 
     m_tips = models.TextField(
@@ -812,8 +821,6 @@ class Act(MagiModel):
     display_bound_break_value = property(lambda _s: u'{}: {}%'.format(
         _('After full bound break'), _s.bound_break_value))
 
-    j_details = models.TextField(null=True)
-
     ############################################################
     # Views utils
 
@@ -844,12 +851,12 @@ class Act(MagiModel):
         return u'{}]{} {} - {}'.format(
             unicode(self.t_type)[0],
             u'🔒{}'.format(self.unlock_at_rank) if self.unlock_at_rank else '',
-            self.t_name,
-            summarize(self.t_description, max_length=(80 - len(unicode(self.t_name)))),
+            self.t_name or self.japanese_name,
+            summarize(
+                self.t_description or self.japanese_description,
+                max_length=(80 - len(unicode(self.t_name or self.japanese_name))),
+            ),
         )
-
-    class Meta(MagiModel.Meta):
-        unique_together = (('name', 'description', 'unlock_at_rank'), )
 
 ############################################################
 # Abstract: Base card
