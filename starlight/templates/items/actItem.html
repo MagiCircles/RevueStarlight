@@ -2,7 +2,7 @@
 {% if not parent_item %}
 <p><span class="label label-default">{{ act.t_type }}</span></p>
 {% endif %}
-<div class="panel panel-{% if parent_item %}{{ parent_item.element }}{% else %}default{% endif %} act act-{{ act.type }}{% if act.show_top_details %} act-with-top-details{% endif %}{% if act.unlock_at_rank %} unlock-at-rank{% endif %}">
+<div class="panel panel-{% if parent_item %}{{ parent_item.element }}{% else %}default{% endif %} act act-{{ act.type }}{% if act.show_top_details %} act-with-top-details{% endif %}{% if act.unlock_at_rank %} unlock-at-rank{% endif %}" data-act-pk="{{ act.pk }}">
   {% if act.show_title %}
   {% if act.show_top_details %}
   <div class="act-top">
@@ -14,7 +14,7 @@
   {% endif %}
   <div class="panel-heading">
     <span>
-      {{ act.t_name }}
+      {{ act.display_name }}
     </span>
   </div>
   {% endif %}
@@ -26,7 +26,7 @@
       </div>
       <div class="col-xs-10">
         {% endif %}
-        <p>{{ act.t_description }}</p>
+        <p>{{ act.display_description }}</p>
         {% if act.bound_break_value %}
         <p><strong>{{ act.display_bound_break_value }}</strong></p>
         {% endif %}

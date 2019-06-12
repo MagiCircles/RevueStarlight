@@ -37,6 +37,7 @@ from magi.utils import (
 from starlight.django_translated import t
 from starlight.utils import (
     displayNameHTML,
+    displayTextWithJapaneseFallback,
     getMaxStatistic,
     getSchoolImageFromPk,
     getSchoolNameFromPk,
@@ -843,6 +844,9 @@ class Act(MagiModel):
                 } if self.show_cost else None,
             ] if d
         ]
+
+    display_name = property(lambda _s: displayTextWithJapaneseFallback(_s, 'name', one_line=True))
+    display_description = property(lambda _s: displayTextWithJapaneseFallback(_s, 'description'))
 
     ############################################################
     # Unicode

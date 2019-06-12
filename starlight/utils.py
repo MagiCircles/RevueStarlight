@@ -4,7 +4,7 @@ from math import floor
 from django.conf import settings as django_settings
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _, string_concat
+from django.utils.translation import ugettext_lazy as _, string_concat, get_language
 from magi.utils import (
     CuteFormTransform,
     FAVORITE_CHARACTERS_IMAGES,
@@ -15,6 +15,7 @@ from magi.utils import (
     mergedFieldCuteForm,
     staticImageURL,
     tourldash,
+    translationURL,
 )
 
 ############################################################
@@ -184,3 +185,26 @@ def calculateMemoirStatistics(memoir):
             delta=getattr(memoir, u'delta_{}'.format(statistic)),
             level=memoir.max_level,
         ))
+
+############################################################
+# Translations utils
+
+def displayTextWithJapaneseFallback(item, field_name, one_line=False):
+    language = get_language()
+    if language == 'en':
+        value_in_language = getattr(item, field_name)
+    elif language == 'ja':
+        value_in_language = getattr(item, u'japanese_{}'.format(field_name))
+    else:
+        value_in_language = getattr(item, u'{}s'.format(field_name)).get(language, None)
+    if value_in_language:
+        return value_in_language
+    fallback_value = ('en', getattr(item, field_name))
+    if not fallback_value[1]:
+        fallback_value = ('ja', getattr(item, u'japanese_{}'.format(field_name)))
+    if not fallback_value[1]:
+        return ''
+    return mark_safe(translationURL(
+        fallback_value[1], from_language=fallback_value[0], to_language=language,
+        with_wrapper=True, one_line=one_line,
+    ))
