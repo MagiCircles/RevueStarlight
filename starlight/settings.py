@@ -146,24 +146,50 @@ MAX_LEVEL_BEFORE_SCREENSHOT_REQUIRED = 70
 # Activities
 
 ACTIVITY_TAGS = [
+    # Revue Starlight
     ('revuestarlight', lambda: LICENSE_NAME_PER_LANGUAGE.get(get_language(), LICENSE_NAME)),
+    ('stagegirls', _('Stage girls')),
+    ('voiceactresses', _('Voice actresses')),
+    ('anime', lambda: u'{} / {} / {} ({})'.format(
+        _('Anime'),
+        _('Manga'),
+        _('Movie'),
+        LICENSE_NAME_PER_LANGUAGE.get(get_language(), LICENSE_NAME),
+    )),
+    ('irlevent', lambda: u'{} / {} ({})'.format(
+        _('Meetups'),
+        _('Events'),
+        LICENSE_NAME_PER_LANGUAGE.get(get_language(), LICENSE_NAME),
+    )),
+
+    # Relive
     ('relive', lambda: SMARTPHONE_GAME_PER_LANGUAGE.get(get_language(), SMARTPHONE_GAME)),
+    ('cards', _('Cards')),
+    ('gacha', _('Gacha')),
+    ('event', lambda: u'{} ({})'.format(
+        _('Events'),
+        SMARTPHONE_GAME_PER_LANGUAGE.get(get_language(), SMARTPHONE_GAME),
+    )),
+    ('mytheater', _('My theater')),
+    ('song', _('Songs')),
+] + [
+    (_version, _details['translation'])
+    for _version, _details in models.VERSIONS.items()
+] + [
+
+    # Community
+    ('introduction', _('Introduce yourself')),
     ('comedy', _('Comedy')),
     ('meme', _('Meme')),
-    ('cards', _('Cards')),
-    ('scout', _('Scouting')),
-    ('event', _('Event')),
-    ('song', _('Songs')),
-    ('introduction', _('Introduce yourself')),
-    ('members', _('Characters')),
     ('birthday', _('Birthday')),
-    ('anime', string_concat(_('Anime'), ' / ', _('Manga'))),
     ('cosplay', _('Cosplay')),
     ('fanart', _('Fanart')),
     ('edit', _('Graphic edit')),
     ('merch', _('Merchandise')),
     ('community', _('Community')),
     ('question', _('Question')),
+
+    # Restricted / meta
     ('staff', {
         'translation': _('News'),
         'has_permission_to_add': lambda r: r.user.is_staff and r.user.hasPermission('mark_activities_as_staff_pick'),
