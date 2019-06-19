@@ -362,10 +362,12 @@ class VoiceActress(MagiModel):
     m_description = models.TextField(_('Description'), null=True)
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_descriptions = models.TextField(_('Description'), null=True)
+    _cache_description = models.TextField(null=True)
 
     m_staff_description = models.TextField(_('Message'), null=True, help_text='Only visible in staff list.')
     M_STAFF_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_staff_descriptions = models.TextField(_('Message'), null=True, help_text='Only visible in staff list.')
+    _cache_staff_description = models.TextField(null=True)
 
     video = YouTubeVideoField(_('Video'), null=True)
 
@@ -423,7 +425,7 @@ class VoiceActressLink(MagiModel):
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Platform'), null=True)
 
-    url = models.CharField(_('URL'), max_length=191)
+    url = models.URLField(_('URL'), max_length=191)
 
     ############################################################
     # Views utils
@@ -457,6 +459,7 @@ class School(MagiModel):
     m_description = models.TextField(_('Description'), null=True)
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_descriptions = models.TextField(_('Description'), null=True)
+    _cache_description = models.TextField(null=True)
 
     ############################################################
     # Reverse relations
@@ -590,6 +593,7 @@ class StageGirl(MagiModel):
     m_description = models.TextField(_('Description'), null=True)
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_descriptions = models.TextField(_('Description'), null=True)
+    _cache_description = models.TextField(null=True)
 
     video = YouTubeVideoField(_('Video'), null=True)
 
@@ -716,6 +720,7 @@ class Staff(MagiModel):
     m_description = models.TextField(_('Message'), null=True)
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_m_descriptions = models.TextField(_('Message'), null=True)
+    _cache_description = models.TextField(null=True)
 
     ############################################################
     # Views utils
@@ -790,6 +795,7 @@ class Act(MagiModel):
     )
     M_TIPSS_CHOICES = ALL_ALT_LANGUAGES
     d_m_tipss = models.TextField(_('Tips'), null=True)
+    _cache_tips = models.TextField(null=True)
 
     image = models.ImageField(_('Image'), upload_to=uploadItem('act'), null=True)
     _original_image = models.ImageField(null=True, upload_to=uploadTiny('act'))
@@ -944,6 +950,7 @@ class BaseCard(MagiModel):
     )
     M_TIPSS_CHOICES = ALL_ALT_LANGUAGES
     d_m_tipss = models.TextField(_('Tips'), null=True)
+    _cache_tips = models.TextField(null=True)
 
     ############################################################
     # Images
