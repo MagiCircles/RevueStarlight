@@ -3,7 +3,7 @@ from django import forms
 from django.core.validators import MaxValueValidator
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, get_language
 from magi.forms import (
     AutoForm,
     MagiFilter,
@@ -21,8 +21,14 @@ from magi.utils import (
     getStaffConfiguration,
     PastOnlyValidator,
 )
-from starlight import settings
 from starlight import models
+from starlight.raw import (
+    LICENSE_NAME,
+    LICENSE_NAME_PER_LANGUAGE,
+    SMARTPHONE_GAME,
+    SMARTPHONE_GAME_PER_LANGUAGE,
+)
+from starlight import settings
 from starlight.utils import (
     calculateMemoirStatistics,
     getSchoolChoices,
@@ -135,6 +141,32 @@ class NewsForm(_ActivityForm):
 
 class NewsFilterForm(_ActivityFilterForm):
     ordering_fields = None
+
+    show_presets_in_navbar = False
+    presets = OrderedDict([
+        ('revuestarlight', {
+            'verbose_name': lambda: LICENSE_NAME_PER_LANGUAGE.get(get_language(), LICENSE_NAME),
+            'fields': {
+                'c_tags': 'revuestarlight',
+            },
+            'image': u'revuestarlight_icon.png',
+            'label': lambda: u'{} {}'.format(
+                LICENSE_NAME_PER_LANGUAGE.get(get_language(), LICENSE_NAME),
+                _('News').lower(),
+            ),
+        }),
+        ('relive', {
+            'verbose_name': lambda: SMARTPHONE_GAME_PER_LANGUAGE.get(get_language(), SMARTPHONE_GAME),
+            'fields': {
+                'c_tags': 'relive',
+            },
+            'image': u'relive_icon.png',
+            'label': lambda: u'{} {}'.format(
+                SMARTPHONE_GAME_PER_LANGUAGE.get(get_language(), SMARTPHONE_GAME),
+                _('News').lower(),
+            ),
+        }),
+    ])
 
     def __init__(self, *args, **kwargs):
         super(NewsFilterForm, self).__init__(*args, **kwargs)

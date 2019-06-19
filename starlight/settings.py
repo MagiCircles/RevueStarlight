@@ -17,16 +17,15 @@ from magi.default_settings import (
     DEFAULT_NAVBAR_ORDERING,
     DEFAULT_PRELAUNCH_ENABLED_PAGES,
 )
+from starlight.raw import *
 from starlight.utils import starlightGlobalContext
 from starlight import models
 
 ############################################################
 # License, game and site settings
 
-SITE_NAME = 'Starlight Academy'
-LICENSE_NAME = 'Revue Starlight'
-GAME_NAME = LICENSE_NAME
-SMARTPHONE_GAME = 'ReLIVE'
+SITE_NAME = SITE_NAME
+GAME_NAME = GAME_NAME
 
 # todo GAME_DESCRIPTION = ''
 # todo GAME_URL = ''
@@ -64,29 +63,7 @@ EMPTY_IMAGE = 'empty_crown.png'
 ############################################################
 # Settings per languages
 
-SITE_NAME_PER_LANGUAGE = {
-    'ja': u'スタァライト アカデミー',
-    'kr': u'스타라이트 아카데미',
-    'zh-hant': u'星光學院',
-}
-
-GAME_NAME_PER_LANGUAGE = {
-    'ja': u'少女☆歌劇 レヴュースタァライト',
-    'kr': u'소녀가극 레뷰 스타라이트',
-    'zh-hant': u'少女☆歌劇 Revue Starlight',
-}
-
-LICENSE_NAME_PER_LANGUAGE = {
-    'ja': u'レヴュースタァライト',
-    'kr': u'레뷰 스타라이트',
-    'zh-hant': u'Revue Starlight',
-}
-
-SMARTPHONE_GAME_PER_LANGUAGE = {
-    'ja': 'Re LIVE',
-    'kr': u'스타리라',
-    'zh-hant': 'Relive',
-}
+SITE_NAME_PER_LANGUAGE = SITE_NAME_PER_LANGUAGE
 
 SITE_LOGO_PER_LANGUAGE = {
     'ja': 'starlight_academy_logo_japanese.png',
@@ -268,7 +245,7 @@ ENABLED_PAGES['about_revuestarlight'] = {
 
 ENABLED_PAGES['news_revuestarlight'] = {
     'title': _('News'),
-    'redirect': '/news/?c_tags=revuestarlight',
+    'redirect': '/news/revuestarlight/',
     'icon': 'new',
     'navbar_link_list': 'revuestarlight',
     'divider_before': True,
@@ -292,7 +269,7 @@ ENABLED_PAGES['about_relive'] = {
 
 ENABLED_PAGES['news_relive'] = {
     'title': _('News'),
-    'redirect': '/news/?c_tags=relive',
+    'redirect': '/news/relive/',
     'icon': 'new',
     'navbar_link_list': 'relive',
     'divider_before': True,

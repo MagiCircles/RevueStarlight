@@ -110,6 +110,8 @@ class UserCollection(_UserCollection):
 class NewsCollection(_ActivityCollection):
     queryset = _ActivityCollection.queryset.filter(c_tags__contains='"staff"')
     plural_name = 'news'
+    title = _('News')
+    plural_title = _('News')
 
     def buttons_per_item(self, view, *args, **kwargs):
         buttons = super(NewsCollection, self).buttons_per_item(view, *args, **kwargs)
