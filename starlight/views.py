@@ -2,13 +2,17 @@ from django.conf import settings as django_settings
 from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from magi.views import (
+    custom_wiki,
     settingsContext,
 )
 from magi.utils import (
     cuteFormFieldsForContext,
     ordinalNumber,
 )
-from starlight.settings import MAIN_SITE_URL
+from starlight.settings import (
+    MAIN_SITE_URL,
+    WIKI,
+)
 from starlight.utils import (
     getVoiceActressThumbnailFromPk,
 )
@@ -25,6 +29,12 @@ from starlight.utils import (
 def index(request):
     return redirect('/prelaunch/')
     # todo when prelaunch ends return redirect(MAIN_SITE_URL)
+
+############################################################
+# Wiki
+
+def wiki(request, wiki_url='_Sidebar'):
+    return custom_wiki(WIKI, _('Wiki'), request, wiki_url)
 
 ############################################################
 # Settings

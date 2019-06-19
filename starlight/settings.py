@@ -82,6 +82,7 @@ CONTACT_REDDIT = 'Ragefire2b'
 
 FEEDBACK_FORM = 'https://forms.gle/6aRWq6zNhPBz9UGHA'
 GITHUB_REPOSITORY = ('MagiCircles', 'RevueStarlight')
+WIKI = GITHUB_REPOSITORY
 
 TWITTER_HANDLE = 'r_starlight_en'
 HASHTAGS = ['スタァライト', 'RevueStarlight', 'Starira', 'RevueStarlightReLIVE']
@@ -249,6 +250,7 @@ ENABLED_PAGES = DEFAULT_ENABLED_PAGES.copy()
 
 # Enable wiki for relive
 ENABLED_PAGES['wiki'][0]['enabled'] = True
+ENABLED_PAGES['wiki'][0]['custom'] = True
 ENABLED_PAGES['wiki'][1]['enabled'] = True
 ENABLED_PAGES['wiki'][0]['divider_before'] = True
 ENABLED_PAGES['wiki'][0]['navbar_link_list'] = 'relive'
@@ -261,9 +263,9 @@ def _externalLinkIcon(title):
 
 # Redirect to main site for some non-migrated pages
 ENABLED_PAGES['about_revuestarlight'] = {
-    'title': lambda _l: _externalLinkIcon(_('About {thing}').format(thing=LICENSE_NAME_PER_LANGUAGE.get(
-        get_language(), LICENSE_NAME))),
-    'redirect': u'{}what-is-revue-starlight/'.format(MAIN_SITE_URL),
+    'title': lambda _l: _('About {thing}').format(thing=LICENSE_NAME_PER_LANGUAGE.get(
+        get_language(), LICENSE_NAME)),
+    'redirect': '/wiki/About%20Revue%20Starlight/',
     'icon': 'about',
     'navbar_link_list': 'revuestarlight',
     'divider_after': True,
@@ -285,9 +287,9 @@ ENABLED_PAGES['lyrics'] = {
 }
 
 ENABLED_PAGES['about_relive'] = {
-    'title': lambda _l: _externalLinkIcon(_('About {thing}').format(thing=SMARTPHONE_GAME_PER_LANGUAGE.get(
-        get_language(),SMARTPHONE_GAME))),
-    'redirect': u'{}relive_wiki/Beginner%27s_Guide'.format(MAIN_SITE_URL),
+    'title': lambda _l: _('About {thing}').format(thing=SMARTPHONE_GAME_PER_LANGUAGE.get(
+        get_language(),SMARTPHONE_GAME)),
+    'redirect': '/wiki/Get%20started%20with%20Relive/',
     'icon': 'about',
     'navbar_link_list': 'relive',
     'divider_after': True,
