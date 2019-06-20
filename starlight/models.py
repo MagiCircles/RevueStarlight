@@ -370,6 +370,11 @@ class VoiceActress(MagiModel):
     _cache_staff_description = models.TextField(null=True)
 
     video = YouTubeVideoField(_('Video'), null=True)
+    VIDEOS_CHOICES = ALL_ALT_LANGUAGES
+    d_videos = models.TextField(
+        _('Video'), null=True,
+        help_text='Enter a valid YouTube URL with format: https://www.youtube.com/watch?v=xxxxxxxxxxx',
+    )
 
     birthday_banner = models.ImageField(upload_to=uploadItem('voiceactress/birthday'), null=True)
     _original_birthday_banner = models.ImageField(null=True, upload_to=uploadTiny('voiceactress/birthday'))
@@ -596,6 +601,11 @@ class StageGirl(MagiModel):
     _cache_description = models.TextField(null=True)
 
     video = YouTubeVideoField(_('Video'), null=True)
+    VIDEOS_CHOICES = ALL_ALT_LANGUAGES
+    d_videos = models.TextField(
+        _('Video'), null=True,
+        help_text='Enter a valid YouTube URL with format: https://www.youtube.com/watch?v=xxxxxxxxxxx',
+    )
 
     birthday_banner = models.ImageField(upload_to=uploadItem('stagegirl/birthday'), null=True)
     _original_birthday_banner = models.ImageField(null=True, upload_to=uploadTiny('stagegirl/birthday'))

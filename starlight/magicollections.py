@@ -316,7 +316,14 @@ class VoiceActressCollection(MainItemCollection):
     navbar_link_list = 'revuestarlight'
     navbar_link_title = _('Cast')
     icon = 'voice-actress'
-    translated_fields = ('name', 'specialty', 'hobbies', 'm_description', 'm_staff_description')
+    translated_fields = [
+        'name',
+        'specialty',
+        'hobbies',
+        'm_description',
+        'm_staff_description',
+        'video',
+    ]
 
     fields_icons = {
         'name': 'id',
@@ -461,6 +468,7 @@ class StageGirlCollection(MainItemCollection):
         'hobbies',
         'introduction',
         'm_description',
+        'video',
     ]
 
     fields_icons = {
