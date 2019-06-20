@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import cStringIO, csv, datetime, html2text, requests, time
+import cStringIO, csv, datetime, html2text, requests, time, urllib
 from collections import OrderedDict
 from django.conf import settings as django_settings
 from django.utils import timezone
@@ -938,7 +938,7 @@ def _upload_to_imgur(url, title=''):
 	},
         data={
             'type': 'URL',
-	    'image': url,
+	    'image': urllib.quote(url, safe=':/'),
 	    'title': title,
 	},
     )
@@ -952,15 +952,15 @@ def _replace_images(markdown):
         if i != 0 and len(part) > 3:
             title = part.split('](')[0]
             url = part.split('](')[1].split(')')[0]
-            print('    Imgur upload', url)
-            imgur_url = _upload_to_imgur(url, title)
-            print('      ->', imgur_url)
-            markdown = markdown.replace(url, imgur_url)
-            time.sleep(5)
+            if not url.startswith('//i.starlight.academy/'):
+                print('    Imgur upload', url)
+                imgur_url = _upload_to_imgur(url, title)
+                print('      ->', imgur_url)
+                markdown = markdown.replace(url, imgur_url)
+                time.sleep(5)
     return markdown
 
 def import_news(args):
-
     author_username = 'Revue_EN'
     try:
         author = models.User.objects.filter(username=author_username)[0]
