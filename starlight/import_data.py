@@ -81,9 +81,9 @@ TO_ATTRIBUTES = {
     1: 'flower',
     2: 'wind',
     3: 'snow',
-    4: 'cloud',
-    5: 'moon',
-    6: 'space',
+    4: 'moon',
+    5: 'space',
+    6: 'cloud',
     7: 'dream',
 }
 
