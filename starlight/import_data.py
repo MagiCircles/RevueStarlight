@@ -938,7 +938,7 @@ def _upload_to_imgur(url, title=''):
 	},
         data={
             'type': 'URL',
-	    'image': urllib.quote(url, safe=':/'),
+	    'image': urllib.quote(url.encode('utf8'), safe=':/'),
 	    'title': title,
 	},
     )
