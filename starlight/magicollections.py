@@ -628,7 +628,7 @@ class SongCollection(MainItemCollection):
     navbar_link_title = string_concat(_('Discography'), ' / ', _('Lyrics'))
     icon = 'song'
 
-    translated_fields = ('name', 'composer', 'lyricist', 'arranger', 'm_lyrics')
+    translated_fields = ['name', 'm_lyrics'] + models.Song.CREDITS_FIELDS
 
     filter_cuteform = {}
     mergeSingersCuteForm(filter_cuteform)
@@ -644,10 +644,8 @@ class SongCollection(MainItemCollection):
         'romaji_lyrics': 'list',
         'singers': 'voice-actress',
         'buy_url': 'shop',
-        'lyricist': 'id',
-        'composer': 'id',
-        'arranger': 'id',
     }
+    fields_icons.update({ _f: 'id' for _f in models.Song.CREDITS_FIELDS })
 
     def to_fields(self, view, item, *args, **kwargs):
         fields = super(SongCollection, self).to_fields(view, item, *args, **kwargs)
@@ -663,6 +661,8 @@ class SongCollection(MainItemCollection):
         default_ordering = '-release_date'
         filter_form = forms.SongFilterForm
         show_items_names = True
+        per_line = 4
+        page_size = 24
 
     class ItemView(MainItemCollection.ItemView):
         ajax_callback = 'loadSong'

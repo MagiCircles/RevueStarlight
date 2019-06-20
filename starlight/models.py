@@ -792,6 +792,14 @@ class Song(MagiModel):
     ARRANGERS_CHOICES = NON_LATIN_LANGUAGES
     d_arrangers = models.TextField(_('Arranger'), null=True)
 
+    orchestral_arrangement = models.CharField(_('Orchestral arrangement'), max_length=100, null=True)
+    ORCHESTRAL_ARRANGEMENTS_CHOICES = NON_LATIN_LANGUAGES
+    d_orchestral_arrangements = models.TextField(_('Orchestral arrangement'), null=True)
+
+    CREDITS_FIELDS = [
+        'composer', 'lyricist', 'arranger', 'orchestral_arrangement',
+    ]
+
     ############################################################
     # Lyrics
 

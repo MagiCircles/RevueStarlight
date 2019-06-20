@@ -221,7 +221,7 @@ def mapSkills(skills):
         if item['i_type']:
             act_unique_data, act_data, not_in_fields = import_generic_item(ACT_IMPORT_CONFIGURATION, item)
             print('- Ignored:', not_in_fields)
-            item = save_item(ACT_IMPORT_CONFIGURATION, act_unique_data, act_data, print)
+            item = save_item(ACT_IMPORT_CONFIGURATION, act_unique_data, act_data, print, json_item=item)
             if item:
                 added_acts.append(item)
     return ('acts', added_acts)
@@ -245,6 +245,109 @@ def memoirCallbackEnd():
     for memoir in models.Memoir.objects.all():
         calculateMemoirStatistics(memoir)
         memoir.save()
+
+TO_SONG_CREDIT = {
+    'en': {
+        'Written by': ['lyricist'],
+        'Composed and arranged by': ['composer', 'lyricist'],
+        'Composed by': ['composer'],
+        'Arranged by': ['arranger'],
+        'Orchestral arrangement': ['orchestral_arrangement'],
+    },
+    'ko': {
+        u'작사': ['lyricist'],
+        u'작곡/편곡': ['composer', 'lyricist'],
+        u'작곡': ['composer'],
+        u'편곡': ['arranger'],
+        u'오케스트라 편곡': ['orchestral_arrangement'],
+    },
+    'zh_hant': {
+        u'作詞': ['lyricist'],
+        u'作曲/編曲': ['composer', 'lyricist'],
+        u'作詞/編曲': ['arranger', 'lyricist'],
+        u'作曲': ['composer'],
+        u'編曲': ['arranger'],
+        u'管弦樂版本': ['orchestral_arrangement'],
+    },
+    'ja': {
+        u'作詞': ['lyricist'],
+        u'作曲/編曲': ['composer', 'lyricist'],
+        u'作曲': ['composer'],
+        u'編曲': ['arranger'],
+        u'オーケストラアレンジ': ['orchestral_arrangement'],
+    },
+}
+
+TO_LANGUAGE_FIELD = {
+    'ko': 'kr',
+    'zh_hant': 'zh-hant',
+    'ja': 'ja',
+}
+
+def songCredits(value):
+    data = {
+        u'd_{}s'.format(field_name): {}
+        for field_name in models.Song.CREDITS_FIELDS
+    }
+    data['singers'] = []
+
+    for language, description in value.items():
+        if not description.strip():
+            continue
+        singers, credits = description.split('\n\n')
+
+        if language == 'en':
+            for singer in singers.split('\n')[1:]:
+                voice_actress_name = singer.split('(')[1].split(')')[0].strip()
+                voice_actress_name = TO_VOICE_ACTRESS.get(voice_actress_name, voice_actress_name)
+                voice_actress_name_reversed = u' '.join(reversed(voice_actress_name.split(' ')))
+                try:
+                    voice_actress = models.VoiceActress.objects.filter(name=voice_actress_name_reversed)[0]
+                except IndexError:
+                    voice_actress = models.VoiceActress.objects.filter(name=voice_actress_name)[0]
+                if voice_actress:
+                    if 'singers' not in data:
+                        data['singers'] = []
+                    data['singers'].append(voice_actress)
+
+        if language == 'ja' and not value.get('en', '').strip():
+            for singer in singers.split('\n')[1:]:
+                voice_actress_name = singer.split(u'（')[1].split(u'）')[0].strip()
+                voice_actress_name_reversed = u' '.join(reversed(voice_actress_name.split(' ')))
+                for va_pk, va in django_settings.VOICE_ACTRESSES.items():
+                    if va['names'].get('ja', None) in [voice_actress_name, voice_actress_name_reversed]:
+                        voice_actress = models.VoiceActress.objects.filter(pk=va_pk)[0]
+                if voice_actress:
+                    if 'singers' not in data:
+                        data['singers'] = []
+                    data['singers'].append(voice_actress)
+
+        credits = credits.replace(u'：', ':')
+
+        for title in TO_SONG_CREDIT[language].keys():
+            credits = credits.replace(u'{}{}:'.format(
+                u'　' if language in ['zh_hant', 'ja'] else ' ',
+                title,
+            ), u'\n{}:'.format(title))
+        credits = credits.replace(u'오케스트라\n편곡', u'오케스트라 편곡')
+
+        for credit in credits.split('\n'):
+            title, name = credit.split(':')
+            title = title.strip()
+            name = name.strip().replace(' and ', ', ')
+            if name.endswith('.'):
+                name = name[:-1]
+            for field_name in TO_SONG_CREDIT[language][title]:
+                if language == 'en':
+                    data[field_name] = name
+                else:
+                    data[u'd_{}s'.format(field_name)][TO_LANGUAGE_FIELD[language]] = name
+    return data
+
+def songCallbackAfterSave(details, item, json_item):
+    path = u'starlight/static/extracts/revue3/27_{}.png'.format(json_item['id'])
+    saveLocalImageToModel(item, 'image', path)
+    item.save()
 
 IMPORT_CONFIGURATION = OrderedDict()
 
@@ -351,6 +454,18 @@ IMPORT_CONFIGURATION['memoirs'] = {
         'material_exp',
     ],
     'callback_end': memoirCallbackEnd,
+}
+
+IMPORT_CONFIGURATION['songs'] = {
+    'model': models.Song,
+    'unique_fields': [
+        'name',
+    ],
+    'mapping': {
+        'name': mapTranslatedValues('name'),
+        'description': songCredits,
+    },
+    'callback_after_save': songCallbackAfterSave,
 }
 
 def import_data(local=False, to_import=None, log_function=print):
