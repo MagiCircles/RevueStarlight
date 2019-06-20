@@ -659,7 +659,7 @@ class StageGirl(MagiModel):
 
     @property
     def display_section_header(self):
-        return mark_safe(u'<a href="{url}" data-ajax-url="{ajax_url}" data-ajax-title="{title}"><img src="{image}" alt="{title}" height="50"> {title}'.format(
+        return mark_safe(u'<a href="{url}" data-ajax-url="{ajax_url}" data-ajax-title="{title}" class="a-nodifference"><img src="{image}" alt="{title}" height="50"> {title}'.format(
             image=getSchoolImageFromPk(self.school_id),
             title=getSchoolNameFromPk(self.school_id),
             url=getSchoolURLFromPk(self.school_id),
