@@ -3,7 +3,7 @@ from django import forms
 from django.core.validators import MaxValueValidator
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _, get_language
+from django.utils.translation import ugettext_lazy as _, get_language, string_concat
 from magi.forms import (
     AutoForm,
     MagiFilter,
@@ -350,6 +350,54 @@ class StageGirlFilterForm(MagiFiltersForm):
             'i_astrological_sign',
             'ordering', 'reverse_order',
         ]
+
+############################################################
+# Song
+
+class SongFilterForm(MagiFiltersForm):
+    search_fields = [
+        'name', 'd_names', 'romaji_name',
+        'm_lyrics', 'm_japanese_lyrics', 'd_m_lyricss', 'm_romaji_lyrics',
+    ]
+
+    ordering_fields = [
+        ('release_date', _('Release date')),
+        ('name', _('Title')),
+        ('romaji_name', string_concat(_('Title'), ' (', _('Romaji'), ')')),
+        ('length', _('Length')),
+        ('bpm', _('BPM')),
+    ]
+
+    merge_fields = {
+        'singer': {
+            'fields': OrderedDict([
+                ('singers', {
+                    'choices': lambda: getVoiceActressChoices(),
+                }),
+                ('stage_girl', {
+                    'choices': lambda: getStageGirlChoices(),
+                }),
+                ('school', {
+                    'choices': lambda: getSchoolChoices(),
+                }),
+            ]),
+            'label': _('Singers'),
+        },
+    }
+
+    stage_girl = forms.ChoiceField()
+    stage_girl_filter = MagiFilter(selector='singers__stagegirls')
+
+    school = forms.ChoiceField()
+    school_filter = MagiFilter(selector='singers__stagegirls__school', distinct=True)
+
+    class Meta(MagiFiltersForm.Meta):
+        model = models.Song
+        fields = (
+            'search',
+            'singers',
+            'ordering', 'reverse_order',
+        )
 
 ############################################################
 ############################################################

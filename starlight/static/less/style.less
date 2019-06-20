@@ -203,6 +203,22 @@ html {
     max-width: 11%;
 }
 
+/* Song */
+
+.item-info.song-info [data-field$="lyrics"] .long-text-value {
+    img {
+        display: inline-block;
+        height: 30px;
+        margin: -10px 0;
+    }
+}
+
+[data-form-name="add_song"], [data-form-name="edit_song"] {
+    [id^="id_"][id$="lyrics"] {
+        height: 800px;
+    }
+}
+
 /* Card and memoir */
 
 [data-cuteform-name="id_i_rarity"] .cuteform-elt:not([data-cuteform-val=""]) {

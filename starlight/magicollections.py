@@ -35,6 +35,7 @@ from starlight.utils import (
     getVoiceActressThumbnailFromPk,
     getVoiceActressURLFromPk,
     mergeSchoolStageGirlCuteForm,
+    mergeSingersCuteForm,
 )
 from starlight import models, forms
 
@@ -337,6 +338,7 @@ class VoiceActressCollection(MainItemCollection):
         'links': 'url',
         'video': 'film',
         'fans': 'heart',
+        'songs': 'song',
     }
 
     fields_images = {
@@ -378,7 +380,7 @@ class VoiceActressCollection(MainItemCollection):
 
     class ItemView(MainItemCollection.ItemView):
         fields_prefetched = ['stagegirls']
-        fields_prefetched_together = ['links']
+        fields_prefetched_together = ['links', 'songs']
         fields_exclude = ['m_staff_description', 'birthday_banner']
         comments_enabled = False
 
@@ -619,13 +621,63 @@ class StaffCollection(MainItemCollection):
 # Song Collection
 
 class SongCollection(MainItemCollection):
-    enabled = False
-    queryset = models.Account.objects.all() # todo
+    queryset = models.Song.objects.all()
     title = _('Song')
     plural_title = _('Songs')
     navbar_link_list = 'revuestarlight'
-    navbar_link_title = _('Discography')
-    icon = 'album'
+    navbar_link_title = string_concat(_('Discography'), ' / ', _('Lyrics'))
+    icon = 'song'
+
+    translated_fields = ('name', 'composer', 'lyricist', 'arranger', 'm_lyrics')
+
+    filter_cuteform = {}
+    mergeSingersCuteForm(filter_cuteform)
+
+    fields_icons = {
+        'name': 'song',
+        'itunes_id': 'play',
+        'length': 'times',
+        'bpm': 'hp',
+        'release_date': 'date',
+        'lyrics': 'translate',
+        'japanese_lyrics': 'list',
+        'romaji_lyrics': 'list',
+        'singers': 'voice-actress',
+        'buy_url': 'shop',
+        'lyricist': 'id',
+        'composer': 'id',
+        'arranger': 'id',
+    }
+
+    def to_fields(self, view, item, *args, **kwargs):
+        fields = super(SongCollection, self).to_fields(view, item, *args, **kwargs)
+
+        # Buy URL labels
+        label = _('Buy {thing}').format(thing=_('CD'))
+        setSubField(fields, 'buy_url', key='link_text', value=label)
+        setSubField(fields, 'buy_url', key='verbose_name', value=label)
+
+        return fields
+
+    class ListView(MainItemCollection.ListView):
+        default_ordering = '-release_date'
+        filter_form = forms.SongFilterForm
+        show_items_names = True
+
+    class ItemView(MainItemCollection.ItemView):
+        ajax_callback = 'loadSong'
+
+        fields_prefetched_together = ['singers']
+
+        fields_exclude = [
+            'romaji_name',
+        ]
+
+    class AddView(MainItemCollection.AddView):
+        savem2m = True
+
+    class EditView(MainItemCollection.EditView):
+        savem2m = True
 
 ############################################################
 ############################################################

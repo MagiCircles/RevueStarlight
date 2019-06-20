@@ -13,6 +13,7 @@ from magi.default_settings import (
     DEFAULT_ENABLED_PAGES,
     DEFAULT_EXTRA_PREFERENCES,
     DEFAULT_HOME_ACTIVITY_TABS,
+    DEFAULT_JAVASCRIPT_TRANSLATED_TERMS,
     DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
     DEFAULT_NAVBAR_ORDERING,
     DEFAULT_PRELAUNCH_ENABLED_PAGES,
@@ -232,6 +233,12 @@ USER_COLORS = [
     for _element, _details in models.ELEMENTS.items()
 ]
 
+JAVASCRIPT_TRANSLATED_TERMS = DEFAULT_JAVASCRIPT_TRANSLATED_TERMS + [
+    'Lyrics',
+    'Open {thing}',
+    'Close',
+]
+
 ############################################################
 # From settings or generated_settings
 
@@ -277,13 +284,6 @@ ENABLED_PAGES['news_revuestarlight'] = {
     'icon': 'new',
     'navbar_link_list': 'revuestarlight',
     'divider_before': True,
-}
-
-ENABLED_PAGES['lyrics'] = {
-    'title': lambda _l: _externalLinkIcon(_('Lyrics')),
-    'redirect': u'{}category/lyrics/'.format(MAIN_SITE_URL),
-    'icon': 'music',
-    'navbar_link_list': 'revuestarlight',
 }
 
 ENABLED_PAGES['about_relive'] = {

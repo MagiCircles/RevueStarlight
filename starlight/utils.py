@@ -41,8 +41,33 @@ def displayNames(item):
         ] if name
     ])
 
-def displayNameHTML(item):
-    names = displayNames(item)
+def displayNamesRomajiFirst(item):
+    """
+    Returns the list of displayable names from an item, with priority to romaji is exists
+    """
+    language = get_language()
+    if language == 'ja':
+        names = [
+            item.japanese_name or item.name,
+        ]
+    elif language in ['kr', 'zh-hant', 'zh-hans']:
+        names = [
+            item.japanese_name or item.name,
+            item.names.get(language, None),
+        ]
+    else:
+        names = [
+            item.romaji_name or item.name,
+            unicode(item.t_name),
+            item.names.get('ja', None),
+        ]
+    return listUnique([name for name in names if name])
+
+def displayNameHTML(item, romaji_first=False):
+    if romaji_first:
+        names = displayNamesRomajiFirst(item)
+    else:
+        names = displayNames(item)
     if not names:
         return ''
     return mark_safe(u'<span>{}</span>{}'.format(
@@ -93,7 +118,7 @@ def getVoiceActressNameFromPk(pk):
     return getTranslatedName(django_settings.VOICE_ACTRESSES[int(pk)])
 
 def getVoiceActressThumbnailFromPk(pk):
-    return django_settings.VOICE_ACTRESSES[int(pk)]['thumbnail']
+    return django_settings.VOICE_ACTRESSES[int(pk)]['thumbnail'] or staticImageURL('default/default.png')
 
 def getVoiceActressURLFromPk(pk):
     voiceactress = django_settings.VOICE_ACTRESSES[int(pk)]
@@ -151,6 +176,19 @@ def mergeSchoolStageGirlCuteForm(filter_cuteform):
         ('school', lambda k, v: getSchoolImageFromPk(k)),
         ('stage_girl', lambda k, v: getStageGirlImageFromPk(int(k))),
     ]))
+
+def mergeSingersCuteForm(filter_cuteform):
+    mergedFieldCuteForm(filter_cuteform, {
+        'title': _('Singers'),
+        'extra_settings': {
+            'modal': 'true',
+            'modal-text': 'true',
+        },
+    }, OrderedDict ([
+        ('singers', lambda k, v: getVoiceActressThumbnailFromPk(int(k))),
+        ('stage_girl', lambda k, v: getStageGirlImageFromPk(int(k))),
+        ('school', lambda k, v: getSchoolImageFromPk(k)),
+    ]), merged_field_name='singer')
 
 ############################################################
 # Max statistics

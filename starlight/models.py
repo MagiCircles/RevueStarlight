@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
+import time
 from collections import OrderedDict
 from django.conf import settings as django_settings
 from django.contrib.auth.models import User
@@ -37,6 +38,7 @@ from magi.utils import (
 from starlight.django_translated import t
 from starlight.utils import (
     displayNameHTML,
+    displayNamesRomajiFirst,
     displayTextWithJapaneseFallback,
     getMaxStatistic,
     getSchoolImageFromPk,
@@ -385,6 +387,7 @@ class VoiceActress(MagiModel):
     reverse_related = [
         { 'field_name': 'stagegirls', 'verbose_name': _('Stage girl') },
         { 'field_name': 'links', 'verbose_name': _('Social media'), 'max_per_line': None },
+        { 'field_name': 'songs', 'verbose_name': _('Songs') },
         {
             'field_name': 'fans',
             'url': 'users',
@@ -430,7 +433,7 @@ class VoiceActressLink(MagiModel):
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Platform'), null=True)
 
-    url = models.URLField(_('URL'), max_length=191)
+    url = models.URLField('URL', max_length=191)
 
     ############################################################
     # Views utils
@@ -742,6 +745,95 @@ class Staff(MagiModel):
 
     def __unicode__(self):
         return self.t_name
+
+############################################################
+# Song
+
+class Song(MagiModel):
+    collection_name = 'song'
+    owner = models.ForeignKey(User, related_name='added_songs')
+
+    ############################################################
+    # Main details
+
+    image = models.ImageField('Album cover', upload_to=uploadItem('song'), null=True)
+    _original_image = models.ImageField(null=True, upload_to=uploadTiny('song'))
+
+    name = models.CharField(_('Title'), max_length=100)
+    NAMES_CHOICES = ALL_ALT_LANGUAGES
+    d_names = models.TextField(_('Title'), null=True)
+    japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
+    romaji_name = models.CharField(string_concat(_('Title'), ' (', _('Romaji'), ')'), max_length=100, null=True)
+
+    ############################################################
+    # Technical details
+
+    itunes_id = models.PositiveIntegerField(_('Preview'), help_text='iTunes ID', null=True)
+    length = models.PositiveIntegerField(_('Length'), help_text='in seconds', null=True)
+    bpm = models.PositiveIntegerField(_('Beats per minute'), null=True)
+    release_date = models.DateField(_('Release date'), null=True)
+
+    buy_url = models.URLField('Buy URL', null=True)
+
+    ############################################################
+    # Credits
+
+    singers = models.ManyToManyField(VoiceActress, related_name='songs', blank=True, verbose_name=_('Singers'))
+
+    composer = models.CharField(_('Composer'), max_length=100, null=True)
+    COMPOSERS_CHOICES = NON_LATIN_LANGUAGES
+    d_composers = models.TextField(_('Composer'), null=True)
+
+    lyricist = models.CharField(_('Lyricist'), max_length=100, null=True)
+    LYRICISTS_CHOICES = NON_LATIN_LANGUAGES
+    d_lyricists = models.TextField(_('Lyricist'), null=True)
+
+    arranger = models.CharField(_('Arranger'), max_length=100, null=True)
+    ARRANGERS_CHOICES = NON_LATIN_LANGUAGES
+    d_arrangers = models.TextField(_('Arranger'), null=True)
+
+    ############################################################
+    # Lyrics
+
+    m_romaji_lyrics = models.TextField(string_concat(_('Lyrics'), ' (', _('Romaji'), ')'), null=True)
+    _cache_romaji_lyrics = models.TextField(null=True)
+
+    m_japanese_lyrics = models.TextField(string_concat(_('Lyrics'), ' (', t['Japanese'], ')'), null=True)
+    _cache_japanese_lyrics = models.TextField(null=True)
+
+    m_lyrics = models.TextField(string_concat(_('Lyrics'), ' (', _('Translations'), ')'), null=True)
+    M_LYRICSS_CHOICES = ALL_ALT_LANGUAGES_EXCEPT_JAPANESE
+    d_m_lyricss = models.TextField(string_concat(_('Lyrics'), ' (', _('Translations'), ')'), null=True)
+    _cache_lyrics = models.TextField(null=True)
+
+    ############################################################
+    # Reverse relations
+
+    reverse_related = [
+        {
+            'field_name': 'singers',
+            'url': 'voiceactresses',
+            'verbose_name': _('Singers'),
+            'max_per_line': None,
+        },
+    ]
+
+    ############################################################
+    # Views utils
+
+    display_names = property(displayNamesRomajiFirst)
+    display_name = property(lambda _s: displayNameHTML(_s, romaji_first=True))
+
+    display_length = property(lambda _s: time.strftime('%M:%S', time.gmtime(_s.length)))
+
+    ############################################################
+    # Unicode
+
+    def __unicode__(self):
+        try:
+            return self.display_names[0]
+        except IndexError:
+            return self.pk
 
 ############################################################
 ############################################################
