@@ -1229,6 +1229,20 @@ def to_BaseCollectedCardCollection(cls):
             'max_leveled': 'max-level',
         }
 
+        def to_fields(self, view, item, *args, **kwargs):
+            fields = super(_BaseCollectedCardCollection, self).to_fields(
+                view, item, *args, **kwargs)
+
+            # Show base icon to avoid confusion
+            setSubField(fields, item.item_parent_name, key='icon', value=None)
+            setSubField(fields, item.item_parent_name, key='image_for_link', value=item.item_parent.base_icon_url)
+
+            # Show rank as images
+            setSubField(fields, 'rank', key='type', value='image')
+            setSubField(fields, 'rank', key='value', value=item.rank_image)
+
+            return fields
+
         class AddView(cls.AddView):
             unique_per_owner = True
             add_to_collection_variables = cls.AddView.add_to_collection_variables + [
@@ -1257,6 +1271,8 @@ def to_CollectedCardCollection(cls):
             'i_rarity': {
                 'image_folder': 'i_rarity',
             },
+            'rank': {
+            },
         })
 
         fields_images = {
@@ -1280,10 +1296,6 @@ def to_CollectedCardCollection(cls):
             setSubField(fields, 'rarity', key='type', value='image')
             setSubField(fields, 'rarity', key='value', value=item.rarity_image)
 
-            # Show rank as images
-            setSubField(fields, 'rank', key='type', value='image')
-            setSubField(fields, 'rank', key='value', value=item.rank_image)
-
             return fields
 
     return _CollectedCardCollection
@@ -1293,15 +1305,20 @@ def to_CollectedCardCollection(cls):
 
 def to_CollectedMemoirCollection(cls):
     cls = to_BaseCollectedCardCollection(cls)
+
     class _CollectedMemoirCollection(cls):
+        form_class = forms.to_CollectedMemoirForm(cls)
+
+        filter_cuteform = cls.filter_cuteform.copy()
+        filter_cuteform.update({
+            'rank': {
+                'image_folder': 'memoir_triangle_rank',
+            },
+        })
+
         fields_images = {
             'memoir': 'red_memoirs.png',
+            'rank': 'memoir_rank.png',
         }
-
-        def to_fields(self, view, item, *args, **kwargs):
-            fields = super(_CollectedMemoirCollection, self).to_fields(view, item, *args, **kwargs)
-            setSubField(fields, 'memoir', key='icon', value=None)
-            setSubField(fields, 'memoir', key='image_for_link', value=item.memoir.base_icon_url)
-            return fields
 
     return _CollectedMemoirCollection

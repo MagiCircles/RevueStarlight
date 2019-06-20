@@ -662,10 +662,16 @@ class MemoirFilterForm(BaseCardFilterForm):
 ############################################################
 
 ############################################################
-# Collected card Collection
+# Collected card
 
 def to_CollectedCardForm(cls):
+
     class _CollectedCardForm(cls.form_class):
+        rank = forms.ChoiceField(label=_('Rank'), choices=[
+            (i, i)
+            for i in range(1, 7 + 1)
+        ])
+
         def __init__(self, *args, **kwargs):
             super(_CollectedCardForm, self).__init__(*args, **kwargs)
 
@@ -689,6 +695,17 @@ def to_CollectedCardForm(cls):
                 instance.save()
             return instance
 
-        class Meta(cls.form_class.Meta):
-            pass
     return _CollectedCardForm
+
+############################################################
+# Collected memoir
+
+def to_CollectedMemoirForm(cls):
+
+    class _CollectedMemoirForm(cls.form_class):
+        rank = forms.ChoiceField(label=_('Rank'), choices=[
+            (i, i - 1)
+            for i in range(1, 5 + 1)
+        ])
+
+    return _CollectedMemoirForm

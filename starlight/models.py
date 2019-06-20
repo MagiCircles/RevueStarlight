@@ -1806,14 +1806,14 @@ class CollectedMemoir(BaseCollectedCard):
     item_parent_name = 'memoir'
     memoir = models.ForeignKey(Memoir, related_name='collectedmemoirs', verbose_name=_('Memoir'))
 
+    rank = models.PositiveIntegerField(_('Rank'), default=5, validators=[
+        MinValueValidator(1),
+        MaxValueValidator(5),
+    ])
+    rank_image = property(lambda _s: staticImageURL(_s.rank, folder='memoir_triangle_rank', extension='png'))
+
     ############################################################
     # Views utils
-
-    @property
-    def rank(self):
-        if self.max_leveled == False:
-            return 1
-        return 5
 
     def get_image(self, prefix='', suffix=''):
         return (
