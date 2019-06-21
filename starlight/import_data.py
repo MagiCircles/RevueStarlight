@@ -952,7 +952,7 @@ def _replace_images(markdown):
         if i != 0 and len(part) > 3:
             title = part.split('](')[0]
             url = part.split('](')[1].split(')')[0]
-            if not url.startswith('//i.starlight.academy/'):
+            if not url.startswith('https://i.starlight.academy/'):
                 print('    Imgur upload', url)
                 imgur_url = _upload_to_imgur(url, title)
                 print('      ->', imgur_url)
