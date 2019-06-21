@@ -856,7 +856,7 @@ def importSongs(details, h):
             image = part.split('![](')[1].split(')')[0]
             markdown = markdown.replace(
                 u'_![]({})_'.format(image),
-                u'![]({}) '.format(voice_actress.stagegirls.all()[0].small_image_url),
+                u'![]({}) '.format(voice_actress.stagegirls.all()[0].http_small_image_url),
             )
             singers.append(voice_actress)
 
