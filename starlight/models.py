@@ -25,7 +25,6 @@ from magi.utils import (
     ColorField,
     getAge,
     getStaffConfiguration,
-    ordinalNumber,
     staticImageURL,
     summarize,
     uploadItem,
@@ -44,6 +43,7 @@ from starlight.utils import (
     getSchoolImageFromPk,
     getSchoolNameFromPk,
     getSchoolURLFromPk,
+    getSchoolYearChoices,
     getStageGirlImageFromPk,
     getStageGirlNamesFromPk,
 )
@@ -495,13 +495,6 @@ class School(MagiModel):
 ############################################################
 # Stage girl
 
-def _to_year_choices():
-    return [
-        ('first', _(u'{nth} year').format(nth=_(ordinalNumber(1)))),
-        ('second', _(u'{nth} year').format(nth=_(ordinalNumber(2)))),
-        ('third', _(u'{nth} year').format(nth=_(ordinalNumber(3)))),
-    ]
-
 class StageGirl(MagiModel):
     collection_name = 'stagegirl'
 
@@ -544,10 +537,10 @@ class StageGirl(MagiModel):
     SCHOOL_DEPARTMENTS_CHOICES = ALL_ALT_LANGUAGES
     d_school_departments = models.TextField(_('Department'), null=True)
 
-    YEAR_CHOICES = _to_year_choices()
+    YEAR_CHOICES = getSchoolYearChoices()
     i_year = models.PositiveIntegerField(_('School year'), choices=i_choices(YEAR_CHOICES), null=True)
-    to_year_choices = classmethod(lambda _s: _to_year_choices())
-    to_t_year = classmethod(lambda _s, _i: dict(i_choices(_to_year_choices())).get(_i, None))
+    to_year_choices = classmethod(lambda _s: getSchoolYearChoices())
+    to_t_year = classmethod(lambda _s, _i: dict(i_choices(_s.to_year_choices())).get(_i, None))
 
     birthday = models.DateField(_('Birthday'), null=True, help_text='The year will be ignored.')
     display_birthday = property(lambda _s: date_format(_s.birthday, format='MONTH_DAY_FORMAT', use_l10n=True))

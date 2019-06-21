@@ -12,6 +12,7 @@ from magi.utils import (
     getTranslatedName,
     globalContext,
     listUnique,
+    ordinalNumber,
     mergedFieldCuteForm,
     staticImageURL,
     tourldash,
@@ -135,6 +136,13 @@ def getSchoolURLFromPk(pk, ajax=False):
     return u'{}/school/{}/{}'.format(
         u'/ajax' if ajax else u'', pk,
         u'' if ajax else u'{}/'.format(tourldash(getSchoolNameFromPk(pk))))
+
+def getSchoolYearChoices():
+    return [
+        ('first', _(u'{nth} year').format(nth=_(ordinalNumber(1)))),
+        ('second', _(u'{nth} year').format(nth=_(ordinalNumber(2)))),
+        ('third', _(u'{nth} year').format(nth=_(ordinalNumber(3)))),
+    ]
 
 ############################################################
 # CuteForm utils

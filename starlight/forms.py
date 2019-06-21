@@ -33,6 +33,7 @@ from starlight.utils import (
     calculateMemoirStatistics,
     getSchoolChoices,
     getVoiceActressChoices,
+    getSchoolYearChoices,
     getStageGirlChoices,
 )
 
@@ -343,6 +344,11 @@ class StageGirlFilterForm(MagiFiltersForm):
         ('voice_actress__name', string_concat(_('Voice actress'), ' (', _('Name'), ')')),
         ('birthday', _('Birthday')),
     ]
+
+    def __init__(self, *args, **kwargs):
+        super(StageGirlFilterForm, self).__init__(*args, **kwargs)
+        if 'i_year' in self.fields:
+            self.fields['i_year'].choices = BLANK_CHOICE_DASH + i_choices(getSchoolYearChoices())
 
     class Meta(MagiFiltersForm.Meta):
         model = models.StageGirl
