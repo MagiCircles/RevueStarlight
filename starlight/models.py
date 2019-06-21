@@ -366,9 +366,9 @@ class VoiceActress(MagiModel):
     d_m_descriptions = models.TextField(_('Description'), null=True)
     _cache_description = models.TextField(null=True)
 
-    m_staff_description = models.TextField(_('Message'), null=True, help_text='Only visible in staff list.')
+    m_staff_description = models.TextField(_('Message'), null=True, help_text='Also visible in staff list.')
     M_STAFF_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
-    d_m_staff_descriptions = models.TextField(_('Message'), null=True, help_text='Only visible in staff list.')
+    d_m_staff_descriptions = models.TextField(_('Message'), null=True, help_text='Also visible in staff list.')
     _cache_staff_description = models.TextField(null=True)
 
     video = YouTubeVideoField(_('Video'), null=True)

@@ -203,6 +203,33 @@ html {
     max-width: 11%;
 }
 
+/* Voice actress */
+
+.item-info.voiceactress-info {
+    [data-field="staff_description"] {
+        .long-text-value {
+            text-align: center;
+            font-size: 0.9em;
+            &:before, &:after {
+                display: block;
+                font-family: serif;
+                font-size: 3em;
+                line-height: 1em;
+            }
+            &:before {
+                content: '“';
+                text-align: left;
+            }
+            &:after {
+                content: '„';
+                text-align: right;
+                margin-top: -20px;
+                margin-bottom: 20px;
+            }
+        }
+    }
+}
+
 /* Song */
 
 .item-info.song-info [data-field$="lyrics"] .long-text-value {
