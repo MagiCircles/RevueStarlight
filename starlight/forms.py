@@ -259,6 +259,7 @@ class VoiceActressFilterForm(MagiFiltersForm):
 
     ordering_fields = [
         ('name', _('Name')),
+        ('stagegirls__name', string_concat(_('Stage girl'), ' (', _('Name'), ')')),
         ('birthday_month,birthday_day', _('Birthday')),
         ('birthday', _('Age')),
         ('height', _('Height')),
@@ -339,6 +340,7 @@ class StageGirlFilterForm(MagiFiltersForm):
     ordering_fields = [
         ('school', _('School')),
         ('name', _('Name')),
+        ('voice_actress__name', string_concat(_('Voice actress'), ' (', _('Name'), ')')),
         ('birthday', _('Birthday')),
     ]
 

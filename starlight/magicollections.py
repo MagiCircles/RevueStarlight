@@ -371,12 +371,32 @@ class VoiceActressCollection(MainItemCollection):
         default_ordering = 'name'
         filter_form = forms.VoiceActressFilterForm
 
-        def ordering_fields(self, item, only_fields=None, *args, **kwargs):
+        def get_queryset(self, queryset, parameters, request):
+            queryset = super(VoiceActressCollection.ListView, self).get_queryset(queryset, parameters, request)
+
+            # When ordering by stage girl name, prefetch stage girls
+            if parameters.get('ordering', None) == 'stagegirls__name':
+                queryset = queryset.prefetch_related('stagegirls')
+
+            return queryset
+
+        def ordering_fields(self, item, only_fields=None, prefetched_together=None, *args, **kwargs):
+            if prefetched_together is None: prefetched_together = []
+            only_fields = (only_fields or [])[:]
+
+            # Show stage girl(s) when ordering by stage girl name
+            if 'stagegirls__name' in only_fields:
+                prefetched_together.append('stagegirls')
+                only_fields.append('stagegirls')
+
             # Show birthday when ordring by birthday
-            return super(VoiceActressCollection.ListView, self).ordering_fields(
-                item, only_fields=(only_fields or []) + (
-                    ['birthday'] if 'birthday_month' in only_fields
-                    else []), *args, **kwargs)
+            if 'birthday_month' in only_fields:
+                only_fields.append('birthday')
+
+            fields = super(VoiceActressCollection.ListView, self).ordering_fields(
+                item, only_fields=only_fields, prefetched_together=prefetched_together, *args, **kwargs)
+
+            return fields
 
     class ItemView(MainItemCollection.ItemView):
         fields_prefetched = ['stagegirls']
@@ -514,6 +534,29 @@ class StageGirlCollection(MainItemCollection):
         page_size = 30
         filter_form = forms.StageGirlFilterForm
         show_section_header_on_change = 'school_id'
+
+        def get_queryset(self, queryset, parameters, request):
+            queryset = super(StageGirlCollection.ListView, self).get_queryset(queryset, parameters, request)
+
+            # When ordering by voice actress name, select related voice actress
+            if parameters.get('ordering', None) == 'voice_actress__name':
+                queryset = queryset.select_related('voice_actress')
+
+            return queryset
+
+        def ordering_fields(self, item, only_fields=None, preselected=None, *args, **kwargs):
+            if preselected is None: preselected = []
+            only_fields = (only_fields or [])[:]
+
+            # Show voice actress when ordering by voice actress name
+            if 'voice_actress__name' in only_fields:
+                preselected.append('voice_actress')
+                only_fields.append('voice_actress')
+
+            fields = super(StageGirlCollection.ListView, self).ordering_fields(
+                item, only_fields=only_fields, preselected=preselected, *args, **kwargs)
+
+            return fields
 
     class ItemView(MainItemCollection.ItemView):
         fields_preselected = ['voice_actress', 'school']
