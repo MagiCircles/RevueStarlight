@@ -897,6 +897,9 @@ def importSongs(details, h):
                 data[field_name] = _replace_images(data[field_name])
                 data[field_name] = data[field_name].replace('\n\n  \n\n', '\n\n<br>\n')
 
+    # Add credit of who translated the lyrics
+    data['m_lyrics'] += u'\n\n[Translation by {}]({})'.format(author.username, author.http_item_url)
+
     # Add or edit song
 
     if song:
