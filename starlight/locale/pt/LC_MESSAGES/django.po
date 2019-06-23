@@ -3939,27 +3939,28 @@ msgstr "Marcar todas como lidas"
 
 #: magi/magicollections.py:3015
 msgid "{total} notifications were marked as read."
-msgstr ""
+msgstr "{total} notificações foram marcadas como lidas"
 
 #: bang/models.py:434
 msgid "For the next {duration} seconds, score boosted by +{percentage}% until a {note_type} note is hit, then score boosted by +{alt_percentage}%"
-msgstr ""
+msgstr "Durante os próximos {duration} segundos, o score aumenta {percentagem}% até uma nota {note_type} ser tocada, que aumenta o score por {alt_percentage}%"
 
 #: bang/models.py:498
 msgid "Life guard"
-msgstr ""
+msgstr "Life Guard\n"
+""
 
 #: bang/models.py:505
 msgid "BAD/MISS notes do not cause damage"
-msgstr ""
+msgstr "Notas BAD/MISS não causam dano"
 
 #: bang/models.py:510
 msgid "and BAD/MISS notes do not cause damage for the next {duration} seconds"
-msgstr ""
+msgstr "e notas BAD/MISS não causam dano nos próximos {duration} seconds"
 
 #: sukutomo/models.py:1189
 msgid "Boost"
-msgstr ""
+msgstr "Boost"
 
 #: bang/forms.py:1154
 msgid "All {type} {things}"
@@ -3967,50 +3968,50 @@ msgstr ""
 
 #: magi/forms.py:922
 msgid "Random"
-msgstr ""
+msgstr "Aleatório"
 
 #: magi/forms.py:935 magi/forms.py:941
 msgid "Suggestions"
-msgstr ""
+msgstr "Sugestões"
 
 #: magi/views_collections.py:364
 msgid "All the {things}! Search by {search_terms} and filter by {filters} to find all the details you need about the {things} from {game}."
-msgstr ""
+msgstr "Todas as {things}! Procura por {search_terms} e filtra por {filters} para encontrares todos os detalhes que precisas sobre {things} do {game}."
 
 #: bang/forms.py:412
 msgid "Default"
-msgstr ""
+msgstr "Por defeito"
 
 #: bang/magicollections.py:2804
 msgid "Chibis"
-msgstr ""
+msgstr "Chibis"
 
 #: sukutomo/magicollections.py:692 sukutomo/magicollections.py:779
 #: sukutomo/models.py:777
 msgid "Merged with other event"
-msgstr ""
+msgstr "Unido a outro evento"
 
 #: sukutomo/magicollections.py:791 sukutomo/models.py:765
 #: sukutomo/models.py:774 sukutomo/models.py:787 sukutomo/models.py:796
 #: sukutomo/models.py:805
 msgid "Tiers"
-msgstr ""
+msgstr "Tiers"
 
 #: sukutomo/magicollections.py:1096
 msgid "Can be sold for stickers?"
-msgstr ""
+msgstr "Pode ser vendida por stickers?"
 
 #: sukutomo/magicollections.py:1160
 msgid "Buy this card"
-msgstr ""
+msgstr "Compra esta carta"
 
 #: sukutomo/models.py:208
 msgid "The character that you selected when you started playing."
-msgstr ""
+msgstr "A personagem que escolheste quando começaste a jogar."
 
 #: starlight/magicollections.py:198 starlight/magicollections.py:217
 msgid "Feed"
-msgstr ""
+msgstr "Feed"
 
 #: starlight/forms.py:60 starlight/magicollections.py:72
 #: starlight/magicollections.py:96 starlight/magicollections.py:315
@@ -4019,276 +4020,276 @@ msgstr ""
 #: starlight/models.py:531 starlight/settings.py:165 starlight/settings.py:167
 #: starlight/settings.py:169 starlight/views.py:49
 msgid "Voice actress"
-msgstr ""
+msgstr "Atriz de Voz"
 
 #: starlight/magicollections.py:318 starlight/magicollections.py:576
 #: starlight/magicollections.py:580 starlight/models.py:708
 msgid "Cast"
-msgstr ""
+msgstr "Elenco"
 
 #: starlight/magicollections.py:429
 msgid "Schools"
-msgstr ""
+msgstr "Escolas"
 
 #: starlight/forms.py:519 starlight/forms.py:568
 #: starlight/magicollections.py:457 starlight/models.py:388
 #: starlight/models.py:1355 starlight/settings.py:157 starlight/utils.py:161
 #: starlight/utils.py:170
 msgid "Stage girl"
-msgstr ""
+msgstr "Stage girl"
 
 #: starlight/magicollections.py:458 starlight/magicollections.py:938
 #: starlight/models.py:1579 starlight/models.py:1684 starlight/settings.py:191
 msgid "Stage girls"
-msgstr ""
+msgstr "Stage girls"
 
 #: starlight/magicollections.py:628
 msgid "Discography"
-msgstr ""
+msgstr "Discografia"
 
 #: starlight/magicollections.py:1082 starlight/models.py:1807
 msgid "Memoir"
-msgstr ""
+msgstr "Memória"
 
 #: starlight/magicollections.py:1083 starlight/models.py:637
 #: starlight/models.py:1689
 msgid "Memoirs"
-msgstr ""
+msgstr "Memórias"
 
 #: starlight/magicollections.py:1194
 msgid "Conversation"
-msgstr ""
+msgstr "Conversa"
 
 #: starlight/magicollections.py:1195
 msgid "Conversations"
-msgstr ""
+msgstr "Conversas"
 
 #: starlight/magicollections.py:1197 starlight/settings.py:213
 msgid "My theater"
-msgstr ""
+msgstr "O Meu Teatro"
 
 #: starlight/magicollections.py:1206
 msgid "Comic"
-msgstr ""
+msgstr "Comic"
 
 #: starlight/models.py:107
 msgid "Flower"
-msgstr ""
+msgstr "Flor"
 
 #: starlight/models.py:115
 msgid "Wind"
-msgstr ""
+msgstr "Vento"
 
 #: starlight/models.py:131
 msgid "Cloud"
-msgstr ""
+msgstr "Nuvem"
 
 #: starlight/models.py:139
 msgid "Moon"
-msgstr ""
+msgstr "Lua"
 
 #: starlight/models.py:155
 msgid "Dream"
-msgstr ""
+msgstr "Sonho"
 
 #: starlight/models.py:356 starlight/models.py:358
 msgid "Specialty"
-msgstr ""
+msgstr "Especialidade"
 
 #: starlight/models.py:479
 msgid "Students"
-msgstr ""
+msgstr "Estudantes"
 
 #: starlight/models.py:564 starlight/models.py:568 starlight/models.py:571
 #: starlight/models.py:575
 msgid "Weapon"
-msgstr ""
+msgstr "Arma"
 
 #: starlight/models.py:585 starlight/models.py:587
 msgid "Likes"
-msgstr ""
+msgstr "Gosta"
 
 #: starlight/models.py:589 starlight/models.py:591
 msgid "Dislikes"
-msgstr ""
+msgstr "Detesta"
 
 #: starlight/models.py:1375
 msgid "Front"
-msgstr ""
+msgstr "Vanguarda"
 
 #: starlight/models.py:1373
 msgid "Rear"
-msgstr ""
+msgstr "Retaguarda"
 
 #: starlight/models.py:1377
 msgid "Position"
-msgstr ""
+msgstr "Posição"
 
 #: starlight/settings.py:226
 msgid "Fanart"
-msgstr ""
+msgstr "Fanart"
 
 #: starlight/settings.py:227
 msgid "Graphic edit"
-msgstr ""
+msgstr "Edição gráfica"
 
 #: starlight/settings.py:246
 msgid "Questionable"
-msgstr ""
+msgstr "Questionável"
 
 #: starlight/forms.py:155 starlight/forms.py:166
 #: starlight/magicollections.py:114 starlight/magicollections.py:115
 #: starlight/settings.py:234 starlight/settings.py:320
 #: starlight/settings.py:337
 msgid "News"
-msgstr ""
+msgstr "Notícias"
 
 #: starlight/magicollections.py:628 starlight/models.py:798
 #: starlight/models.py:801 starlight/models.py:804 starlight/models.py:806
 msgid "Lyrics"
-msgstr ""
+msgstr "Letra"
 
 #: magi/default_settings.py:28
 msgid "Less"
-msgstr ""
+msgstr "Menos"
 
 #: magi/default_settings.py:349
 msgid "β-tester"
-msgstr ""
+msgstr "β-tester"
 
 #: magi/forms.py:2052
 msgid "Users who can speak {language}"
-msgstr ""
+msgstr "Utilizadores que conseguem falar {language}"
 
 #: magi/magicollections.py:2266
 msgid "Website"
-msgstr ""
+msgstr "Website"
 
 #: starlight/forms.py:190
 msgid "Skip"
-msgstr ""
+msgstr "Saltar"
 
 #: starlight/forms.py:384 starlight/models.py:781 starlight/models.py:816
 #: starlight/utils.py:182
 msgid "Singers"
-msgstr ""
+msgstr "Cantoras"
 
 #: starlight/forms.py:412 starlight/forms.py:573 starlight/forms.py:600
 #: starlight/models.py:921 starlight/models.py:922 starlight/models.py:924
 #: starlight/models.py:926
 msgid "Target"
-msgstr ""
+msgstr "Alvo"
 
 #: starlight/forms.py:489 starlight/magicollections.py:698
 #: starlight/models.py:1103 starlight/models.py:1333
 msgid "Acts"
-msgstr ""
+msgstr "Atos"
 
 #: starlight/forms.py:494
 msgid "Number"
-msgstr ""
+msgstr "Número"
 
 #: starlight/forms.py:591 starlight/magicollections.py:1033
 msgid "Effective against"
-msgstr ""
+msgstr "Efetivo contra"
 
 #: starlight/forms.py:594 starlight/magicollections.py:1034
 msgid "Less effective against"
-msgstr ""
+msgstr "Menos efetivo contra"
 
 #: starlight/forms.py:597
 msgid "Hits more than once"
-msgstr ""
+msgstr "Atinge mais que uma vez"
 
 #: starlight/magicollections.py:223
 msgid "Relive account"
-msgstr ""
+msgstr "Reativa conta"
 
 #: starlight/magicollections.py:656
 msgid "Buy {thing}"
-msgstr ""
+msgstr "Compra {thing}"
 
 #: starlight/magicollections.py:656
 msgid "CD"
-msgstr ""
+msgstr "CD"
 
 #: starlight/magicollections.py:697
 msgid "Act"
-msgstr ""
+msgstr "Ato"
 
 #: starlight/magicollections.py:882
 msgid "Cost"
-msgstr ""
+msgstr "Custo"
 
 #: starlight/magicollections.py:911 starlight/models.py:1785
 msgid "Rank"
-msgstr ""
+msgstr "Classificação"
 
 #: starlight/magicollections.py:989 starlight/models.py:722
 #: starlight/models.py:724
 msgid "Role"
-msgstr ""
+msgstr "Papel"
 
 #: starlight/models.py:147
 msgid "Space"
-msgstr ""
+msgstr "Espaço"
 
 #: starlight/models.py:240
 msgid "Casual"
-msgstr ""
+msgstr "Casual"
 
 #: starlight/models.py:244
 msgid "Hardcore"
-msgstr ""
+msgstr "Hardcore"
 
 #: starlight/models.py:250
 msgid "Play style"
-msgstr ""
+msgstr "Modo de jogar"
 
 #: starlight/models.py:253
 msgid "Stage of dreams level"
-msgstr ""
+msgstr "Nível de palco de sonhos"
 
 #: starlight/models.py:265 starlight/models.py:266 starlight/models.py:267
 msgid "Platinum"
-msgstr ""
+msgstr "Platinum"
 
 #: starlight/models.py:268
 msgid "Legend"
-msgstr ""
+msgstr "Lenda"
 
 #: starlight/models.py:272
 msgid "Vs. Revue rank"
-msgstr ""
+msgstr "Classificação Vs. Revue"
 
 #: starlight/models.py:291
 msgid "Total stars bought"
-msgstr ""
+msgstr "Total de estrelas compradas"
 
 #: starlight/models.py:295
 msgid "Check this box if this account doesn't exist in the game."
-msgstr ""
+msgstr "Carrega nesta caixa se esta conta não existe no jogo"
 
 #: starlight/models.py:374 starlight/models.py:377 starlight/models.py:606
 #: starlight/models.py:609
 msgid "Video"
-msgstr ""
+msgstr "Vídeo"
 
 #: starlight/models.py:542 starlight/models.py:545
 msgid "Department"
-msgstr ""
+msgstr "Departamento"
 
 #: starlight/models.py:597 starlight/models.py:599
 msgid "Introduction"
-msgstr ""
+msgstr "Introdução"
 
 #: starlight/models.py:710
 msgid "General"
-msgstr ""
+msgstr "Geral"
 
 #: starlight/models.py:711
 msgid "Stage play"
-msgstr ""
+msgstr "Peça de teatro"
 
 #: starlight/models.py:712
 msgid "Additional"
@@ -4296,19 +4297,19 @@ msgstr ""
 
 #: starlight/models.py:714
 msgid "Category"
-msgstr ""
+msgstr "Categoria"
 
 #: starlight/models.py:855
 msgid "Basic"
-msgstr ""
+msgstr "Básico"
 
 #: starlight/models.py:860
 msgid "Climax"
-msgstr ""
+msgstr "Climáx"
 
 #: starlight/models.py:865
 msgid "Auto"
-msgstr ""
+msgstr "Auto"
 
 #: starlight/models.py:870
 msgid "Finishing"
@@ -4321,7 +4322,7 @@ msgstr ""
 
 #: starlight/models.py:911
 msgid "Unlock at rank {rank}"
-msgstr ""
+msgstr "Desbloqueia no rank {rank]"
 
 #: starlight/models.py:914
 msgid "Hits {number_of_times} times"
