@@ -282,17 +282,6 @@ class AccountCollection(_AccountCollection):
         filter_form = forms.AccountFilterForm
         ajax_callback = 'loadAccountsFilters'
 
-        def buttons_per_item(self, request, context, item):
-            buttons = super(AccountCollection.ListView, self).buttons_per_item(request, context, item)
-            buttons['version'] = {
-                'show': True, 'has_permissions': True,
-                'image': item.version_image,
-                'title': item.t_version,
-                'url': self.collection.get_list_url(preset=item.version),
-                'classes': [],
-            }
-            return buttons
-
     class AddView(_AccountCollection.AddView):
         simpler_form = get_account_simple_form(forms.AccountForm, simple_fields=[
             'nickname', 'i_version', 'level', 'friend_id',
@@ -711,9 +700,15 @@ class SongCollection(MainItemCollection):
     class ListView(MainItemCollection.ListView):
         default_ordering = '-release_date'
         filter_form = forms.SongFilterForm
+        show_title = True
         show_items_names = True
         per_line = 4
         page_size = 24
+
+        def extra_context(self, context):
+            super(SongCollection.ListView, self).extra_context(context)
+            context['h1_page_title'] = self.collection.navbar_link_title
+            context['h1_page_title_icon'] = self.collection.icon
 
     class ItemView(MainItemCollection.ItemView):
         ajax_callback = 'loadSong'

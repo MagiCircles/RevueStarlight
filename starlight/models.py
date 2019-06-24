@@ -296,6 +296,13 @@ class Account(BaseAccount):
     )
 
     ############################################################
+    # Views utils
+
+    @property
+    def right_image(self):
+        return self.version_image
+
+    ############################################################
     # Leaderboard per version
 
     def update_cache_leaderboards(self):
