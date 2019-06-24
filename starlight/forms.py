@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from django import forms
+from django.conf import settings as django_settings
 from django.core.validators import MaxValueValidator
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.safestring import mark_safe
@@ -36,6 +37,37 @@ from starlight.utils import (
     getSchoolYearChoices,
     getStageGirlChoices,
 )
+
+############################################################
+############################################################
+# Utils
+############################################################
+############################################################
+
+class ImportableItemForm(AutoForm):
+    def __init__(self, *args, **kwargs):
+        super(ImportableItemForm, self).__init__(*args, **kwargs)
+        if self.is_creating:
+            self.beforeform = mark_safe(
+                '<br><div class="alert alert-danger">{}s are imported automatically and shouldn\'t be added manually.'
+                .format(self.Meta.model.collection_name.title()))
+        configuration = django_settings.IMPORTABLE_FIELDS[self.Meta.model.collection_name]
+        for field_name, field in self.fields.items():
+            if field_name in configuration['ok_to_edit_fields']:
+                field.widget.attrs['class'] = field.widget.attrs.get('class', '') + ' editable-imported-field'
+                field.help_text = mark_safe(u'<span class="text-warning">{}</span><br>{}'.format(
+                    'Can be changed, but may get overwitten by automatic import.',
+                    field.help_text,
+                ))
+            elif field_name in configuration['imported_fields']:
+                field.widget.attrs['class'] = field.widget.attrs.get('class', '') + ' imported-field'
+                if field_name in configuration['many2many_fields']:
+                    message = 'Imported automatically, but you may add more.'
+                else:
+                    message = 'Don\'t change. Imported automatically.'
+                field.help_text = mark_safe(u'<span class="text-danger">{}</span><br>{}'.format(
+                    message, field.help_text,
+                ))
 
 ############################################################
 ############################################################
@@ -307,7 +339,7 @@ class SchoolForm(AutoForm):
 ############################################################
 # Stage girl
 
-class StageGirlForm(AutoForm):
+class StageGirlForm(ImportableItemForm):
     def save(self, commit=False):
         instance = super(StageGirlForm, self).save(commit=False)
 
@@ -319,7 +351,7 @@ class StageGirlForm(AutoForm):
             instance.save()
         return instance
 
-    class Meta(AutoForm.Meta):
+    class Meta(ImportableItemForm.Meta):
         model = models.StageGirl
         tinypng_on_save = [
             'small_image',
@@ -361,6 +393,10 @@ class StageGirlFilterForm(MagiFiltersForm):
 
 ############################################################
 # Song
+
+class SongForm(ImportableItemForm):
+    class Meta(ImportableItemForm.Meta):
+        model = models.Song
 
 class SongFilterForm(MagiFiltersForm):
     search_fields = [
@@ -416,7 +452,7 @@ class SongFilterForm(MagiFiltersForm):
 ############################################################
 # Act
 
-class ActForm(AutoForm):
+class ActForm(ImportableItemForm):
     i_target = forms.ChoiceField(label=_('Target'), choices=BLANK_CHOICE_DASH + i_choices(
         models.Act.TARGET_CHOICES
     ) + [
@@ -427,13 +463,13 @@ class ActForm(AutoForm):
         i_target = self.cleaned_data.get('i_target')
         return None if i_target == 'other' else i_target
 
-    class Meta(AutoForm.Meta):
+    class Meta(ImportableItemForm.Meta):
         model = models.Act
 
 ############################################################
 # Base card
 
-class BaseCardForm(AutoForm):
+class BaseCardForm(ImportableItemForm):
     acts = forms.ModelMultipleChoiceField(
         queryset=models.Act.objects.all().order_by('i_type', 'name'),
         widget=forms.CheckboxSelectMultiple, required=False,

@@ -3,8 +3,8 @@ from collections import OrderedDict
 from django.conf import settings as django_settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
+from django.db.models.fields.related import ManyToManyField
 from django.utils import timezone
-from magi import urls # unused, loads static
 from magi.tools import (
     totalDonatorsThisMonth,
     latestDonationMonth,
@@ -13,9 +13,15 @@ from magi.tools import (
     getUsersBirthdaysToday,
     getCharactersBirthdays,
 )
+from magi import urls # unused, loads static
 from magi.utils import (
-    staticImageURL,
     birthdays_within,
+    listUnique,
+    staticImageURL,
+)
+from starlight.import_data import (
+    IMPORT_CONFIGURATION,
+    ACT_IMPORT_CONFIGURATION,
 )
 from starlight import models
 
@@ -190,6 +196,25 @@ def generate_settings():
         'hd_url': staticImageURL('default_art_hd.png'),
     })
 
+    print 'Cache importable fields'
+    importable_fields = {}
+    for configuration in IMPORT_CONFIGURATION.values() + [ACT_IMPORT_CONFIGURATION]:
+        ok_to_edit_fields = configuration.get('dont_erase_existing_value_fields', [])
+        imported_fields = listUnique(
+            configuration.get('unique_fields', [])
+            + configuration.get('fields', [])
+            + configuration.get('mapped_fields', []),
+        )
+        many2many_fields = []
+        for field in imported_fields:
+            if isinstance(configuration['model']._meta.get_field(field), ManyToManyField):
+                many2many_fields.append(field)
+        importable_fields[configuration['model'].collection_name] = {
+            'imported_fields': imported_fields,
+            'ok_to_edit_fields': ok_to_edit_fields,
+            'many2many_fields': many2many_fields,
+        }
+
     print 'Save generated settings'
     generateSettings({
         'LATEST_NEWS': latest_news,
@@ -203,6 +228,7 @@ def generate_settings():
         'SCHOOLS': all_schools,
         'VOICE_ACTRESSES': all_voiceactresses,
         'MAX_STATISTICS': max_statistics,
+        'IMPORTABLE_FIELDS': importable_fields,
         # 'BACKGROUNDS': backgrounds,
     }, imports=[
         'from collections import OrderedDict',

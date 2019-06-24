@@ -201,6 +201,9 @@ ACT_IMPORT_CONFIGURATION = {
         'name': mapTranslatedValues('name', external_japanese_field=True),
         'description': mapTranslatedValues('description', external_japanese_field=True),
     },
+    'mapped_fields': [
+        'internal_id', 'name', 'japanese_name', 'description', 'japanese_description',
+    ],
     'dont_erase_existing_value_fields': [
         'name',
         'japanese_name',
@@ -370,6 +373,10 @@ IMPORT_CONFIGURATION['stagegirls'] = {
             transform_name=lambda _name: u' '.join(reversed(TO_VOICE_ACTRESS.get(
                 _name, _name).split(' ')))),
     },
+    'mapped_fields': [
+        'name', 'school', 'likes', 'dislikes', 'favorite_food', 'least_favorite_food',
+        'introduction', 'school_department', 'voice_actress',
+    ],
     'ignored_fields': [
         'id',
         'first_name', 'last_name', 'cv_fist', 'cv_last', 'name_ruby', # Already in name
@@ -400,6 +407,15 @@ IMPORT_CONFIGURATION['cards'] = {
         'profile': mapTranslatedValues('profile'),
         'get_message': mapTranslatedValues('message'),
     },
+    'mapped_fields': [
+        'number', 'stage_girl', 'i_rarity', 'i_element', 'i_damage', 'i_position',
+    ] + [
+        u'{}{}'.format(_prefix, _statistic)
+        for _statistic in models.BaseCard.STATISTICS_FIELDS
+        for _prefix in ['base_', 'delta_']
+    ] + [
+        'acts', 'name', 'description', 'profile', 'message',
+    ],
     'dont_erase_existing_value_fields': [
         'name',
         'description',
@@ -443,9 +459,18 @@ IMPORT_CONFIGURATION['memoirs'] = {
         'profile': mapTranslatedValues('explanation'),
         'skills': mapSkills, # todo: not in JSON atm
     },
+    'mapped_fields': [
+        'number', 'i_rarity', 'is_upgrade',
+    ] + [
+        u'{}{}'.format(_prefix, _statistic)
+        for _statistic in models.BaseCard.STATISTICS_FIELDS
+        for _prefix in ['base_', 'delta_']
+    ] + [
+        'name', 'explanation',
+    ],
     'dont_erase_existing_value_fields': [
         'name',
-        'profile',
+        'explanation',
     ],
     'ignored_fields': [
         'cost', # value can be determined by rarity
@@ -465,6 +490,9 @@ IMPORT_CONFIGURATION['songs'] = {
         'name': mapTranslatedValues('name'),
         'description': songCredits,
     },
+    'mapped_fields': [
+        'name', 'singers',
+    ] + models.Song.CREDITS_FIELDS,
     'callback_after_save': songCallbackAfterSave,
 }
 
@@ -473,7 +501,6 @@ def import_data(local=False, to_import=None, log_function=print):
         None, IMPORT_CONFIGURATION, results_location=None,
         local=local, to_import=to_import, log_function=log_function,
     )
-
 
 ############################################################
 # Local images import

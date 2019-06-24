@@ -671,6 +671,7 @@ class SongCollection(MainItemCollection):
     navbar_link_list = 'revuestarlight'
     navbar_link_title = string_concat(_('Discography'), ' / ', _('Lyrics'))
     icon = 'song'
+    form_class = forms.SongForm
 
     translated_fields = ['name', 'm_lyrics'] + models.Song.CREDITS_FIELDS
 
