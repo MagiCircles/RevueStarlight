@@ -129,6 +129,7 @@ class NewsCollection(_ActivityCollection):
 
     class ItemView(_ActivityCollection.ItemView):
         template = 'activityItem'
+        ajax_callback = 'loadActivities'
 
     class ListView(_ActivityCollection.ListView):
         item_template = 'activityItem'
@@ -136,6 +137,7 @@ class NewsCollection(_ActivityCollection):
         default_ordering = '-creation'
         filter_form = forms.NewsFilterForm
         add_button_subtitle = None
+        ajax_pagination_callback = 'loadActivities'
 
         # Todo: Should be removed after launch
         def check_permissions(self, request, context):
@@ -202,6 +204,7 @@ class ActivityCollection(_ActivityCollection):
             _url for _url in _ActivityCollection.ListView.shortcut_urls
             if _url != ''
         ] + ['feed']
+        ajax_pagination_callback = 'loadActivities'
 
         def show_homepage(self, context):
             return True
@@ -215,6 +218,9 @@ class ActivityCollection(_ActivityCollection):
             context['show_title'] = True
             context['art'] = None
             context['h1_page_title'] = string_concat(_('Community'), ' - ', _('Feed'))
+
+    class ItemView(_ActivityCollection.ItemView):
+        ajax_callback = 'loadActivities'
 
 ############################################################
 # Account Collection
