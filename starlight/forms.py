@@ -282,6 +282,18 @@ class AccountFilterForm(_AccountFilterForm):
 ############################################################
 # Voice Actress
 
+def to_translate_voice_actress_form_class(cls):
+    class _TranslateVoiceActressForm(cls):
+        def __init__(self, *args, **kwargs):
+            super(_TranslateVoiceActressForm, self).__init__(*args, **kwargs)
+            for field_name, field in self.fields.items():
+                if field_name.startswith('d_m_descriptions-') and '<div' in field.help_text:
+                    field.help_text = mark_safe(
+                        field.help_text.split('<div')[0]
+                        + field.help_text.split('</div>')[-1]
+                    )
+    return _TranslateVoiceActressForm
+
 class VoiceActressFilterForm(MagiFiltersForm):
     search_fields = [
         'name', 'd_names',

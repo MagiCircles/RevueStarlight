@@ -409,6 +409,11 @@ class VoiceActressCollection(MainItemCollection):
                 item, *args, prefetched_together=prefetched_together, **kwargs)
             return fields
 
+    class EditView(MainItemCollection.EditView):
+        def to_translate_form_class(self):
+            super(VoiceActressCollection.EditView, self).to_translate_form_class()
+            self._translate_form_class = forms.to_translate_voice_actress_form_class(self._translate_form_class)
+
 ############################################################
 # Voice Actress Link Collection
 

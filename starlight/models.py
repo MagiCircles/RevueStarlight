@@ -330,6 +330,7 @@ class VoiceActress(MagiModel):
     owner = models.ForeignKey(User, related_name='added_voiceactresses')
 
     name = models.CharField(_('Name'), max_length=100, unique=True, db_index=True)
+    NAME_SOURCE_LANGUAGES = ['ja']
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
     japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
@@ -370,7 +371,10 @@ class VoiceActress(MagiModel):
 
     m_description = models.TextField(_('Description'), null=True)
     M_DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
-    d_m_descriptions = models.TextField(_('Description'), null=True)
+    d_m_descriptions = models.TextField(
+        _('Description'), null=True,
+        help_text='Do not translate from English. Write your own description if you\'d like.',
+    )
     _cache_description = models.TextField(null=True)
 
     m_staff_description = models.TextField(_('Message'), null=True, help_text='Also visible in staff list.')
@@ -437,6 +441,7 @@ class VoiceActressLink(MagiModel):
     )
 
     name = models.CharField(_('Platform'), max_length=100)
+    NAME_SOURCE_LANGUAGES = ['ja']
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Platform'), null=True)
 
@@ -462,6 +467,7 @@ class School(MagiModel):
     owner = models.ForeignKey(User, related_name='added_schools')
 
     name = models.CharField(_('Name'), max_length=100, unique=True)
+    NAME_SOURCE_LANGUAGES = ['ja']
     NAMES_CHOICES = ALL_ALT_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
 
@@ -508,6 +514,7 @@ class StageGirl(MagiModel):
     owner = models.ForeignKey(User, related_name='added_stagegirls')
 
     name = models.CharField(_('Name'), max_length=100, unique=True)
+    NAME_SOURCE_LANGUAGES = ['ja']
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
     japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
@@ -541,6 +548,7 @@ class StageGirl(MagiModel):
     school_department = models.CharField(
         _('Department'), max_length=100, null=True,
     )
+    SCHOOL_DEPARTMENT_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     SCHOOL_DEPARTMENTS_CHOICES = ALL_ALT_LANGUAGES
     d_school_departments = models.TextField(_('Department'), null=True)
 
@@ -575,18 +583,22 @@ class StageGirl(MagiModel):
     d_weapon_types = models.TextField(_('Weapon'), null=True)
 
     favorite_food = models.CharField(_('Liked food'), max_length=100, null=True)
+    FAVORITE_FOOD_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     FAVORITE_FOODS_CHOICES = ALL_ALT_LANGUAGES
     d_favorite_foods = models.TextField(_('Liked food'), null=True)
 
     least_favorite_food = models.CharField(_('Disliked food'), max_length=100, null=True)
+    LEAST_FAVORITE_FOOD_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     LEAST_FAVORITE_FOODS_CHOICES = ALL_ALT_LANGUAGES
     d_least_favorite_foods = models.TextField(_('Disliked food'), null=True)
 
     likes = models.CharField(_('Likes'), max_length=150, null=True)
+    LIKES_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     LIKESS_CHOICES = ALL_ALT_LANGUAGES
     d_likess = models.TextField(_('Likes'), null=True)
 
     dislikes = models.CharField(_('Dislikes'), max_length=150, null=True)
+    DISLIKES_FOOD_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     DISLIKESS_CHOICES = ALL_ALT_LANGUAGES
     d_dislikess = models.TextField(_('Dislikes'), null=True)
 
@@ -595,6 +607,7 @@ class StageGirl(MagiModel):
     d_hobbiess = models.TextField(_('Hobbies'), null=True)
 
     introduction = models.TextField(_('Introduction'), help_text='In-game introduction', null=True)
+    INTRODUCTION_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     INTRODUCTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_introductions = models.TextField(_('Introduction'), help_text='In-game introduction', null=True)
 
@@ -716,6 +729,7 @@ class Staff(MagiModel):
 
     name = models.CharField(_('Name'), max_length=100)
     NAMES_CHOICES = NON_LATIN_LANGUAGES
+    NAME_SOURCE_LANGUAGES = ['ja']
     d_names = models.TextField(_('Name'), null=True)
     japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
 
@@ -760,6 +774,7 @@ class Song(MagiModel):
     _original_image = models.ImageField(null=True, upload_to=uploadTiny('song'))
 
     name = models.CharField(_('Title'), max_length=100)
+    NAME_SOURCE_LANGUAGES = ['ja']
     NAMES_CHOICES = ALL_ALT_LANGUAGES
     d_names = models.TextField(_('Title'), null=True)
     japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
@@ -781,18 +796,22 @@ class Song(MagiModel):
     singers = models.ManyToManyField(VoiceActress, related_name='songs', blank=True, verbose_name=_('Singers'))
 
     composer = models.CharField(_('Composer'), max_length=100, null=True)
+    COMPOSER_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     COMPOSERS_CHOICES = NON_LATIN_LANGUAGES
     d_composers = models.TextField(_('Composer'), null=True)
 
     lyricist = models.CharField(_('Lyricist'), max_length=100, null=True)
+    LYRICIST_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     LYRICISTS_CHOICES = NON_LATIN_LANGUAGES
     d_lyricists = models.TextField(_('Lyricist'), null=True)
 
     arranger = models.CharField(_('Arranger'), max_length=100, null=True)
+    ARRANGER_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     ARRANGERS_CHOICES = NON_LATIN_LANGUAGES
     d_arrangers = models.TextField(_('Arranger'), null=True)
 
     orchestral_arrangement = models.CharField(_('Orchestral arrangement'), max_length=100, null=True)
+    ORCHESTRAL_ARRANGEMENT_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     ORCHESTRAL_ARRANGEMENTS_CHOICES = NON_LATIN_LANGUAGES
     d_orchestral_arrangements = models.TextField(_('Orchestral arrangement'), null=True)
 
@@ -810,6 +829,7 @@ class Song(MagiModel):
     _cache_japanese_lyrics = models.TextField(null=True)
 
     m_lyrics = models.TextField(string_concat(_('Lyrics'), ' (', _('Translations'), ')'), null=True)
+    M_LYRICS_SOURCE_LANGUAGES = ['ja']
     M_LYRICSS_CHOICES = ALL_ALT_LANGUAGES_EXCEPT_JAPANESE
     d_m_lyricss = models.TextField(string_concat(_('Lyrics'), ' (', _('Translations'), ')'), null=True)
     _cache_lyrics = models.TextField(null=True)
@@ -890,12 +910,14 @@ class Act(MagiModel):
 
     name = models.CharField(_('Title'), max_length=100, db_index=True, null=True)
     japanese_name = models.CharField(string_concat(_('Title'), ' (', t['Japanese'], ')'), max_length=100, null=True)
+    NAME_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     NAMES_CHOICES = ALL_ALT_LANGUAGES_EXCEPT_JAPANESE
     d_names = models.TextField(_('Title'), null=True)
 
     description = models.CharField(_('Description'), max_length=191, null=True)
     japanese_description = models.CharField(string_concat(
         _('Description'), ' (', t['Japanese'], ')'), max_length=191, null=True)
+    DESCRIPTION_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES_EXCEPT_JAPANESE
     d_descriptions = models.TextField(_('Description'), null=True)
 
@@ -1000,6 +1022,7 @@ class BaseCard(MagiModel):
     )
 
     name = models.CharField(_('Title'), max_length=100, null=True)
+    NAME_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     NAMES_CHOICES = ALL_ALT_LANGUAGES
     d_names = models.TextField(_('Title'), null=True)
 
@@ -1410,14 +1433,17 @@ class Card(BaseCard):
     # Long texts
 
     profile = models.TextField(_('Profile'), null=True)
+    PROFILE_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     PROFILES_CHOICES = ALL_ALT_LANGUAGES
     d_profiles = models.TextField(_('Profile'), null=True)
 
     description = models.TextField(_('Description'), null=True)
+    DESCRIPTION_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     DESCRIPTIONS_CHOICES = ALL_ALT_LANGUAGES
     d_descriptions = models.TextField(_('Description'), null=True)
 
     message = models.TextField(_('Message'), null=True)
+    MESSAGE_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     MESSAGES_CHOICES = ALL_ALT_LANGUAGES
     d_messages = models.TextField(_('Message'), null=True)
 
@@ -1621,6 +1647,7 @@ class Memoir(BaseCard):
     # Long texts
 
     explanation = models.TextField(_('Explanation'), null=True)
+    EXPLANATION_SOURCE_LANGUAGES = ['ja', 'kr', 'zh-hant']
     EXPLANATIONS_CHOICES = ALL_ALT_LANGUAGES
     d_explanations = models.TextField(_('Explanation'), null=True)
 
