@@ -58,7 +58,7 @@ def generate_settings():
     )
     def get_name_image_url_from_voice_actress(voice_actress):
         if voice_actress.birthday_banner:
-            return voice_actress.first_name, voice_actress.birthday_banner_url, voice_actress.item_url
+            return voice_actress.t_name, voice_actress.birthday_banner_url, voice_actress.item_url
         return voice_actress.t_name, voice_actress.image_url, voice_actress.item_url
     latest_news = getCharactersBirthdays(
         models.VoiceActress.objects.all(),
