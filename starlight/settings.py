@@ -276,6 +276,7 @@ ENABLED_PAGES['about_revuestarlight'] = {
     'icon': 'about',
     'navbar_link_list': 'revuestarlight',
     'divider_after': True,
+    'check_permissions': lambda c: c['request'].LANGUAGE_CODE not in DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
 }
 
 ENABLED_PAGES['news_revuestarlight'] = {
@@ -284,6 +285,7 @@ ENABLED_PAGES['news_revuestarlight'] = {
     'icon': 'new',
     'navbar_link_list': 'revuestarlight',
     'divider_before': True,
+    'check_permissions': lambda c: c['request'].LANGUAGE_CODE not in DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
 }
 
 ENABLED_PAGES['about_relive'] = {
@@ -293,6 +295,7 @@ ENABLED_PAGES['about_relive'] = {
     'icon': 'about',
     'navbar_link_list': 'relive',
     'divider_after': True,
+    'check_permissions': lambda c: c['request'].LANGUAGE_CODE not in DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
 }
 
 ENABLED_PAGES['news_relive'] = {
@@ -301,6 +304,7 @@ ENABLED_PAGES['news_relive'] = {
     'icon': 'new',
     'navbar_link_list': 'relive',
     'divider_before': True,
+    'check_permissions': lambda c: c['request'].LANGUAGE_CODE not in DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
 }
 
 SOCIAL_MEDIA_LINKS = OrderedDict([
