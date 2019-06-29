@@ -348,8 +348,8 @@ def songCredits(value):
     return data
 
 def songCallbackAfterSave(details, item, json_item):
-    path = u'starlight/static/extracts/revue3/27_{}.png'.format(json_item['id'])
-    saveLocalImageToModel(item, 'image', path)
+    url = u'{}jp/res/item_root/music_coverart/27_{}.png'.format(ASSET_BASE_URL, json_item['id'])
+    saveImageURLToModel(item, 'image', url)
     item.save()
 
 IMPORT_CONFIGURATION = OrderedDict()
@@ -503,8 +503,10 @@ def import_data(local=False, to_import=None, log_function=print):
     )
 
 ############################################################
-# Local images import
+# Images import
 ############################################################
+
+ASSET_BASE_URL = u'http://beta.karen.makoo.eu/assets/'
 
 # This is a temporary feature which in the future will be
 # replaced by images downloaded directly from the API.
@@ -516,19 +518,24 @@ def import_images(to_import=None):
             # Art
             art_data = None
             if not card.art or 'reload' in to_import:
-                path = u'starlight/static/extracts/dress/cg/{}/image.png'.format(card.number)
-                art_data, art = saveLocalImageToModel(card, 'art', path, return_data=True)
+                url = u'{}dlc/res/dress/cg/{}/image.png'.format(ASSET_BASE_URL, card.number)
+                art_data, art = saveImageURLToModel(card, 'art', url, return_data=True)
                 if art is None:
-                    print('  Art file not found:', path)
+                    print('  Art file not found:', url)
                 else:
                     needs_save.append('art')
+            # Image
+            if not card.image or 'art' in needs_save:
+                art_data, image = generate_card(card, art_data=art_data)
+                if image is not None:
+                    needs_save.append('image')
             # Base icon
             base_icon_data = None
             if not card.base_icon or 'reload' in to_import:
-                path = u'starlight/static/extracts/large/1_{}.png'.format(card.number)
-                base_icon_data, icon = saveLocalImageToModel(card, 'base_icon', path, return_data=True)
+                url = u'{}jp/res/item_root/large/1_{}.png'.format(ASSET_BASE_URL, card.number)
+                base_icon_data, icon = saveImageURLToModel(card, 'base_icon', url, return_data=True)
                 if icon is None:
-                    print('  Icon file not found:', path)
+                    print('  Icon file not found:', url)
                 else:
                     needs_save.append('base_icon')
             # Generated icons
@@ -547,18 +554,13 @@ def import_images(to_import=None):
                             needs_save.append(field_name)
             # Transparent
             if not card.transparent or 'reload' in to_import:
-                path = u'starlight/static/extracts/battle/model/{n}/cutin/cutin_special_{n}.png'.format(
-                    n=card.number)
-                transparent = saveLocalImageToModel(card, 'transparent', path)
+                url = u'{url}dlc/res/battle/model/{n}/cutin/cutin_special_{n}.png'.format(
+                    url=ASSET_BASE_URL, n=card.number)
+                transparent = saveImageURLToModel(card, 'transparent', url)
                 if transparent is None:
-                    print('  Transparent file not found:', path)
+                    print('  Transparent file not found:', url)
                 else:
                     needs_save.append('transparent')
-            # Image
-            if not card.image or 'art' in needs_save:
-                art_data, image = generate_card(card, art_data=art_data)
-                if image is not None:
-                    needs_save.append('image')
 
             if needs_save:
                 card.save()
@@ -570,19 +572,24 @@ def import_images(to_import=None):
             # Art
             art_data = None
             if not memoir.art or 'reload' in to_import:
-                path = u'starlight/static/extracts/equip/cg/{}/image.png'.format(memoir.number)
-                art_data, art = saveLocalImageToModel(memoir, 'art', path, return_data=True)
+                url = u'{}dlc/res/equip/cg/{}/image.png'.format(ASSET_BASE_URL, memoir.number)
+                art_data, art = saveImageURLToModel(memoir, 'art', url, return_data=True)
                 if art is None:
-                    print('  Art file not found:', path)
+                    print('  Art file not found:', url)
                 else:
                     needs_save.append('art')
+            # Image
+            if not memoir.image or 'art' in needs_save:
+                art_data, image = generate_memoir(memoir, art_data=art_data)
+                if image is not None:
+                    needs_save.append('image')
             # Base icon
             base_icon_data = None
             if not memoir.base_icon or 'reload' in to_import:
-                path = u'starlight/static/extracts/large/2_{}.png'.format(memoir.number)
-                base_icon_data, icon = saveLocalImageToModel(memoir, 'base_icon', path, return_data=True)
+                url = u'{}jp/res/item_root/large/2_{}.png'.format(ASSET_BASE_URL, memoir.number)
+                base_icon_data, icon = saveImageURLToModel(memoir, 'base_icon', url, return_data=True)
                 if icon is None:
-                    print('  Icon file not found:', path)
+                    print('  Icon file not found:', url)
                 else:
                     needs_save.append('base_icon')
             # Generated icons
@@ -596,11 +603,6 @@ def import_images(to_import=None):
                         memoir, field_name, rank, base_icon_data=base_icon_data)
                     if icon is not None:
                         needs_save.append(field_name)
-            # Image
-            if not memoir.image or 'art' in needs_save:
-                art_data, image = generate_memoir(memoir, art_data=art_data)
-                if image is not None:
-                    needs_save.append('image')
 
             if needs_save:
                 memoir.save()
