@@ -70,7 +70,7 @@ def generate_settings():
 
     print 'Show a happy birthday banner for the users whose birthday is today'
     latest_news = getUsersBirthdaysToday(
-        staticImageURL('generic_banner.png'),
+        'https://i.imgur.com/0T5j2rr.png',
         latest_news=latest_news,
         max_usernames=4,
     )
