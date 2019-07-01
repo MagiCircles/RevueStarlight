@@ -232,7 +232,7 @@ SITE_STATIC_URL = '//localhost:{}/'.format(django_settings.DEBUG_PORT) if django
 
 GET_GLOBAL_CONTEXT = starlightGlobalContext
 
-DISQUS_SHORTNAME = 'starlight'
+DISQUS_SHORTNAME = 'starlight-academy'
 GOOGLE_ANALYTICS = 'UA-142986850-1'
 
 ACCOUNT_MODEL = models.Account
