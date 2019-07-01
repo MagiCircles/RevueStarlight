@@ -133,7 +133,7 @@ CORS_URLS_REGEX = r'^/api/.*$'
 LOGIN_REDIRECT_URL = '/'
 LOG_EMAIL = 'emails-log@schoolido.lu'
 PASSWORD_EMAIL = 'password@schoolido.lu'
-AWS_SES_RETURN_PATH = 'contact@schoolido.lu'
+AWS_SES_RETURN_PATH = 'contact@starlight.academy'
 
 FAVORITE_CHARACTERS = []
 STAGE_GIRLS_NAMES = {}

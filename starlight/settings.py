@@ -28,12 +28,13 @@ from starlight import models
 SITE_NAME = SITE_NAME
 GAME_NAME = GAME_NAME
 
-# todo GAME_DESCRIPTION = ''
-# todo GAME_URL = ''
+GAME_DESCRIPTION = _(u"""
+Shoujo☆Kageki Revue Starlight (Lit. Girls☆Opera Revue Starlight) is a multi-media project produced by Bushiroad and Nelke Planning. It aims to link the world of anime and musicals together. Besides the anime series and the musical performances, the voice actresses also perform live concerts and various events for fans. The characters from the license also appear in 3 manga series and a mobile game called "Relive".
+""")
+
+GAME_URL = '/wiki/About%20Revue%20Starlight/'
 
 COLOR = '#1A1D24'
-
-# SITE_LONG_DESCRIPTION = 'todo'
 
 ############################################################
 # Prelaunch details
@@ -56,8 +57,8 @@ SITE_LOGO = 'starlight_academy_logo.png'
 
 ABOUT_PHOTO = 'about.png'
 
-# todo DONATE_IMAGE = ''
-# todo EMAIL_IMAGE = ''
+DONATE_IMAGE = 'donate.png'
+EMAIL_IMAGE = 'email.png'
 
 EMPTY_IMAGE = 'empty_crown.png'
 
@@ -77,9 +78,10 @@ SITE_IMAGE_PER_LANGUAGE = {
 ############################################################
 # Contact & Social
 
-# todo CONTACT_EMAIL = ''
+CONTACT_EMAIL = 'contact@starlight.academy'
 CONTACT_REDDIT = 'Ragefire2b'
-# todo CONTACT_FACEBOOK = ''
+CONTACT_FACEBOOK = 'revuestarlight.en'
+CONTACT_DISCORD = 'https://discordapp.com/invite/dZ93wsW'
 
 FEEDBACK_FORM = 'https://forms.gle/6aRWq6zNhPBz9UGHA'
 GITHUB_REPOSITORY = ('MagiCircles', 'RevueStarlight')
@@ -142,7 +144,14 @@ MAX_LEVEL_BEFORE_SCREENSHOT_REQUIRED = 70
 ############################################################
 # Donators
 
-# todo DONATORS_STATUS_CHOICES = ''
+DONATORS_STATUS_CHOICES = (
+    ('THANKS', 'Thanks'),
+    ('SUPPORTER', 'Seisho student'),
+    ('LOVER', 'Revue performer'),
+    ('AMBASSADOR', 'Play stage manager'),
+    ('PRODUCER', 'Revue producer'),
+    ('DEVOTEE', 'Starlight reached'),
+)
 
 ############################################################
 # Activities
@@ -224,7 +233,7 @@ SITE_STATIC_URL = '//localhost:{}/'.format(django_settings.DEBUG_PORT) if django
 GET_GLOBAL_CONTEXT = starlightGlobalContext
 
 DISQUS_SHORTNAME = 'starlight'
-# todo GOOGLE_ANALYTICS = ''
+GOOGLE_ANALYTICS = 'UA-142986850-1'
 
 ACCOUNT_MODEL = models.Account
 
