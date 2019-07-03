@@ -33,6 +33,15 @@ from starlight.utils import (
 # API Import
 ############################################################
 
+API_BASE_URL = u'http://beta.karen.makoo.eu/api/json/'
+ASSET_BASE_URL = u'http://beta.karen.makoo.eu/assets/'
+
+REQUEST_OPTIONS = {
+    'headers': {
+        'X-Karen-API-Header': getattr(django_settings, 'KAREN_API_TOKEN', None),
+    },
+}
+
 TO_STATISTICS = {
     'hp': 'hp',
     'atk': 'act_power',
@@ -349,13 +358,14 @@ def songCredits(value):
 
 def songCallbackAfterSave(details, item, json_item):
     url = u'{}jp/res/item_root/music_coverart/27_{}.png'.format(ASSET_BASE_URL, json_item['id'])
-    saveImageURLToModel(item, 'image', url)
+    saveImageURLToModel(item, 'image', url, request_options=REQUEST_OPTIONS)
     item.save()
 
 IMPORT_CONFIGURATION = OrderedDict()
 
 IMPORT_CONFIGURATION['stagegirls'] = {
     'model': models.StageGirl,
+    'endpoint': 'chara_info',
     'unique_fields': [
         'name',
     ],
@@ -388,6 +398,7 @@ IMPORT_CONFIGURATION['stagegirls'] = {
 
 IMPORT_CONFIGURATION['cards'] = {
     'model': models.Card,
+    'endpoint': 'dress',
     'unique_fields': [
         'number',
    ],
@@ -443,6 +454,7 @@ IMPORT_CONFIGURATION['cards'] = {
 
 IMPORT_CONFIGURATION['memoirs'] = {
     'model': models.Memoir,
+    'endpoint': 'equip',
     'unique_fields': [
         'number',
     ],
@@ -483,6 +495,7 @@ IMPORT_CONFIGURATION['memoirs'] = {
 
 IMPORT_CONFIGURATION['songs'] = {
     'model': models.Song,
+    'endpoint': 'music',
     'unique_fields': [
         'name',
     ],
@@ -498,15 +511,14 @@ IMPORT_CONFIGURATION['songs'] = {
 
 def import_data(local=False, to_import=None, log_function=print):
     magi_import_data(
-        None, IMPORT_CONFIGURATION, results_location=None,
+        API_BASE_URL, IMPORT_CONFIGURATION, results_location=None,
         local=local, to_import=to_import, log_function=log_function,
+        request_options=REQUEST_OPTIONS,
     )
 
 ############################################################
 # Images import
 ############################################################
-
-ASSET_BASE_URL = u'http://beta.karen.makoo.eu/assets/'
 
 # This is a temporary feature which in the future will be
 # replaced by images downloaded directly from the API.
@@ -519,7 +531,8 @@ def import_images(to_import=None):
             art_data = None
             if not card.art or 'reload' in to_import:
                 url = u'{}dlc/res/dress/cg/{}/image.png'.format(ASSET_BASE_URL, card.number)
-                art_data, art = saveImageURLToModel(card, 'art', url, return_data=True)
+                art_data, art = saveImageURLToModel(
+                    card, 'art', url, return_data=True, request_options=REQUEST_OPTIONS)
                 if art is None:
                     print('  Art file not found:', url)
                 else:
@@ -533,7 +546,8 @@ def import_images(to_import=None):
             base_icon_data = None
             if not card.base_icon or 'reload' in to_import:
                 url = u'{}jp/res/item_root/large/1_{}.png'.format(ASSET_BASE_URL, card.number)
-                base_icon_data, icon = saveImageURLToModel(card, 'base_icon', url, return_data=True)
+                base_icon_data, icon = saveImageURLToModel(
+                    card, 'base_icon', url, return_data=True, request_options=REQUEST_OPTIONS)
                 if icon is None:
                     print('  Icon file not found:', url)
                 else:
@@ -556,7 +570,7 @@ def import_images(to_import=None):
             if not card.transparent or 'reload' in to_import:
                 url = u'{url}dlc/res/battle/model/{n}/cutin/cutin_special_{n}.png'.format(
                     url=ASSET_BASE_URL, n=card.number)
-                transparent = saveImageURLToModel(card, 'transparent', url)
+                transparent = saveImageURLToModel(card, 'transparent', url, request_options=REQUEST_OPTIONS)
                 if transparent is None:
                     print('  Transparent file not found:', url)
                 else:
@@ -573,7 +587,8 @@ def import_images(to_import=None):
             art_data = None
             if not memoir.art or 'reload' in to_import:
                 url = u'{}dlc/res/equip/cg/{}/image.png'.format(ASSET_BASE_URL, memoir.number)
-                art_data, art = saveImageURLToModel(memoir, 'art', url, return_data=True)
+                art_data, art = saveImageURLToModel(
+                    memoir, 'art', url, return_data=True, request_options=REQUEST_OPTIONS)
                 if art is None:
                     print('  Art file not found:', url)
                 else:
@@ -587,7 +602,8 @@ def import_images(to_import=None):
             base_icon_data = None
             if not memoir.base_icon or 'reload' in to_import:
                 url = u'{}jp/res/item_root/large/2_{}.png'.format(ASSET_BASE_URL, memoir.number)
-                base_icon_data, icon = saveImageURLToModel(memoir, 'base_icon', url, return_data=True)
+                base_icon_data, icon = saveImageURLToModel(
+                    memoir, 'base_icon', url, return_data=True, request_options=REQUEST_OPTIONS)
                 if icon is None:
                     print('  Icon file not found:', url)
                 else:
