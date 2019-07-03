@@ -432,6 +432,7 @@ class VoiceActressLinkCollection(SubItemCollection):
         display_style = 'table'
         display_style_table_fields = ['voice_actress', 'name', 'url']
         show_item_buttons_as_icons = True
+        auto_filter_form = True
 
     class ItemView(SubItemCollection.ItemView):
         enabled = False
