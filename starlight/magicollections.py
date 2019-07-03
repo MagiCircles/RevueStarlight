@@ -46,6 +46,12 @@ from starlight import models, forms
 ############################################################
 
 ############################################################
+# Badge Collection
+
+class BadgeCollection(_BadgeCollection):
+    enabled = True
+
+############################################################
 # StaffConfiguration Collection
 
 class StaffConfigurationCollection(_StaffConfigurationCollection):
