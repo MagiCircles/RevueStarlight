@@ -334,6 +334,7 @@ class VoiceActress(MagiModel):
     NAMES_CHOICES = NON_LATIN_LANGUAGES
     d_names = models.TextField(_('Name'), null=True)
     japanese_name = property(lambda _s: _s.names.get('ja', _s.name))
+    first_name = property(lambda _s: _s.name.split(' ')[-1])
 
     image = models.ImageField(_('Image'), upload_to=uploadItem('voiceactress'), null=True)
     _tthumbnail_image = models.ImageField(null=True, upload_to=uploadTthumb('voiceactress'))
@@ -441,8 +442,7 @@ class VoiceActressLink(MagiModel):
     )
 
     name = models.CharField(_('Platform'), max_length=100)
-    NAME_SOURCE_LANGUAGES = ['ja']
-    NAMES_CHOICES = NON_LATIN_LANGUAGES
+    NAMES_CHOICES = ALL_ALT_LANGUAGES
     d_names = models.TextField(_('Platform'), null=True)
 
     url = models.URLField('URL', max_length=191)
@@ -556,6 +556,7 @@ class StageGirl(MagiModel):
     i_year = models.PositiveIntegerField(_('School year'), choices=i_choices(YEAR_CHOICES), null=True)
     to_year_choices = classmethod(lambda _s: getSchoolYearChoices())
     to_t_year = classmethod(lambda _s, _i: dict(i_choices(_s.to_year_choices())).get(_i, None))
+    display_year = property(lambda _s: _s.to_t_year(_s.i_year))
 
     birthday = models.DateField(_('Birthday'), null=True, help_text='The year will be ignored.')
     display_birthday = property(lambda _s: date_format(_s.birthday, format='MONTH_DAY_FORMAT', use_l10n=True))
