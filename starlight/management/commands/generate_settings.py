@@ -92,7 +92,7 @@ def generate_settings():
     ) for stage_girl in all_stage_girls]
 
     print 'Cache stage girls names'
-    stage_girls_names = OrderedDict([
+    favorite_characters_names = OrderedDict([
         (stage_girl.pk, stage_girl.names)
         for stage_girl in all_stage_girls
     ])
@@ -224,7 +224,7 @@ def generate_settings():
         'IS_CHARACTER_BIRTHDAY': is_character_birthday,
         'STAFF_CONFIGURATIONS': staff_configurations,
         'FAVORITE_CHARACTERS': favorite_characters,
-        'STAGE_GIRLS_NAMES': stage_girls_names,
+        'FAVORITE_CHARACTERS_NAMES': favorite_characters_names,
         'SCHOOLS': all_schools,
         'VOICE_ACTRESSES': all_voiceactresses,
         'MAX_STATISTICS': max_statistics,

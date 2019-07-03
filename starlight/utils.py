@@ -9,6 +9,10 @@ from magi.utils import (
     CuteFormTransform,
     FAVORITE_CHARACTERS_IMAGES,
     FAVORITE_CHARACTERS_NAMES,
+    getFavoriteCharacterChoices,
+    getFavoriteCharacterImageFromPk,
+    getFavoriteCharacterNamesFromPk,
+    getFavoriteCharacterNameFromPk,
     getTranslatedName,
     globalContext,
     listUnique,
@@ -88,26 +92,12 @@ def getSchoolChoices(without_other=False):
         if not without_other or (without_other and school_details['name'] != 'Other')
     ]
 
-def getStageGirlNamesFromPk(pk):
-    return {
-        'name': FAVORITE_CHARACTERS_NAMES.get(pk, None),
-        'names': django_settings.STAGE_GIRLS_NAMES.get(pk, {}),
-    }
-
-def getStageGirlNameFromPk(pk):
-    return getTranslatedName(getStageGirlNamesFromPk(pk))
+getStageGirlNamesFromPk = getFavoriteCharacterNamesFromPk
+getStageGirlNameFromPk = getFavoriteCharacterNameFromPk
+getStageGirlChoices = getFavoriteCharacterChoices
 
 def getStageGirlImageFromPk(pk):
-    return (
-        FAVORITE_CHARACTERS_IMAGES.get(pk, None)
-        or staticImageURL('default/default_stagegirl.png')
-    )
-
-def getStageGirlChoices():
-    return [
-        (pk, getStageGirlNameFromPk(pk))
-        for pk in FAVORITE_CHARACTERS_NAMES.keys()
-    ]
+    return getFavoriteCharacterImageFromPk(pk, default=staticImageURL('default/default_stagegirl.png'))
 
 def getVoiceActressChoices():
     return BLANK_CHOICE_DASH + [

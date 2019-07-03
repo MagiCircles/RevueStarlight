@@ -120,7 +120,7 @@ GET_STARTED_VIDEO = 'WLfi932cfFI'
 
 FAVORITE_CHARACTER_NAME = _('Stage girl')
 FAVORITE_CHARACTER_TO_URL = lambda link: (
-    '/stagegirl/{pk}/{name}/'.format(pk=link.raw_value, name=tourldash(link.value)))
+    u'/stagegirl/{pk}/{name}/'.format(pk=link.raw_value, name=tourldash(link.value)))
 
 CUSTOM_PREFERENCES_FORM = True
 
