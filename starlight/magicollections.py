@@ -14,6 +14,7 @@ from magi.magicollections import (
     ActivityCollection as _ActivityCollection,
     AccountCollection as _AccountCollection,
     UserCollection as _UserCollection,
+    BadgeCollection as _BadgeCollection,
 )
 from magi.middleware.httpredirect import HttpRedirectException # Todo: Should be removed after launch
 from magi.utils import (
