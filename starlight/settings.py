@@ -258,8 +258,7 @@ ENABLED_PAGES = DEFAULT_ENABLED_PAGES.copy()
 ENABLED_PAGES['wiki'][0]['enabled'] = True
 ENABLED_PAGES['wiki'][0]['custom'] = True
 ENABLED_PAGES['wiki'][1]['enabled'] = True
-ENABLED_PAGES['wiki'][0]['divider_before'] = True
-ENABLED_PAGES['wiki'][0]['navbar_link_list'] = 'relive'
+ENABLED_PAGES['wiki'][0]['navbar_link'] = False
 
 # Add voice actress cuteform to settings
 ENABLED_PAGES['settings']['custom'] = True
@@ -303,6 +302,7 @@ ENABLED_PAGES['news_relive'] = {
     'icon': 'new',
     'navbar_link_list': 'relive',
     'divider_before': True,
+    'divider_after': True,
     'check_permissions': lambda c: c['request'].LANGUAGE_CODE not in DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
 }
 

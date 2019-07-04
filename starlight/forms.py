@@ -723,7 +723,7 @@ class MemoirFilterForm(BaseCardFilterForm):
 def to_CollectedCardForm(cls):
 
     class _CollectedCardForm(cls.form_class):
-        rank = forms.ChoiceField(label=_('Rank'), choices=[
+        rank = forms.ChoiceField(label=_('Rank'), initial=7, choices=[
             (i, i)
             for i in range(1, 7 + 1)
         ])
@@ -759,7 +759,7 @@ def to_CollectedCardForm(cls):
 def to_CollectedMemoirForm(cls):
 
     class _CollectedMemoirForm(cls.form_class):
-        rank = forms.ChoiceField(label=_('Rank'), choices=[
+        rank = forms.ChoiceField(label=_('Rank'), initial=5, choices=[
             (i, i - 1)
             for i in range(1, 5 + 1)
         ])
