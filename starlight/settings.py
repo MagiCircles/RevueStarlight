@@ -146,6 +146,8 @@ DONATORS_STATUS_CHOICES = (
 ############################################################
 # Activities
 
+MINIMUM_LIKES_POPULAR = 5
+
 ACTIVITY_TAGS = [
     # Revue Starlight
     ('revuestarlight', lambda: LICENSE_NAME_PER_LANGUAGE.get(get_language(), LICENSE_NAME)),
