@@ -170,86 +170,88 @@ function loadCardsFilters() {
 }
 
 function loadBaseCard() {
-    let card = $('.item-info.card-info, .item-info.memoir-info');
-    if (!card.data('loaded-card')) {
-        card.data('loaded-card', true);
-        // Load statistics tabs
-        card.find('[data-open-tab]').each(function() {
-	        $(this).unbind('click');
-	        $(this).click(function(e) {
-	            $('[data-tabs="' + $(this).closest('.btn-group').data('control-tabs') + '"] .tab-pane').removeClass('active');
-	            $('[data-tab="' + $(this).data('open-tab') + '"]').addClass('active');
-	            $(this).blur();
-	        });
-        });
-        // Load icons selector
-        let all_icons = card.find('[data-field="icon"] [data-rank]');
-        let all_ranks = getAllValues(all_icons, 'data-rank').map(n => parseInt(n));
-        let all_rarities = getAllValues(all_icons, 'data-rarity').map(n => parseInt(n));
-        var current_rank = all_ranks[all_ranks.length - 1];
-        var current_rarity = 0;
-        var rarity_selector = 0;
-        let selectors = $('<div style="display: inline-block;" class="padding10"></div>');
-        card.find('[data-field="icon"] td').last().prepend(selectors);
-        let selector_template = '<span><a href="#previous"><span class="glyphicon glyphicon-triangle-left text-muted fontx0-8"></span></a> <span style="display: inline-block; text-align: center; width: 100px;"><img src="#" height="20"></span> <a href="#next"><span class="glyphicon glyphicon-triangle-right text-muted fontx0-8"></span></a></span>';
-        let rank_selector = $(selector_template);
-        rank_selector.find('a[href="#previous"]').click(function(e) {
-            e.preventDefault();
-            current_rank = current_rank - 1;
-            if (!all_ranks.includes(current_rank)) {
-                current_rank = all_ranks[all_ranks.length - 1];
-            }
-            iconToggler();
-            return false;
-        });
-        rank_selector.find('a[href="#next"]').click(function(e) {
-            e.preventDefault();
-            current_rank = current_rank + 1;
-            if (!all_ranks.includes(current_rank)) {
-                current_rank = all_ranks[0];
-            }
-            iconToggler();
-            return false;
-        });
-        selectors.append(rank_selector);
-        if (all_rarities.length > 0) {
-            current_rarity = all_rarities[0];
-            rarity_selector = $(selector_template);
-            rarity_selector.find('a[href="#previous"]').click(function(e) {
+    $('.item-info.card-info, .item-info.memoir-info').each(function() {
+        let card = $(this);
+        if (!card.data('loaded-card')) {
+            card.data('loaded-card', true);
+            // Load statistics tabs
+            card.find('[data-open-tab]').each(function() {
+    	        $(this).unbind('click');
+    	        $(this).click(function(e) {
+    	            $('[data-tabs="' + $(this).closest('.btn-group').data('control-tabs') + '"] .tab-pane').removeClass('active');
+    	            $('[data-tab="' + $(this).data('open-tab') + '"]').addClass('active');
+    	            $(this).blur();
+    	        });
+            });
+            // Load icons selector
+            let all_icons = card.find('[data-field="icon"] [data-rank]');
+            let all_ranks = getAllValues(all_icons, 'data-rank').map(n => parseInt(n));
+            let all_rarities = getAllValues(all_icons, 'data-rarity').map(n => parseInt(n));
+            var current_rank = all_ranks[all_ranks.length - 1];
+            var current_rarity = 0;
+            var rarity_selector = 0;
+            let selectors = $('<div style="display: inline-block;" class="padding10"></div>');
+            card.find('[data-field="icon"] td').last().prepend(selectors);
+            let selector_template = '<span><a href="#previous"><span class="glyphicon glyphicon-triangle-left text-muted fontx0-8"></span></a> <span style="display: inline-block; text-align: center; width: 100px;"><img src="#" height="20"></span> <a href="#next"><span class="glyphicon glyphicon-triangle-right text-muted fontx0-8"></span></a></span>';
+            let rank_selector = $(selector_template);
+            rank_selector.find('a[href="#previous"]').click(function(e) {
                 e.preventDefault();
-                current_rarity = current_rarity - 1;
-                if (!all_rarities.includes(current_rarity)) {
-                    current_rarity = all_rarities[all_rarities.length - 1];
+                current_rank = current_rank - 1;
+                if (!all_ranks.includes(current_rank)) {
+                    current_rank = all_ranks[all_ranks.length - 1];
                 }
                 iconToggler();
                 return false;
             });
-            rarity_selector.find('a[href="#next"]').click(function(e) {
+            rank_selector.find('a[href="#next"]').click(function(e) {
                 e.preventDefault();
-                current_rarity = current_rarity + 1;
-                if (!all_rarities.includes(current_rarity)) {
-                    current_rarity = all_rarities[0];
+                current_rank = current_rank + 1;
+                if (!all_ranks.includes(current_rank)) {
+                    current_rank = all_ranks[0];
                 }
                 iconToggler();
                 return false;
             });
-            selectors.append('<br>');
-            selectors.append(rarity_selector);
-        }
-        function iconToggler() {
-            all_icons.hide();
-            rank_selector.find('img').prop('src', static_url + 'img/' + (all_ranks.includes(7) ? '' : 'memoir_') + 'rank/' + current_rank + '.png');
-            rank_selector.find('img').prop('alt', current_rank);
+            selectors.append(rank_selector);
             if (all_rarities.length > 0) {
-                rarity_selector.find('img').prop('src', static_url + 'img/small_rarity/' + current_rarity + '.png');
-                rarity_selector.find('img').prop('alt', current_rarity);
-                all_icons.filter('[data-rank="' + current_rank + '"][data-rarity="' + current_rarity + '"]').show();
-            } else {
-                all_icons.filter('[data-rank="' + current_rank + '"]').show();
+                current_rarity = all_rarities[0];
+                rarity_selector = $(selector_template);
+                rarity_selector.find('a[href="#previous"]').click(function(e) {
+                    e.preventDefault();
+                    current_rarity = current_rarity - 1;
+                    if (!all_rarities.includes(current_rarity)) {
+                        current_rarity = all_rarities[all_rarities.length - 1];
+                    }
+                    iconToggler();
+                    return false;
+                });
+                rarity_selector.find('a[href="#next"]').click(function(e) {
+                    e.preventDefault();
+                    current_rarity = current_rarity + 1;
+                    if (!all_rarities.includes(current_rarity)) {
+                        current_rarity = all_rarities[0];
+                    }
+                    iconToggler();
+                    return false;
+                });
+                selectors.append('<br>');
+                selectors.append(rarity_selector);
             }
+            function iconToggler() {
+                all_icons.hide();
+                rank_selector.find('img').prop('src', static_url + 'img/' + (all_ranks.includes(7) ? '' : 'memoir_') + 'rank/' + current_rank + '.png');
+                rank_selector.find('img').prop('alt', current_rank);
+                if (all_rarities.length > 0) {
+                    rarity_selector.find('img').prop('src', static_url + 'img/small_rarity/' + current_rarity + '.png');
+                    rarity_selector.find('img').prop('alt', current_rarity);
+                    all_icons.filter('[data-rank="' + current_rank + '"][data-rarity="' + current_rarity + '"]').show();
+                } else {
+                    all_icons.filter('[data-rank="' + current_rank + '"]').show();
+                }
+            }
+            iconToggler();
         }
-        iconToggler();
-    }
+    });
 }
 
 function loadBaseCardForm() {
