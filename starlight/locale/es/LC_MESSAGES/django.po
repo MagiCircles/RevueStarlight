@@ -3921,7 +3921,7 @@ msgstr "Habilidad de líder"
 
 #: sukutomo/models.py:713
 msgid "Statistic effect"
-msgstr ""
+msgstr "Efecto estadístico"
 
 #: sukutomo/models.py:1216
 msgid "{group} members points up by +{number}%"
@@ -3937,7 +3937,7 @@ msgstr ""
 
 #: bang/models.py:434
 msgid "For the next {duration} seconds, score boosted by +{percentage}% until a {note_type} note is hit, then score boosted by +{alt_percentage}%"
-msgstr ""
+msgstr "Por los próximos {duration} segundos, aumenta el puntaje un +{percentage}% hasta que {note_type} sean tocadas, luego el puntaje aumenta +{alt_percentage}%"
 
 #: bang/models.py:498
 msgid "Life guard"
@@ -4072,7 +4072,7 @@ msgstr "Flor"
 
 #: starlight/models.py:115
 msgid "Wind"
-msgstr "Aire"
+msgstr "Viento"
 
 #: starlight/models.py:131
 msgid "Cloud"
@@ -4130,7 +4130,7 @@ msgstr "Edición gráfica"
 #: starlight/settings.py:255
 #, fuzzy
 msgid "Questionable"
-msgstr "Preguntable"
+msgstr "Cuestionable"
 
 #: starlight/forms.py:188 starlight/forms.py:199
 #: starlight/magicollections.py:114 starlight/magicollections.py:115
@@ -4154,39 +4154,39 @@ msgstr ""
 
 #: magi/forms.py:2128
 msgid "Users who can speak {language}"
-msgstr ""
+msgstr "Usuarios que pueden hablar {language}"
 
 #: magi/magicollections.py:2266
 msgid "Website"
-msgstr ""
+msgstr "Sitio Web"
 
 #: starlight/forms.py:223
 msgid "Skip"
-msgstr ""
+msgstr "Omitir"
 
 #: starlight/forms.py:440 starlight/models.py:797 starlight/models.py:845
 #: starlight/utils.py:190
 msgid "Singers"
-msgstr ""
+msgstr "Cantantes"
 
 #: starlight/forms.py:468 starlight/forms.py:629 starlight/forms.py:656
 #: starlight/models.py:952 starlight/models.py:953 starlight/models.py:955
 #: starlight/models.py:957
 msgid "Target"
-msgstr ""
+msgstr "Objetivo"
 
 #: starlight/forms.py:545 starlight/magicollections.py:749
 #: starlight/models.py:1135 starlight/models.py:1365
 msgid "Acts"
-msgstr ""
+msgstr "Actos"
 
 #: starlight/forms.py:550
 msgid "Number"
-msgstr ""
+msgstr "Número"
 
 #: starlight/forms.py:647 starlight/magicollections.py:1084
 msgid "Effective against"
-msgstr ""
+msgstr "Efectivo contra"
 
 #: starlight/forms.py:650 starlight/magicollections.py:1085
 msgid "Less effective against"
@@ -4274,15 +4274,15 @@ msgstr "Vídeo"
 
 #: starlight/models.py:550 starlight/models.py:554
 msgid "Department"
-msgstr ""
+msgstr "Departamento"
 
 #: starlight/models.py:610 starlight/models.py:613
 msgid "Introduction"
-msgstr ""
+msgstr "Introducción"
 
 #: starlight/models.py:724
 msgid "General"
-msgstr ""
+msgstr "General"
 
 #: starlight/models.py:725
 msgid "Stage play"
@@ -4290,23 +4290,23 @@ msgstr ""
 
 #: starlight/models.py:726
 msgid "Additional"
-msgstr ""
+msgstr "Adicional"
 
 #: starlight/models.py:728
 msgid "Category"
-msgstr ""
+msgstr "Categoría"
 
 #: starlight/models.py:884
 msgid "Basic"
-msgstr ""
+msgstr "Básico"
 
 #: starlight/models.py:889
 msgid "Climax"
-msgstr ""
+msgstr "Clímax"
 
 #: starlight/models.py:894
 msgid "Auto"
-msgstr ""
+msgstr "Automático"
 
 #: starlight/models.py:899
 msgid "Finishing"
@@ -4315,27 +4315,27 @@ msgstr ""
 #: starlight/models.py:926 starlight/models.py:930 starlight/models.py:1082
 #: starlight/models.py:1086
 msgid "Tips"
-msgstr ""
+msgstr "Consejos"
 
 #: starlight/models.py:942
 msgid "Unlock at rank {rank}"
-msgstr ""
+msgstr "Desbloquea en rango {rank}"
 
 #: starlight/models.py:945
 msgid "Hits {number_of_times} times"
-msgstr ""
+msgstr "Golpea {number_of_times} veces"
 
 #: starlight/models.py:948
 msgid "Front enemy"
-msgstr ""
+msgstr "Enemigo del frente"
 
 #: starlight/models.py:949
 msgid "Front group of enemies"
-msgstr ""
+msgstr "Grupo de enemigos del frente"
 
 #: starlight/models.py:950
 msgid "All enemies"
-msgstr ""
+msgstr "Todos los enemigos"
 
 #: starlight/models.py:962
 msgid "After full bound break"
@@ -4343,51 +4343,51 @@ msgstr ""
 
 #: starlight/models.py:981
 msgid "AP"
-msgstr ""
+msgstr "Puntos de acción"
 
 #: starlight/models.py:1138 starlight/models.py:1144 starlight/models.py:1150
 #: starlight/models.py:1158
 msgid "ACT Power"
-msgstr ""
+msgstr "Poder Actoral"
 
 #: starlight/models.py:1139 starlight/models.py:1145 starlight/models.py:1152
 #: starlight/models.py:1160
 msgid "Normal defense"
-msgstr ""
+msgstr "Defensa Normal"
 
 #: starlight/models.py:1140 starlight/models.py:1146 starlight/models.py:1154
 #: starlight/models.py:1162
 msgid "Special defense"
-msgstr ""
+msgstr "Defensa Especial"
 
 #: starlight/models.py:1141 starlight/models.py:1147 starlight/models.py:1155
 #: starlight/models.py:1163
 msgid "Agility"
-msgstr ""
+msgstr "Agilidad"
 
 #: starlight/models.py:1170
 msgid "Base"
-msgstr ""
+msgstr "Base"
 
 #: starlight/models.py:1390
 msgid "Element"
-msgstr ""
+msgstr "Elemento"
 
 #: starlight/models.py:1416
 msgid "Anti-tank"
-msgstr ""
+msgstr "Antitanque"
 
 #: starlight/models.py:1417
 msgid "Assassin"
-msgstr ""
+msgstr "Asesino"
 
 #: starlight/models.py:1418
 msgid "Attacker"
-msgstr ""
+msgstr "Atacante"
 
 #: starlight/models.py:1419
 msgid "Burn"
-msgstr ""
+msgstr "Quemar"
 
 #: starlight/models.py:1420
 msgid "Debuffer"
@@ -4395,11 +4395,11 @@ msgstr ""
 
 #: starlight/models.py:1421
 msgid "Defender"
-msgstr ""
+msgstr "Defensor"
 
 #: starlight/models.py:1422
 msgid "Disabler"
-msgstr ""
+msgstr "Deshabilitador"
 
 #: starlight/models.py:1424
 msgid "Nuker"
@@ -4407,35 +4407,35 @@ msgstr ""
 
 #: starlight/models.py:1426
 msgid "Special defender"
-msgstr ""
+msgstr "Defensor Especial"
 
 #: starlight/models.py:1427
 msgid "Special defense tank"
-msgstr ""
+msgstr "Tanque y Defensor Especial"
 
 #: starlight/models.py:1429
 msgid "Tank"
-msgstr ""
+msgstr "Tanque"
 
 #: starlight/models.py:1642 starlight/models.py:1690
 msgid "Upgrade"
-msgstr ""
+msgstr "Mejorar"
 
 #: starlight/models.py:1643 starlight/models.py:1696
 msgid "VS. Revue reward"
-msgstr ""
+msgstr "Recompensa de VS. Revue"
 
 #: starlight/models.py:1645
 msgid "Selling price"
-msgstr ""
+msgstr "Precio"
 
 #: starlight/models.py:1650 starlight/models.py:1653
 msgid "Explanation"
-msgstr ""
+msgstr "Explicación"
 
 #: starlight/settings.py:205
 msgid "Movie"
-msgstr ""
+msgstr "Película"
 
 #: starlight/settings.py:209
 msgid "Meetups"
@@ -4449,5 +4449,5 @@ msgstr ""
 msgid "\n"
 "Shoujo☆Kageki Revue Starlight (Lit. Girls☆Opera Revue Starlight) is a multi-media project produced by Bushiroad and Nelke Planning. It aims to link the world of anime and musicals together. Besides the anime series and the musical performances, the voice actresses also perform live concerts and various events for fans. The characters from the license also appear in 3 manga series and a mobile game called \"Relive\".\n"
 ""
-msgstr ""
+msgstr "Shoujo☆Kageki Revue Starlight (Lit. Teatro Estelar, Chicas☆ de la Opera) es un proyecto multimedia producido por Bushiroad y Nelke Planning. Su objetivo es unir el mundo del anime y los musicales. Además del anime y actuaciones musicales, las actrices de voz también realizan conciertos en vivo y varios eventos para los fans. Los personajes de la franquicia también aparecen en tres series de mangas y un juego para móbiles llamado \"ReLive\"."
 
