@@ -1119,7 +1119,7 @@ msgstr "Typ"
 #: starlight/magicollections.py:260 starlight/models.py:221
 #: starlight/models.py:1406
 msgid "Center"
-msgstr "Center"
+msgstr "Mitte"
 
 #: starlight/models.py:1066 starlight/models.py:1817
 msgid "Rarity"
@@ -3992,7 +3992,7 @@ msgstr "Chibis"
 #: sukutomo/magicollections.py:614 sukutomo/magicollections.py:701
 #: sukutomo/models.py:845
 msgid "Merged with other event"
-msgstr ""
+msgstr "Mit anderem Event fusioniert"
 
 #: sukutomo/magicollections.py:713 sukutomo/models.py:833
 #: sukutomo/models.py:842 sukutomo/models.py:855 sukutomo/models.py:864
@@ -4118,11 +4118,11 @@ msgstr "Dislikes"
 
 #: starlight/models.py:1407
 msgid "Front"
-msgstr ""
+msgstr "Vorne"
 
 #: starlight/models.py:1405
 msgid "Rear"
-msgstr ""
+msgstr "Hinten"
 
 #: starlight/models.py:1409
 msgid "Position"
@@ -4134,7 +4134,7 @@ msgstr "Fanart"
 
 #: starlight/settings.py:236
 msgid "Graphic edit"
-msgstr ""
+msgstr "Bearbeitete Grafik"
 
 #: starlight/settings.py:255
 msgid "Questionable"
@@ -4298,7 +4298,7 @@ msgstr "Theaterstück"
 
 #: starlight/models.py:726
 msgid "Additional"
-msgstr ""
+msgstr "zusätzliche/r/s"
 
 #: starlight/models.py:728
 msgid "Category"
@@ -4306,7 +4306,7 @@ msgstr "Kategorie"
 
 #: starlight/models.py:884
 msgid "Basic"
-msgstr ""
+msgstr "Basis"
 
 #: starlight/models.py:889
 msgid "Climax"
@@ -4347,7 +4347,7 @@ msgstr "Alle Gegner"
 
 #: starlight/models.py:962
 msgid "After full bound break"
-msgstr ""
+msgstr "Nach vollständigem Bound Break"
 
 #: starlight/models.py:981
 msgid "AP"
@@ -4451,11 +4451,12 @@ msgstr "Treffen"
 
 #: starlight/models.py:814 starlight/models.py:817
 msgid "Orchestral arrangement"
-msgstr ""
+msgstr "Orchesterarrangement"
 
 #: starlight/settings.py:69
 msgid "\n"
 "Shoujo☆Kageki Revue Starlight (Lit. Girls☆Opera Revue Starlight) is a multi-media project produced by Bushiroad and Nelke Planning. It aims to link the world of anime and musicals together. Besides the anime series and the musical performances, the voice actresses also perform live concerts and various events for fans. The characters from the license also appear in 3 manga series and a mobile game called \"Relive\".\n"
 ""
-msgstr ""
+msgstr "Shoujo☆Kageki Revue Starlight ist ein Multi-Media Projekt, welches von Bushiroad and Nelke Planning produziert wird. Ziel ist es, die Welt der Anime und Musical miteinander zu verbinden.\n"
+"Neben der Anime Adaption und den Musicals, treten die Synchronsprecherinnen auch auf Live Konzerten und verschiedenen Events für Fans auf. Die Charaktere aus der Reihe erscheinen auch in 3 Manga-Serien und einem Handyspiel namens \"Relive\"."
 
