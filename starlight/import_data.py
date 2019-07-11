@@ -252,6 +252,22 @@ def stageGirlCallback(details, item, unique_data, data):
     except ValueError:
         pass
 
+def baseCardAfterSave(details, item, json_item):
+    # Check if it's available in English version based on presence of all translations
+    available_in_ww = True
+    for term in ['name', 'description', 'profile', 'get_message']:
+        for language in ['en', 'ko', 'zh_hant']:
+            if not json_item.get(term, {}).get(language, None):
+                available_in_ww = False
+                break
+    if available_in_ww and not item.ww_release_date:
+        item.ww_release_date = timezone.now()
+        item.save()
+    # Add Japanese release date as today if no release date has been saved
+    if not item.jp_release_date:
+        item.jp_release_date = timezone.now()
+        item.save()
+
 def memoirCallbackEnd():
     # Auto calculate min_level and max_level from base and delta
     for memoir in models.Memoir.objects.all():
@@ -452,6 +468,7 @@ IMPORT_CONFIGURATION['cards'] = {
         'personality_id', # personality.lua has sentences + final_attack_id?
         'role_index', # I couldn't find any list of index -> role
     ],
+    'callback_after_save': baseCardAfterSave,
 }
 
 IMPORT_CONFIGURATION['memoirs'] = {
@@ -494,6 +511,7 @@ IMPORT_CONFIGURATION['memoirs'] = {
         'material_exp',
     ],
     'callback_end': memoirCallbackEnd,
+    'callback_after_save': baseCardAfterSave,
 }
 
 IMPORT_CONFIGURATION['songs'] = {
