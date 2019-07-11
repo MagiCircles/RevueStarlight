@@ -366,6 +366,7 @@ IMPORT_CONFIGURATION = OrderedDict()
 IMPORT_CONFIGURATION['stagegirls'] = {
     'model': models.StageGirl,
     'endpoint': 'chara_info',
+    'results_location': ['entries'],
     'unique_fields': [
         'name',
     ],
@@ -399,6 +400,7 @@ IMPORT_CONFIGURATION['stagegirls'] = {
 IMPORT_CONFIGURATION['cards'] = {
     'model': models.Card,
     'endpoint': 'dress',
+    'results_location': ['entries'],
     'unique_fields': [
         'number',
    ],
@@ -455,6 +457,7 @@ IMPORT_CONFIGURATION['cards'] = {
 IMPORT_CONFIGURATION['memoirs'] = {
     'model': models.Memoir,
     'endpoint': 'equip',
+    'results_location': ['entries'],
     'unique_fields': [
         'number',
     ],
@@ -495,6 +498,7 @@ IMPORT_CONFIGURATION['memoirs'] = {
 
 IMPORT_CONFIGURATION['songs'] = {
     'model': models.Song,
+    'results_location': ['entries'],
     'endpoint': 'music',
     'unique_fields': [
         'name',
