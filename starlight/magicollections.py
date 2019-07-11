@@ -146,14 +146,6 @@ class NewsCollection(_ActivityCollection):
         add_button_subtitle = None
         ajax_pagination_callback = 'loadActivities'
 
-        # Todo: Should be removed after launch
-        def check_permissions(self, request, context):
-            if (context.get('launch_date', None)
-                and (not request.user.is_authenticated()
-                     or not request.user.hasPermission('access_site_before_launch'))):
-                raise HttpRedirectException('/prelaunch/')
-            super(NewsCollection.ListView, self).check_permissions(request, context)
-
         def top_buttons(self, request, context):
             # Call parents super to avoid adding warning button
             return super(_ActivityCollection.ListView, self).top_buttons(request, context)
@@ -162,6 +154,24 @@ class NewsCollection(_ActivityCollection):
             super(NewsCollection.ListView, self).extra_context(context)
             context['activity_tabs'] = None
             context['show_bump'] = True
+
+            # Show a popup to tell people about the feed
+            if (context['request'].user.is_authenticated()
+                and context['request'].LANGUAGE_CODE == 'en'):
+                context['corner_popups']['about_feed'] = {
+                    'title': u'Starlight Academy is a social network.',
+                    'content': 'Did you know? You can post activities and scroll through hundreds of activities posted by our community of Revue Starlight fans like you.',
+                    'image': context['corner_popup_image'],
+                    'image_overflow': context['corner_popup_image_overflow'],
+                    'buttons': {
+                        'feed': {
+                            'title': 'Take me to the feed!',
+                            'url': '/activities/',
+                        },
+                    },
+                    'allow_close_remind': 5,
+                    'allow_close_forever': True,
+                }
 
     def _redirect_after_modification(self, request, item, ajax):
         return (item.ajax_item_url if ajax else item.item_url).replace(

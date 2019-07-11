@@ -24,13 +24,6 @@ from starlight.utils import (
 ############################################################
 
 ############################################################
-# Index
-
-def index(request):
-    return redirect('/prelaunch/')
-    # todo when prelaunch ends return redirect(MAIN_SITE_URL)
-
-############################################################
 # Wiki
 
 def wiki(request, wiki_url='_Sidebar'):
