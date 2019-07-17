@@ -227,13 +227,19 @@ ACT_IMPORT_CONFIGURATION = {
 }
 
 def mapSkills(skills):
+    return ('acts', []) # tmp todo
+    global global_verbose
     added_acts = []
     for skill_name, item in skills.items():
         item['i_type'] = TO_SKILL_TYPE[skill_name]
         if item['i_type']:
             act_unique_data, act_data, not_in_fields = import_generic_item(ACT_IMPORT_CONFIGURATION, item)
-            print('- Ignored:', not_in_fields)
-            item = save_item(ACT_IMPORT_CONFIGURATION, act_unique_data, act_data, print, json_item=item)
+            if global_verbose:
+                print('- Ignored:', not_in_fields)
+            item = save_item(
+                ACT_IMPORT_CONFIGURATION, act_unique_data, act_data,
+                print, json_item=item, verbose=global_verbose,
+            )
             if item:
                 added_acts.append(item)
     return ('acts', added_acts)
@@ -531,11 +537,15 @@ IMPORT_CONFIGURATION['songs'] = {
     'callback_after_save': songCallbackAfterSave,
 }
 
-def import_data(local=False, to_import=None, log_function=print):
+global_verbose = True
+
+def import_data(local=False, to_import=None, log_function=print, verbose=True):
+    global global_verbose
+    global_verbose = verbose
     magi_import_data(
         API_BASE_URL, IMPORT_CONFIGURATION, results_location=None,
         local=local, to_import=to_import, log_function=log_function,
-        request_options=REQUEST_OPTIONS,
+        request_options=REQUEST_OPTIONS, verbose=verbose,
     )
 
 ############################################################

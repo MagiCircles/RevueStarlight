@@ -6,6 +6,10 @@ class Command(BaseCommand):
     can_import_settings = True
 
     def handle(self, *args, **options):
+        verbose = False
+        if 'verbose' in args:
+            verbose = True
+            args = [arg for arg in args if arg != 'verbose']
         if 'images' in args:
             import_images([arg for arg in args if arg != 'images'])
         elif 'news' in args:
@@ -15,4 +19,5 @@ class Command(BaseCommand):
                 local='local' in args,
                 to_import=[arg for arg in args if arg != 'local'] or None,
                 log_function=print,
+                verbose=verbose,
             )
