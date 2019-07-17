@@ -15,6 +15,7 @@ from magi.magicollections import (
     AccountCollection as _AccountCollection,
     UserCollection as _UserCollection,
     BadgeCollection as _BadgeCollection,
+    PrizeCollection as _PrizeCollection,
 )
 from magi.middleware.httpredirect import HttpRedirectException # Todo: Should be removed after launch
 from magi.utils import (
@@ -50,6 +51,12 @@ from starlight import models, forms
 # Badge Collection
 
 class BadgeCollection(_BadgeCollection):
+    enabled = True
+
+############################################################
+# Prize Collection
+
+class PrizeCollection(_PrizeCollection):
     enabled = True
 
 ############################################################
