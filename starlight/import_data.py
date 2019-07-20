@@ -17,6 +17,8 @@ from magi.tools import (
 )
 from magi import urls # loads context
 from magi.utils import (
+    FilterByMode,
+    filterByTranslatedValue,
     getAstrologicalSign,
     saveImageURLToModel,
     join_data,
@@ -177,7 +179,7 @@ def updateOrCreateFk(model, new_field_name, default_name=None, transform_name=No
         return (new_field_name, item)
     return _f
 
-def findAct(model, unique_data, data):
+def findAct(model, unique_data, data, manytomany, dictionaries):
     # First try to get it from the internal id
     try:
         return model.objects.filter(internal_id=unique_data['internal_id'])[0]
@@ -227,7 +229,6 @@ ACT_IMPORT_CONFIGURATION = {
 }
 
 def mapSkills(skills):
-    return ('acts', []) # tmp todo
     global global_verbose
     added_acts = []
     for skill_name, item in skills.items():
@@ -282,6 +283,7 @@ def memoirCallbackEnd():
 
 TO_SONG_CREDIT = {
     'en': {
+        'Lyrics': ['lyricist'],
         'Written by': ['lyricist'],
         'Composed and arranged by': ['composer', 'lyricist'],
         'Composed by': ['composer'],
@@ -520,9 +522,28 @@ IMPORT_CONFIGURATION['memoirs'] = {
     'callback_after_save': baseCardAfterSave,
 }
 
+def findSong(model, unique_data, data, manytomany, dictionaries):
+    # Find from Japanese name
+    japanese_name = dictionaries.get('d_names', {}).get('ja', None)
+    if japanese_name:
+        try:
+            return filterByTranslatedValue(
+                model.objects.all(), 'name',
+                language='ja',
+                value=japanese_name,
+                mode=FilterByMode.Exact,
+            )[0]
+        except IndexError:
+            pass
+    # Fallback to English name
+    if unique_data.get('name', None):
+        return model.objects.filter(**unique_data)[0]
+    return None
+
 IMPORT_CONFIGURATION['songs'] = {
     'model': models.Song,
     'results_location': ['entries'],
+    'find_existing_item': findSong,
     'endpoint': 'music',
     'unique_fields': [
         'name',
