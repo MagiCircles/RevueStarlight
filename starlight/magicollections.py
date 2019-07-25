@@ -935,6 +935,8 @@ class BaseCardCollection(MainItemCollection):
         item_buttons_classes = ['btn', 'btn-link-main', 'btn-lines']
         item_padding = 0
 
+        quick_add_view = 'icons'
+
         alt_views = MainItemCollection.ListView.alt_views + [
             ('icons', {
                 'verbose_name': string_concat(_('Icons'), ' (', _('Quick add'), ')'),
