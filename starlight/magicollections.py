@@ -735,6 +735,24 @@ class SongCollection(MainItemCollection):
         per_line = 4
         page_size = 24
 
+        def buttons_per_item(self, request, context, item):
+            buttons = OrderedDict()
+
+            # Buy CD button
+            if item.buy_url:
+                buttons[u'buy_url'] = {
+                    'classes': self.item_buttons_classes,
+                    'show': True,
+                    'url': item.buy_url,
+                    'open_in_new_window': True,
+                    'icon': 'shop',
+                    'title': _('Buy {thing}').format(thing=_('CD')),
+                    'has_permissions': True,
+                }
+
+            buttons.update(super(SongCollection.ListView, self).buttons_per_item(request, context, item))
+            return buttons
+
         def extra_context(self, context):
             super(SongCollection.ListView, self).extra_context(context)
             context['h1_page_title'] = self.collection.navbar_link_title

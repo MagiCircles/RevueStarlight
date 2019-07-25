@@ -855,6 +855,8 @@ class Song(MagiModel):
 
     display_length = property(lambda _s: time.strftime('%M:%S', time.gmtime(_s.length)))
 
+    top_image = property(lambda _s: _s.image_url or staticImageURL('default/default.png'))
+
     ############################################################
     # Unicode
 
