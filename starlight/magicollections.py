@@ -748,6 +748,7 @@ class SongCollection(MainItemCollection):
                     'icon': 'shop',
                     'title': _('Buy {thing}').format(thing=_('CD')),
                     'has_permissions': True,
+                    'tooltip': _('When you buy from this link, it costs you nothing extra, but we get a percentage which helps support the community and pay for the servers!'),
                 }
 
             buttons.update(super(SongCollection.ListView, self).buttons_per_item(request, context, item))
