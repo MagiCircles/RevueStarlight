@@ -381,9 +381,10 @@ def songCredits(value):
     return data
 
 def songCallbackAfterSave(details, item, json_item):
-    url = u'{}jp/res/item_root/music_coverart/27_{}.png'.format(ASSET_BASE_URL, json_item['id'])
-    saveImageURLToModel(item, 'image', url, request_options=REQUEST_OPTIONS)
-    item.save()
+    if not item.image:
+        url = u'{}jp/res/item_root/music_coverart/27_{}.png'.format(ASSET_BASE_URL, json_item['id'])
+        saveImageURLToModel(item, 'image', url, request_options=REQUEST_OPTIONS)
+        item.save()
 
 IMPORT_CONFIGURATION = OrderedDict()
 
