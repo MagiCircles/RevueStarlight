@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import cStringIO, csv, datetime, html2text, requests, time, urllib
+import cStringIO, csv, datetime, html2text, requests, time, urllib, os
 from collections import OrderedDict
 from django.conf import settings as django_settings
 from django.utils import timezone
@@ -390,7 +390,7 @@ IMPORT_CONFIGURATION = OrderedDict()
 
 IMPORT_CONFIGURATION['stagegirls'] = {
     'model': models.StageGirl,
-    'endpoint': 'chara_info',
+    'endpoint': 'chara',
     'results_location': ['entries'],
     'unique_fields': [
         'name',
@@ -561,26 +561,32 @@ IMPORT_CONFIGURATION['songs'] = {
 
 global_verbose = True
 
-def import_data(local=False, to_import=None, log_function=print, verbose=True):
+def import_data(local=False, to_import=None, log_function=print, verbose=False):
     global global_verbose
     global_verbose = verbose
-    magi_import_data(
-        API_BASE_URL, IMPORT_CONFIGURATION, results_location=None,
-        local=local, to_import=to_import, log_function=log_function,
-        request_options=REQUEST_OPTIONS, verbose=verbose,
-    )
+    if to_import and 'images' in to_import:
+        import_images([arg for arg in to_import if arg != 'images'])
+    else:
+        magi_import_data(
+            API_BASE_URL, IMPORT_CONFIGURATION, results_location=None,
+            local=local, to_import=to_import, log_function=log_function,
+            request_options=REQUEST_OPTIONS, verbose=verbose,
+        )
 
 ############################################################
 # Images import
 ############################################################
 
+BASE_DIR = os.path.dirname(os.path.dirname(__file__)) + u'/'
+
 # This is a temporary feature which in the future will be
 # replaced by images downloaded directly from the API.
 def import_images(to_import=None):
+    global global_verbose
     if not to_import or 'cards' in to_import:
         for card in models.Card.objects.all():
-            print('Importing images for card #{} {}'.format(card.number, card))
             needs_save = []
+            errors = []
             # Art
             art_data = None
             if not card.art or 'reload' in to_import:
@@ -588,12 +594,13 @@ def import_images(to_import=None):
                 art_data, art = saveImageURLToModel(
                     card, 'art', url, return_data=True, request_options=REQUEST_OPTIONS)
                 if art is None:
-                    print('  Art file not found:', url)
+                    errors.append('  Art file not found:' + url)
                 else:
                     needs_save.append('art')
             # Image
             if not card.image or 'art' in needs_save:
-                art_data, image = generate_card(card, art_data=art_data)
+                art_data, image, new_errors = generate_card(card, art_data=art_data)
+                errors += new_errors
                 if image is not None:
                     needs_save.append('image')
             # Base icon
@@ -603,7 +610,7 @@ def import_images(to_import=None):
                 base_icon_data, icon = saveImageURLToModel(
                     card, 'base_icon', url, return_data=True, request_options=REQUEST_OPTIONS)
                 if icon is None:
-                    print('  Icon file not found:', url)
+                    errors.append('  Icon file not found:' + url)
                 else:
                     needs_save.append('base_icon')
             # Generated icons
@@ -616,8 +623,9 @@ def import_images(to_import=None):
                     else:
                         field_name = 'rank{rank}_rarity{rarity}_icon'.format(rank=rank, rarity=rarity)
                     if not getattr(card, field_name) or 'reload' in to_import:
-                        base_icon_data, icon = generate_card_icon(
+                        base_icon_data, icon, new_errors = generate_card_icon(
                             card, field_name, rank, rarity, base_icon_data=base_icon_data)
+                        errors += new_errors
                         if icon is not None:
                             needs_save.append(field_name)
             # Transparent
@@ -626,16 +634,24 @@ def import_images(to_import=None):
                     url=ASSET_BASE_URL, n=card.number)
                 transparent = saveImageURLToModel(card, 'transparent', url, request_options=REQUEST_OPTIONS)
                 if transparent is None:
-                    print('  Transparent file not found:', url)
+                    errors.append('  Transparent file not found:' + url)
                 else:
                     needs_save.append('transparent')
 
+            if global_verbose and not needs_save and not errors:
+                print('Nothing to import for for card #{} {}'.format(card.number, card))
+            if errors:
+                print('Error(s) while importing images for card #{} {}'.format(card.number, card))
+                for error in errors:
+                    print(error)
             if needs_save:
+                print('Importing images for card #{} {}'.format(card.number, card))
                 card.save()
                 print('  Saved:', needs_save)
+
     if not to_import or 'memoirs' in to_import:
         for memoir in models.Memoir.objects.all():
-            print('Importing images for memoir #{} {}'.format(memoir.number, memoir))
+            errors = []
             needs_save = []
             # Art
             art_data = None
@@ -644,12 +660,13 @@ def import_images(to_import=None):
                 art_data, art = saveImageURLToModel(
                     memoir, 'art', url, return_data=True, request_options=REQUEST_OPTIONS)
                 if art is None:
-                    print('  Art file not found:', url)
+                    errors.append('  Art file not found:' + url)
                 else:
                     needs_save.append('art')
             # Image
             if not memoir.image or 'art' in needs_save:
-                art_data, image = generate_memoir(memoir, art_data=art_data)
+                art_data, image, new_errors = generate_memoir(memoir, art_data=art_data)
+                errors += new_errors
                 if image is not None:
                     needs_save.append('image')
             # Base icon
@@ -659,7 +676,7 @@ def import_images(to_import=None):
                 base_icon_data, icon = saveImageURLToModel(
                     memoir, 'base_icon', url, return_data=True, request_options=REQUEST_OPTIONS)
                 if icon is None:
-                    print('  Icon file not found:', url)
+                    errors.append('  Icon file not found:' + url)
                 else:
                     needs_save.append('base_icon')
             # Generated icons
@@ -669,33 +686,42 @@ def import_images(to_import=None):
                 else:
                     field_name = 'rank{rank}_icon'.format(rank=rank)
                 if not getattr(memoir, field_name) or 'reload' in to_import:
-                    base_icon_data, icon = generate_memoir_icon(
+                    base_icon_data, icon, new_errors = generate_memoir_icon(
                         memoir, field_name, rank, base_icon_data=base_icon_data)
+                    errors += new_errors
                     if icon is not None:
                         needs_save.append(field_name)
 
+            if global_verbose and not needs_save and not errors:
+                print('Nothing to import for for memoir #{} {}'.format(memoir.number, memoir))
+            if errors:
+                print('Error(s) while importing images for memoir #{} {}'.format(memoir.number, memoir))
+                for error in errors:
+                    print(error)
             if needs_save:
+                print('Importing images for memoir #{} {}'.format(memoir.number, memoir))
                 memoir.save()
                 print('  Saved:', needs_save)
 
 def generate_card(card, art_data=None):
+    errors = []
     try:
         if not art_data:
             art_field = getattr(card, 'art')
             art_data = art_field.read()
         art_image = Image(file=cStringIO.StringIO(art_data))
     except (BlobError, ValueError):
-        print('  Art not saved in card.')
-        return art_data, None
+        errors.append('  Art not saved in card.')
+        return art_data, None, errors
 
     try:
-        border_image = Image(filename='starlight/static/extracts/cards_elements/card_border.png')
-        element_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.element))
-        rarity_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.rarity))
-        position_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.position))
+        border_image = Image(filename=BASE_DIR + 'starlight/static/extracts/cards_elements/card_border.png')
+        element_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/{}.png'.format(card.element))
+        rarity_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/{}.png'.format(card.rarity))
+        position_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/{}.png'.format(card.position))
     except BlobError:
-        print('  Cards layer image(s) not found.')
-        return art_data, None
+        errors.append('  Cards layer image(s) not found.')
+        return art_data, None, errors
 
     art_image.resize(width=border_image.width, height=border_image.height)
     art_image.composite(border_image, left=0, top=0)
@@ -703,28 +729,29 @@ def generate_card(card, art_data=None):
     art_image.composite(position_image, top=element_image.height, left=(art_image.width - position_image.width - 18))
     art_image.composite(rarity_image, top=(art_image.height - rarity_image.height - 22), left=22)
 
-    art_image.save(filename='tmp.png')
+    art_image.save(filename=BASE_DIR + 'tmp.png')
 
-    return art_data, saveLocalImageToModel(card, 'image', 'tmp.png')
+    return art_data, saveLocalImageToModel(card, 'image', 'tmp.png'), errors
 
 def generate_card_icon(card, field_name, rank, rarity, base_icon_data=None):
+    errors = []
     try:
         if not base_icon_data:
             base_icon_field = getattr(card, 'base_icon')
             base_icon_data = base_icon_field.read()
         base_icon_image = Image(file=cStringIO.StringIO(base_icon_data))
     except (BlobError, ValueError):
-        print('  Base icon not saved in card.')
-        return base_icon_data, None
+        errors.append('  Base icon not saved in card.')
+        return base_icon_data, None, errors
 
     try:
-        border_image = Image(filename=u'starlight/static/extracts/cards_elements/card_icon_rank{}.png'.format(rank))
-        position_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.position))
-        element_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(card.element))
-        rarity_image = Image(filename=u'starlight/static/extracts/cards_elements/icon_rarity{}.png'.format(rarity))
+        border_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/card_icon_rank{}.png'.format(rank))
+        position_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/{}.png'.format(card.position))
+        element_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/{}.png'.format(card.element))
+        rarity_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/icon_rarity{}.png'.format(rarity))
     except BlobError:
-        print('  Icon layer image(s) not found.')
-        return base_icon_data, None
+        errors.append('  Icon layer image(s) not found.')
+        return base_icon_data, None, errors
     base_icon_image.composite(border_image, left=0, top=0)
     position_image.transform(resize='x20')
     base_icon_image.composite(position_image, top=34, left=4)
@@ -735,54 +762,56 @@ def generate_card_icon(card, field_name, rank, rarity, base_icon_data=None):
         left=(base_icon_image.width / 2) - (rarity_image.width / 2),
     )
 
-    base_icon_image.save(filename='tmp.png')
+    base_icon_image.save(filename=BASE_DIR + 'tmp.png')
 
-    return base_icon_data, saveLocalImageToModel(card, field_name, 'tmp.png')
+    return base_icon_data, saveLocalImageToModel(card, field_name, 'tmp.png'), errors
 
 def generate_memoir(memoir, art_data=None):
+    errors = []
     try:
         if not art_data:
             art_field = getattr(memoir, 'art')
             art_data = art_field.read()
         art_image = Image(file=cStringIO.StringIO(art_data))
     except (BlobError, ValueError):
-        print('  Art not saved in memoir.')
-        return art_data, None
+        errors.append('  Art not saved in memoir.')
+        return art_data, None, errors
 
     try:
-        border_image = Image(filename='starlight/static/extracts/cards_elements/memoir_border.png')
-        rarity_image = Image(filename=u'starlight/static/extracts/cards_elements/{}.png'.format(memoir.rarity))
+        border_image = Image(filename=BASE_DIR + 'starlight/static/extracts/cards_elements/memoir_border.png')
+        rarity_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/{}.png'.format(memoir.rarity))
     except BlobError:
-        print('  Memoir layer image(s) not found.')
-        return art_data, None
+        errors.append('  Memoir layer image(s) not found.')
+        return art_data, None, errors
 
     art_image.resize(width=border_image.width, height=border_image.height)
     art_image.composite(border_image, left=0, top=0)
     rarity_image.transform(resize='x73')
     art_image.composite(rarity_image, top=(art_image.height - rarity_image.height - 19), left=20)
 
-    art_image.save(filename='tmp.png')
+    art_image.save(filename=BASE_DIR + 'tmp.png')
 
-    return art_data, saveLocalImageToModel(memoir, 'image', 'tmp.png')
+    return art_data, saveLocalImageToModel(memoir, 'image', 'tmp.png'), errors
 
 def generate_memoir_icon(memoir, field_name, rank, base_icon_data=None):
+    errors = []
     try:
         if not base_icon_data:
             base_icon_field = getattr(memoir, 'base_icon')
             base_icon_data = base_icon_field.read()
         base_icon_image = Image(file=cStringIO.StringIO(base_icon_data))
     except (BlobError, ValueError):
-        print('  Base icon not saved in memoir.')
-        return base_icon_data, None
+        errors.append('  Base icon not saved in memoir.')
+        return base_icon_data, None, errors
 
     try:
-        border_image = Image(filename=u'starlight/static/extracts/cards_elements/memoir_icon_rank{}.png'.format(
+        border_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/memoir_icon_rank{}.png'.format(
             rank))
-        rarity_image = Image(filename=u'starlight/static/extracts/cards_elements/icon_rarity{}.png'.format(
+        rarity_image = Image(filename=BASE_DIR + u'starlight/static/extracts/cards_elements/icon_rarity{}.png'.format(
         memoir.rarity))
     except BlobError:
-        print('  Icon layer image(s) not found.')
-        return base_icon_data, None
+        errors.append('  Icon layer image(s) not found.')
+        return base_icon_data, None, errors
 
     base_icon_image.composite(border_image, left=0, top=0)
     base_icon_image.composite(
@@ -790,427 +819,6 @@ def generate_memoir_icon(memoir, field_name, rank, base_icon_data=None):
         left=(base_icon_image.width / 2) - (rarity_image.width / 2),
     )
 
-    base_icon_image.save(filename='tmp.png')
+    base_icon_image.save(filename=BASE_DIR + 'tmp.png')
 
-    return base_icon_data, saveLocalImageToModel(memoir, field_name, 'tmp.png')
-
-############################################################
-# Local news import
-############################################################
-
-AUTHORS_MAP = {
-    'Revue Starlight EN': 'satsunyan',
-    'raide': 'Raide',
-    'satsunyan': 'satsunyan',
-}
-
-_voice_actresses = list(models.VoiceActress.objects.all().values_list('name', flat=True))
-
-ALL_CHARACTERS_NAMES = (
-    TO_CHARACTER_NAME_SWAPPED.values()
-) + (
-    TO_CHARACTER.values()
-) + [
-    'Saijou Claudine',
-    'Kochou Shizuha',
-    'Kanou Misora',
-    'Ootsuki Aruru',
-    'Ootori Michiru',
-    'Liu Meifan',
-    'Aijou Karen',
-    'Tendou Maya',
-]
-
-ALL_VOICE_ACTRESSES_NAMES = (
-    _voice_actresses
-) + [
-    u' '.join(reversed(_name.split(' ')))
-    for _name in _voice_actresses
-] + (
-    TO_VOICE_ACTRESS.keys()
-) + (
-    TO_VOICE_ACTRESS.values()
-) + [
-    u' '.join(reversed(_name.split(' ')))
-    for _name in TO_VOICE_ACTRESS.keys()
-] + [
-    u' '.join(reversed(_name.split(' ')))
-    for _name in TO_VOICE_ACTRESS.values()
-]
-
-MANUAL_IMPORT = [
-    'Privacy Policy',
-    'Cast / Staff',
-    'About RSI',
-    'Looking for Volunteers! We need Translators, Contributors and Social Media handlers!',
-    'What is Revue Starlight?',
-    'Test',
-    '',
-    'Sample Page',
-] + (
-    ALL_CHARACTERS_NAMES
-) + (
-    ALL_VOICE_ACTRESSES_NAMES
-)
-
-TAGS_MAPPER = {
-    'site-news': 'community',
-    'jp_trailers': 'JP',
-    'en_trailers': 'WW',
-    'revue-starlight-tv-anime': 'anime',
-    'event-reports': 'irlevent',
-    'starlight-theater': 'irlevent',
-    'weiss-schwarz': 'merch',
-    'interviews': 'voiceactress',
-    'mobage': 'relive',
-    'revue-starlight-relive': 'relive',
-    'starira': 'relive',
-    'latest': 'staff',
-    'news': 'staff',
-    'starlight-relive': 'relive',
-    'my-theater': 'mytheater',
-    'event-masterpost': 'event',
-    'new-theater-items': 'mytheater',
-    'gacha': 'gacha',
-    'starira-announcement-stream': 'irlevent',
-    'stickers': 'relive',
-    'patch-notes': 'relive',
-    'theater-items': 'mytheater',
-    'my-theater-items': 'mytheater',
-    'english-server': 'WW',
-    'taiwan-event': 'irlevent',
-}
-
-TAGS_VERBOSE_MAPPER = {
-    _va: 'voiceactresses'
-    for _va in ALL_VOICE_ACTRESSES_NAMES
-}
-TAGS_VERBOSE_MAPPER.update({
-    _va: 'stagegirls'
-    for _va in ALL_CHARACTERS_NAMES
-})
-
-def importSongs(details, h):
-    title = details['wp_post_title'][len('Lyrics - '):]
-    romaji_title = None
-
-    if '(' in title:
-        romaji_title = title.split('(')[0].strip()
-        title = title.split('(')[1].split(')')[0].strip()
-
-    html = details['wp_post_content']
-    html = u'<p>{}</p>'.format(html).replace(
-        '\n\n', '</p><br><p>'
-    ).replace(
-        '\n', '</p><p>'
-    )
-    markdown = h.handle(html)
-    markdown = markdown.strip()
-
-    if not markdown:
-        return
-
-    # Author
-    author_username = details['wp_post_author']
-    author_username = AUTHORS_MAP.get(author_username, author_username)
-    try:
-        author = models.User.objects.filter(username=author_username)[0]
-    except IndexError:
-        author = create_user(author_username)
-
-    try:
-        song = models.Song.objects.filter(name=title)[0]
-    except IndexError:
-        song = None
-
-    data = {
-        'owner_id': author.id,
-        'name': title,
-    }
-    if romaji_title:
-        data['romaji_name'] = romaji_title
-
-    # Image
-
-    image_url = None
-    if not song or not song.image:
-        image_url = markdown.split('![')[1].split('](')[1].split(')')[0].strip()
-
-    # Singers
-
-    singers = []
-    try:
-        sung_by_parts = markdown.split('Sung by:')[1].split('\n')[0].split(', ')
-    except IndexError:
-        sung_by_parts = None
-    if sung_by_parts:
-        for part in sung_by_parts:
-            voice_actress_name = part.split('CV: ')[-1].split(')')[0].strip()
-            voice_actress_name = TO_VOICE_ACTRESS.get(voice_actress_name, voice_actress_name)
-            voice_actress_name_reversed = u' '.join(reversed(voice_actress_name.split(' ')))
-            try:
-                voice_actress = models.VoiceActress.objects.filter(name=voice_actress_name_reversed)[0]
-            except IndexError:
-                voice_actress = models.VoiceActress.objects.filter(name=voice_actress_name)[0]
-            image = part.split('![](')[1].split(')')[0]
-            markdown = markdown.replace(
-                u'_![]({})_'.format(image),
-                u'![]({}) '.format(voice_actress.stagegirls.all()[0].http_small_image_url),
-            )
-            singers.append(voice_actress)
-
-    # Credits
-
-    try:
-        data['lyricist'] = markdown.split('Lyrics: ')[1].split('\n')[0].strip()
-    except IndexError:
-        try:
-            data['lyricist'] = markdown.split('Lyricist: ')[1].split('\n')[0].strip()
-        except IndexError:
-            pass
-
-    try:
-        data['composer'] = markdown.split('Composer: ')[1].split('\n')[0].strip()
-    except IndexError:
-        pass
-
-    try:
-        data['arranger'] = markdown.split('Lyrics: ')[1].split('\n')[0].strip()
-    except IndexError:
-        pass
-
-    # Lyrics
-
-    data['m_lyrics'] = markdown.split('[tabby title="Translation"]')[1].split('[tabby')[0].strip()
-    data['m_japanese_lyrics'] = markdown.split('[tabby title="Kanji"]')[1].split('[tabby')[0].strip()
-    data['m_romaji_lyrics'] = markdown.split('[tabby title="Romaji"]')[1].split('[tabby')[0].strip()
-
-    # Upload images to imgur
-
-    for field_name, value in data.items():
-        if field_name.startswith('m_'):
-            # Avoid reuploading
-            if song and 'https://i.imgur.com/' in getattr(song, field_name):
-                data[field_name] = getattr(song, field_name)
-            else:
-                data[field_name] = _replace_images(data[field_name])
-                data[field_name] = data[field_name].replace('\n\n  \n\n', '\n\n<br>\n')
-
-    # Add credit of who translated the lyrics
-    data['m_lyrics'] += u'\n\n[Translation by {}]({})'.format(author.username, author.http_item_url)
-
-    # Add or edit song
-
-    if song:
-        models.Song.objects.filter(pk=song.pk).update(**data)
-        song = models.Song.objects.filter(pk=song.pk)[0]
-    else:
-        song = models.Song.objects.create(**data)
-
-    # Add singers many to many
-
-    song.singers.add(*singers)
-
-    # Upload image
-
-    try:
-        saveImageURLToModel(song, 'image', image_url)
-    except:
-        pass
-
-    song.save()
-    print(details['wp_ID'], song)
-
-TAGS_EXCEPTION = {
-    'lyrics': importSongs,
-}
-
-def _parse_date(string):
-    return timezone.make_aware(
-        datetime.datetime.strptime(string, '%Y-%m-%d %H:%M:%S'),
-        timezone.get_default_timezone()
-    )
-
-def _upload_to_imgur(url, title=''):
-    r = requests.post(
-        u'https://api.imgur.com/3/upload.json',
-        headers={
-	    'Authorization': 'Client-ID {}'.format(django_settings.IMGUR_API_KEY),
-	    'Accept': 'application/json',
-	},
-        data={
-            'type': 'URL',
-	    'image': urllib.quote(url.encode('utf8'), safe=':/'),
-	    'title': title,
-	},
-    )
-    r.raise_for_status()
-    return r.json()['data']['link']
-
-def _replace_images(markdown):
-    if not getattr(django_settings, 'IMGUR_API_KEY', None):
-        return markdown
-    for i, part in enumerate(markdown.split('![')):
-        if i != 0 and len(part) > 3:
-            title = part.split('](')[0]
-            url = part.split('](')[1].split(')')[0]
-            if not url.startswith('https://i.starlight.academy/'):
-                print('    Imgur upload', url)
-                imgur_url = _upload_to_imgur(url, title)
-                print('      ->', imgur_url)
-                markdown = markdown.replace(url, imgur_url)
-                time.sleep(5)
-    return markdown
-
-def import_news(args):
-    author_username = 'Revue_EN'
-    try:
-        author = models.User.objects.filter(username=author_username)[0]
-    except IndexError:
-        author = create_user(author_username)
-
-    h = html2text.HTML2Text(bodywidth=0)
-
-    for main_hashtag, csv_file in [
-            ('revuestarlight', 'starlight/static/extracts/revuestarlightnews.csv'),
-            ('relive', 'starlight/static/extracts/relivenews.csv'),
-    ]:
-        csv_file = open(csv_file)
-        csv_reader = csv.reader(csv_file)
-
-        keys_i = {}
-        for i, row in enumerate(csv_reader):
-
-            if i == 0:
-
-                for j, item in enumerate(row):
-                    keys_i[item] = j
-
-            else:
-
-                details = {
-                    key: row[i].decode("utf-8")
-                    for key, i in keys_i.items()
-                }
-
-                title = details['wp_post_title']
-                type = details['wp_post_type']
-                if type in ['attachment', 'revision']:
-                    continue
-                if title in MANUAL_IMPORT:
-                    continue
-
-                # Tags from tags + category
-                tags = {
-                    'staff': True,
-                    main_hashtag: True,
-                }
-                if title.startswith('[Event]'):
-                    tags['event'] = True
-                elif title.startswith('[Gacha]'):
-                    tags['gacha'] = True
-                elif title.startswith('[Event&Gacha]'):
-                    tags['event'] = True
-                    tags['gacha'] = True
-
-                other_tags = {}
-                dont_import_as_activity = False
-                for tag in (
-                        split_data(details['tx_post_tag'])
-                        + split_data(details['tx_category'])
-                ):
-                    tag_code = tag.split(':')[0]
-                    tag_verbose = tag.split(':')[1]
-                    if tag_code in TAGS_EXCEPTION:
-                        TAGS_EXCEPTION[tag_code](details, h)
-                        dont_import_as_activity = True
-                        break
-                    if tag_code in TAGS_MAPPER:
-                        tags[TAGS_MAPPER[tag_code]] = True
-                    elif tag_verbose in TAGS_VERBOSE_MAPPER:
-                        tags[TAGS_VERBOSE_MAPPER[tag_verbose]] = True
-                    else:
-                        other_tags[tag_code] = tag_verbose
-                if dont_import_as_activity:
-                    continue
-                tags = join_data(*tags.keys())
-
-                # Prepare invisible tag used to avoid duplicates
-                unique_tag = u'[](importid#{id})'.format(id=details['wp_ID'])
-
-                # Check if the activity exists
-                try:
-                    activity = magi_models.Activity.objects.filter(m_message__endswith=unique_tag)[0]
-                except IndexError:
-                    activity = None
-
-                # Dates
-                date = _parse_date(details['wp_post_date'])
-                modification_date = _parse_date(details['wp_post_modified'])
-
-                # Message
-                html = details['wp_post_content']
-                html = u'<p>{}</p>'.format(html).replace(
-                    '\n\n', '</p><br><p>'
-                ).replace(
-                    '\n', '</p><p>'
-                )
-                markdown = h.handle(html)
-                markdown = markdown.strip()
-
-                if not markdown:
-                    continue
-
-                markdown_title = u'### {}\n\n'.format(title)
-
-                # Don't reupload to imgur
-                if activity and 'https://i.imgur.com/' in activity.m_message:
-                    message = activity.m_message
-                else:
-                    markdown = _replace_images(markdown)
-                    markdown = markdown.replace('\n\n  \n\n', '\n\n<br>\n')
-
-                    message = u'{title}{content}\n\n{unique_tag}'.format(
-                        title=markdown_title,
-                        content=markdown,
-                        unique_tag=unique_tag,
-                    )
-
-                # Check if an existing activity doesn't exist with exactly the same title
-                try:
-                    copy_activity = None
-                    copy_activities = list(magi_models.Activity.objects.filter(m_message__startswith=markdown_title))
-                    if len(copy_activities) == 1:
-                        copy_activity = copy_activities[0]
-                    elif len(copy_activities) > 1:
-                        print('Multiple activities match!!')
-                        print(u','.join([unicode(a.id) for a in copy_activities]))
-
-                except IndexError:
-                    copy_activity = None
-                if copy_activity:
-                    activity = copy_activity
-
-                data = {
-                    'owner_id': author.id,
-                    'm_message': message,
-                    '_cache_message': None,
-                    'creation': date,
-                    'last_bump': modification_date or date,
-                    'i_language': 'en',
-                    'c_tags': tags,
-                    'archived_by_owner': True,
-                }
-
-                if activity:
-                    magi_models.Activity.objects.filter(pk=activity.pk).update(**data)
-                    activity = magi_models.Activity.objects.filter(pk=activity.pk)[0]
-                else:
-                    activity = magi_models.Activity.objects.create(**data)
-                    activity.creation = data['creation']
-                    activity.save()
-                print(details['wp_ID'], activity.id, unicode(activity).replace('\n', ''))
-                if other_tags:
-                    print('     ', other_tags)
-
-        csv_file.close()
+    return base_icon_data, saveLocalImageToModel(memoir, field_name, 'tmp.png'), errors

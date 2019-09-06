@@ -17,7 +17,6 @@ from magi.magicollections import (
     BadgeCollection as _BadgeCollection,
     PrizeCollection as _PrizeCollection,
 )
-from magi.middleware.httpredirect import HttpRedirectException # Todo: Should be removed after launch
 from magi.utils import (
     AttrDict,
     CuteFormType,
