@@ -731,7 +731,7 @@ def generate_card(card, art_data=None):
 
     art_image.save(filename=BASE_DIR + 'tmp.png')
 
-    return art_data, saveLocalImageToModel(card, 'image', 'tmp.png'), errors
+    return art_data, saveLocalImageToModel(card, 'image', BASE_DIR + 'tmp.png'), errors
 
 def generate_card_icon(card, field_name, rank, rarity, base_icon_data=None):
     errors = []
@@ -764,7 +764,7 @@ def generate_card_icon(card, field_name, rank, rarity, base_icon_data=None):
 
     base_icon_image.save(filename=BASE_DIR + 'tmp.png')
 
-    return base_icon_data, saveLocalImageToModel(card, field_name, 'tmp.png'), errors
+    return base_icon_data, saveLocalImageToModel(card, field_name, BASE_DIR + 'tmp.png'), errors
 
 def generate_memoir(memoir, art_data=None):
     errors = []
@@ -791,7 +791,7 @@ def generate_memoir(memoir, art_data=None):
 
     art_image.save(filename=BASE_DIR + 'tmp.png')
 
-    return art_data, saveLocalImageToModel(memoir, 'image', 'tmp.png'), errors
+    return art_data, saveLocalImageToModel(memoir, 'image', BASE_DIR + 'tmp.png'), errors
 
 def generate_memoir_icon(memoir, field_name, rank, base_icon_data=None):
     errors = []
@@ -821,4 +821,4 @@ def generate_memoir_icon(memoir, field_name, rank, base_icon_data=None):
 
     base_icon_image.save(filename=BASE_DIR + 'tmp.png')
 
-    return base_icon_data, saveLocalImageToModel(memoir, field_name, 'tmp.png'), errors
+    return base_icon_data, saveLocalImageToModel(memoir, field_name, BASE_DIR + 'tmp.png'), errors

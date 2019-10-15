@@ -77,6 +77,7 @@ class UserCollection(_UserCollection):
     icon = 'users'
     navbar_link = True
     navbar_link_list = 'community'
+    plural_title = _('Users')
 
     filter_cuteform = _UserCollection.filter_cuteform.copy()
     filter_cuteform.update({
@@ -89,9 +90,6 @@ class UserCollection(_UserCollection):
             },
         },
     })
-
-    def navbar_link_title(self, context):
-        return t['users'].title()
 
     class ItemView(_UserCollection.ItemView):
 
@@ -116,7 +114,6 @@ class UserCollection(_UserCollection):
 
     class ListView(_UserCollection.ListView):
         filter_form = forms.UserFilterForm
-        ajax_callback = 'loadUsersFilters'
 
 ############################################################
 # News Collection
@@ -220,7 +217,6 @@ class NewsCollection(_ActivityCollection):
 class ActivityCollection(_ActivityCollection):
     navbar_link = True
     navbar_link_list = 'community'
-    navbar_link_title = _('Feed')
 
     class ListView(_ActivityCollection.ListView):
         shortcut_urls = [
@@ -240,7 +236,7 @@ class ActivityCollection(_ActivityCollection):
             context['hide_header'] = True
             context['show_title'] = True
             context['art'] = None
-            context['h1_page_title'] = string_concat(_('Community'), ' - ', _('Feed'))
+            context['force_show_title'] = True
 
     class ItemView(_ActivityCollection.ItemView):
         ajax_callback = 'loadActivities'
@@ -303,7 +299,6 @@ class AccountCollection(_AccountCollection):
 
     class ListView(_AccountCollection.ListView):
         filter_form = forms.AccountFilterForm
-        ajax_callback = 'loadAccountsFilters'
 
     class AddView(_AccountCollection.AddView):
         simpler_form = get_account_simple_form(forms.AccountForm, simple_fields=[
@@ -333,7 +328,6 @@ class VoiceActressCollection(MainItemCollection):
     title = _('Voice actress')
     plural_title = _('Voice actresses')
     navbar_link_list = 'revuestarlight'
-    navbar_link_title = _('Cast')
     icon = 'voice-actress'
     translated_fields = [
         'name',
@@ -389,6 +383,9 @@ class VoiceActressCollection(MainItemCollection):
         show_items_names = True
         default_ordering = 'name'
         filter_form = forms.VoiceActressFilterForm
+
+        def get_page_title(self, *args, **kwargs):
+            return _('Cast')
 
         def get_queryset(self, queryset, parameters, request):
             queryset = super(VoiceActressCollection.ListView, self).get_queryset(queryset, parameters, request)
@@ -693,7 +690,6 @@ class SongCollection(MainItemCollection):
     title = _('Song')
     plural_title = _('Songs')
     navbar_link_list = 'revuestarlight'
-    navbar_link_title = string_concat(_('Discography'), ' / ', _('Lyrics'))
     icon = 'song'
     form_class = forms.SongForm
 
@@ -729,10 +725,12 @@ class SongCollection(MainItemCollection):
     class ListView(MainItemCollection.ListView):
         default_ordering = '-release_date'
         filter_form = forms.SongFilterForm
-        show_title = True
         show_items_names = True
         per_line = 4
         page_size = 24
+
+        def get_page_title(self, *args, **kwargs):
+            return string_concat(_('Discography'), ' / ', _('Lyrics'))
 
         def buttons_per_item(self, request, context, item):
             buttons = OrderedDict()
@@ -752,11 +750,6 @@ class SongCollection(MainItemCollection):
 
             buttons.update(super(SongCollection.ListView, self).buttons_per_item(request, context, item))
             return buttons
-
-        def extra_context(self, context):
-            super(SongCollection.ListView, self).extra_context(context)
-            context['h1_page_title'] = self.collection.navbar_link_title
-            context['h1_page_title_icon'] = self.collection.icon
 
     class ItemView(MainItemCollection.ItemView):
         ajax_callback = 'loadSong'
@@ -1030,8 +1023,7 @@ class CardCollection(BaseCardCollection):
     enabled = True
     queryset = models.Card.objects.all()
     title = _('Card')
-    plural_title = _('Cards')
-    navbar_link_title = string_concat(_('Cards'), ' (', _('Stage girls'), ')')
+    plural_title = string_concat(_('Cards'), ' (', _('Stage girls'), ')')
     image = 'red_dresses'
     form_class = forms.CardForm
 
@@ -1088,7 +1080,6 @@ class CardCollection(BaseCardCollection):
 
     class ListView(BaseCardCollection.ListView):
         filter_form = forms.CardFilterForm
-        ajax_callback = 'loadCardsFilters'
         fields_exclude = ['number'] # Don't show number on ordering
 
     class ItemView(BaseCardCollection.ItemView):
@@ -1140,18 +1131,18 @@ class CardCollection(BaseCardCollection):
                             ajax=True, modal_only=True, parameters=parameters),
                         'link_text': t_element,
                         'tooltip': t_element,
-                        'value': staticImageURL(element, folder='color', extension='png'),
+                        'value': staticImageURL(element, folder='color'),
                     })
                 if images:
                     extra_fields.append((field_name, {
-                        'image': staticImageURL(image, extension='png'),
+                        'image': staticImageURL(image),
                         'verbose_name': verbose_name,
                         'type': 'images_links',
                         'images': images,
                     }))
                 else:
                     extra_fields.append((field_name, {
-                        'image': staticImageURL(image, extension='png'),
+                        'image': staticImageURL(image),
                         'verbose_name': verbose_name,
                         'type': 'text',
                         'value': _('None'),
@@ -1290,8 +1281,11 @@ class ConversationCollection(MainItemCollection):
     title = _('Conversation')
     plural_title = _('Conversations')
     navbar_link_list = 'relive'
-    navbar_link_title = _('My theater')
     icon = 'chat'
+
+    class ListView(MainItemCollection.ListView):
+        def get_page_title(self, *args, **kwargs):
+            return _('My theater')
 
 ############################################################
 # Comic Collection

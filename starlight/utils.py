@@ -115,6 +115,19 @@ def getVoiceActressURLFromPk(pk):
     voiceactress = django_settings.VOICE_ACTRESSES[int(pk)]
     return u'/voiceactress/{}/{}/'.format(pk, tourldash(getTranslatedName(voiceactress)))
 
+def presetsFromVoiceActresses(field_name='voice_actress', get_field_value=None):
+    def verbose_name_lambda(pk):
+        return lambda: getVoiceActressNameFromPk(pk)
+    return [
+        (details['name'], {
+            'verbose_name': verbose_name_lambda(pk),
+            'fields': {
+                field_name: pk if not get_field_value else get_field_value(pk),
+            },
+            'image': details['thumbnail'] or 'default/default.png',
+        }) for pk, details in getattr(django_settings, 'VOICE_ACTRESSES', {}).items()
+    ]
+
 def getSchoolNameFromPk(pk):
     return getTranslatedName(django_settings.SCHOOLS[int(pk)])
 
@@ -132,6 +145,19 @@ def getSchoolYearChoices():
         ('first', _(u'{nth} year').format(nth=_(ordinalNumber(1)))),
         ('second', _(u'{nth} year').format(nth=_(ordinalNumber(2)))),
         ('third', _(u'{nth} year').format(nth=_(ordinalNumber(3)))),
+    ]
+
+def presetsFromSchools(field_name='school', get_field_value=None):
+    def verbose_name_lambda(pk):
+        return lambda: getSchoolNameFromPk(pk)
+    return [
+        (details['name'], {
+            'verbose_name': verbose_name_lambda(pk),
+            'fields': {
+                field_name: pk if not get_field_value else get_field_value(pk),
+            },
+            'image': details['image'] or 'default/default_school.png',
+        }) for pk, details in getattr(django_settings, 'SCHOOLS', {}).items()
     ]
 
 ############################################################

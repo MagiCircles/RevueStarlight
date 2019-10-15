@@ -538,6 +538,10 @@ html {
         background: fade(white, 70%);
         font-family: 'Raleway', 'Arial Black';
         text-transform: uppercase;
+        text-align: center;
+        .page-title-duplicate-title {
+            display: none;
+        }
     }
     .default-index {
         margin: auto;
@@ -559,10 +563,16 @@ html {
             width: 50%;
         }
         .list-page-title-activity {
-            text-align: right;
             font-size: 40px;
             margin: 30px 0;
             padding: 30px 50px;
+            text-align: right;
+            .padding50 {
+                padding: 0;
+                display: inline-block;
+                padding-left: 20px;
+                vertical-align: middle;
+            }
         }
         .default-index {
             text-align: left;

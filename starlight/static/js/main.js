@@ -5,29 +5,6 @@
 // *****************************************
 
 // *****************************************
-// Accounts / leaderboard
-
-function loadAccountsFilters() {
-    loadAccounts();
-    let form = $('[id="filter-form-account"]');
-    if (!form.data('loaded-separators')) {
-        form.data('loaded-separators', true);
-        formShowMore(form, 'i_version', false, 'ordering', false);
-    }
-}
-
-// *****************************************
-// Users
-
-function loadUsersFilters() {
-    let form = $('[id="filter-form-user"]');
-    if (!form.data('loaded-separators')) {
-        form.data('loaded-separators', true);
-        formShowMore(form, 'color', true, 'ordering', false);
-    }
-}
-
-// *****************************************
 // Activities
 
 function loadActivities() {
@@ -161,14 +138,6 @@ function loadSong() {
 // *****************************************
 // Cards
 
-function loadCardsFilters() {
-    let form = $('[id="filter-form-card"]');
-    if (!form.data('loaded-separators')) {
-        form.data('loaded-separators', true);
-        formShowMore(form, 'type', true, 'ordering', false);
-    }
-}
-
 function loadBaseCard() {
     $('.item-info.card-info, .item-info.memoir-info').each(function() {
         let card = $(this);
@@ -272,12 +241,6 @@ function loadBaseCardForm() {
                 return false;
             });
             buttons.prepend(button);
-        }
-        // Statistics
-        formShowMore(form, 'base_hp', true, 'max_level_agility', false, 'Show statistics fields', 'Hide statistics fields', false);
-        // Icons
-        if ($('#id_rank1_rarity2_icon').length > 0) {
-            formShowMore(form, 'rank1_rarity2_icon', true, 'rank7_rarity6_icon', false, 'Show icons fields', 'Hide icons fields', false);
         }
     }
 }

@@ -399,7 +399,7 @@ class VoiceActress(MagiModel):
     reverse_related = [
         { 'field_name': 'stagegirls', 'verbose_name': _('Stage girl') },
         { 'field_name': 'links', 'verbose_name': _('Social media'), 'max_per_line': None },
-        { 'field_name': 'songs', 'verbose_name': _('Songs') },
+        { 'field_name': 'songs', 'verbose_name': _('Songs'), 'to_preset': lambda _i: _i.name },
         {
             'field_name': 'fans',
             'url': 'users',
@@ -647,8 +647,18 @@ class StageGirl(MagiModel):
     # Reverse relations
 
     reverse_related = [
-        { 'field_name': 'cards', 'verbose_name': _('Cards'), 'filter_field_name': 'stage_girl' },
-        { 'field_name': 'memoirs', 'verbose_name': _('Memoirs'), 'filter_field_name': 'stage_girl' },
+        {
+            'field_name': 'cards',
+            'verbose_name': _('Cards'),
+            'filter_field_name': 'stage_girl',
+            'to_preset': lambda _i: _i.name,
+        },
+        {
+            'field_name': 'memoirs',
+            'verbose_name': _('Memoirs'),
+            'filter_field_name': 'stage_girl',
+            'to_preset': lambda _i: _i.name,
+        },
         {
             'field_name': 'fans',
             'url': 'users',

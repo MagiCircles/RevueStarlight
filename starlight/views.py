@@ -3,12 +3,12 @@ from django.shortcuts import render, redirect
 from django.utils.translation import ugettext_lazy as _
 from magi.views import (
     custom_wiki,
-    settingsContext,
 )
 from magi.utils import (
     cuteFormFieldsForContext,
     ordinalNumber,
 )
+from magi.views import settings as magi_settings
 from starlight.settings import (
     MAIN_SITE_URL,
     WIKI,
@@ -26,14 +26,14 @@ from starlight.utils import (
 ############################################################
 # Wiki
 
-def wiki(request, wiki_url='_Sidebar'):
-    return custom_wiki(WIKI, _('Wiki'), request, wiki_url)
+def wiki(request, context, wiki_url='_Sidebar'):
+    return custom_wiki(WIKI, 'wiki', _('Wiki'), request, context, wiki_url)
 
 ############################################################
 # Settings
 
-def settings(request):
-    context = settingsContext(request)
+def settings(request, context):
+    magi_settings(request, context)
     cuteFormFieldsForContext({
         'd_extra-favorite_voiceactress{}'.format(nth): {
             'to_cuteform': lambda k, v: getVoiceActressThumbnailFromPk(k),
@@ -48,4 +48,3 @@ def settings(request):
         }
         for nth in range(1, 4)
     }, context, context['forms']['preferences'])
-    return render(request, 'pages/settings.html', context)

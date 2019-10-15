@@ -19,8 +19,12 @@ from magi.forms import (
 from magi.item_model import i_choices
 from magi.utils import (
     birthdayOrderingQueryset,
+    FormShowMore,
     getStaffConfiguration,
     PastOnlyValidator,
+    presetsFromCharacters,
+    presetsFromChoices,
+    staticImageURL,
 )
 from starlight import models
 from starlight.raw import (
@@ -36,6 +40,8 @@ from starlight.utils import (
     getVoiceActressChoices,
     getSchoolYearChoices,
     getStageGirlChoices,
+    presetsFromSchools,
+    presetsFromVoiceActresses,
 )
 
 ############################################################
@@ -85,6 +91,8 @@ class UserFilterForm(_UserFilterForm):
 
     favorite_voice_actress = forms.ChoiceField()
     favorite_voice_actress_filter = MagiFilter(to_queryset=_favorite_voice_actress_to_queryset)
+
+    show_more = FormShowMore(cutoff='color', including_cutoff=True, until='ordering')
 
     def __init__(self, *args, **kwargs):
         super(UserFilterForm, self).__init__(*args, **kwargs)
@@ -265,6 +273,8 @@ class AccountFilterForm(_AccountFilterForm):
     collected_memoir = forms.IntegerField(widget=forms.HiddenInput)
     collected_memoir_filter = MagiFilter(selector='collectedmemoirs__memoir__number')
 
+    show_more = FormShowMore('i_version', until='ordering')
+
     class Meta(_AccountFilterForm.Meta):
         fields = [
             'search', 'has_friend_id', 'friend_id',
@@ -389,6 +399,10 @@ class StageGirlFilterForm(MagiFiltersForm):
         ('birthday', _('Birthday')),
     ]
 
+    presets = OrderedDict(
+        presetsFromSchools()
+    )
+
     def __init__(self, *args, **kwargs):
         super(StageGirlFilterForm, self).__init__(*args, **kwargs)
         if 'i_year' in self.fields:
@@ -400,8 +414,10 @@ class StageGirlFilterForm(MagiFiltersForm):
             'search',
             'i_year',
             'i_astrological_sign',
+            'school',
             'ordering', 'reverse_order',
         ]
+        hidden_foreign_keys = ['school']
 
 ############################################################
 # Song
@@ -440,6 +456,14 @@ class SongFilterForm(MagiFiltersForm):
             'label': _('Singers'),
         },
     }
+
+    presets = OrderedDict(
+        presetsFromSchools(
+            'singer', get_field_value=lambda _id: u'school-{}'.format(_id))
+        + presetsFromVoiceActresses('singer', get_field_value=lambda _pk: u'singers-{}'.format(_pk))
+        + presetsFromCharacters(
+            'singer', get_field_value=lambda _id, _name, _vname: u'stage_girl-{}'.format(_id))
+    )
 
     stage_girl = forms.ChoiceField()
     stage_girl_filter = MagiFilter(selector='singers__stagegirls')
@@ -486,6 +510,13 @@ class BaseCardForm(ImportableItemForm):
         queryset=models.Act.objects.all().order_by('i_type', 'name'),
         widget=forms.CheckboxSelectMultiple, required=False,
     )
+
+    show_more = FormShowMore(
+        cutoff='base_hp', including_cutoff=True, until='max_level_agility',
+        message_more='Show statistics fields', message_less='Hide statistics fields',
+        check_values=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super(BaseCardForm, self).__init__(*args, **kwargs)
 
@@ -565,6 +596,19 @@ class BaseCardFilterForm(MagiFiltersForm):
         ]),
     ]
 
+    base_presets = (
+        presetsFromSchools(
+            'school_stage_girl', get_field_value=lambda _id: u'school-{}'.format(_id))
+        + presetsFromCharacters(
+            'school_stage_girl', get_field_value=lambda _id, _name, _vname: u'stage_girl-{}'.format(_id))
+    )
+
+    @classmethod
+    def base_preset_get_key(self, i, value, verbose):
+        return u'{}-star{}'.format(value, '' if value < 2 else 's')
+
+    show_more = FormShowMore(cutoff='type', including_cutoff=True, until='ordering')
+
     version = forms.ChoiceField(label=_('Version'), choices=models.VERSION_CHOICES)
     version_filter = MagiFilter(to_queryset=(
         lambda form, queryset, request, value: queryset.filter(**{
@@ -602,6 +646,15 @@ class BaseCardFilterForm(MagiFiltersForm):
 # Card
 
 class CardForm(BaseCardForm):
+    show_more = [
+        BaseCardForm.show_more,
+        FormShowMore(
+            cutoff='rank1_rarity2_icon', including_cutoff=True, until='rank7_rarity6_icon',
+            message_more='Show icons fields', message_less='Hide icons fields',
+            check_values=False,
+        ),
+    ]
+
     def save(self, commit=False):
         instance = super(CardForm, self).save(commit=False)
         instance.update_cache('statistics_ranks')
@@ -630,6 +683,17 @@ class CardFilterForm(BaseCardFilterForm):
             'fields': ('act_target', 'act_other_target'),
         },
     ]
+
+    presets = OrderedDict(
+        presetsFromChoices(
+            models.Card, 'rarity',
+            get_key=BaseCardFilterForm.base_preset_get_key,
+            should_include=lambda _i, _value, _verbose: _value in models.Card.LIMIT_TO_RARITIES)
+        + presetsFromChoices(
+            models.Card, 'element',
+            get_image=lambda _i, _value, _verbose: 'color/{}.png'.format(_value))
+        + BaseCardFilterForm.base_presets
+    )
 
     school_filter = MagiFilter(selector='stage_girl__school', distinct=True)
 
@@ -680,6 +744,15 @@ class CardFilterForm(BaseCardFilterForm):
 # Memoir
 
 class MemoirForm(BaseCardForm):
+    show_more = [
+        BaseCardForm.show_more,
+        FormShowMore(
+            cutoff='rank1_icon', including_cutoff=True,
+            message_more='Show icons fields', message_less='Hide icons fields',
+            check_values=False,
+        ),
+    ]
+
     def save(self, commit=False):
         instance = super(MemoirForm, self).save(commit=False)
 
@@ -697,6 +770,14 @@ class MemoirFilterForm(BaseCardFilterForm):
     search_fields = BaseCardFilterForm.search_fields + [
         'explanation', 'd_explanations',
     ]
+
+    presets = OrderedDict(
+        presetsFromChoices(
+            models.Memoir, 'rarity',
+            get_key=BaseCardFilterForm.base_preset_get_key,
+            should_include=lambda _i, _value, _verbose: _value in models.Memoir.LIMIT_TO_RARITIES)
+        + BaseCardFilterForm.base_presets
+    )
 
     school_filter = MagiFilter(selector='stage_girls__school', distinct=True)
     stage_girl_filter = MagiFilter(selector='stage_girls')
