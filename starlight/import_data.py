@@ -330,7 +330,14 @@ def songCredits(value):
     for language, description in value.items():
         if not description.strip():
             continue
-        singers, credits = description.split('\n\n')
+
+        if '\nWritten by' in description and '\n\nWritten by' not in description:
+            description = description.replace('Written by', u'\nWritten by')
+        try:
+            singers, credits = description.split('\n\n')
+        except ValueError:
+            singers = ''
+            credits = description
 
         if language == 'en':
             for singer in singers.split('\n')[1:]:
