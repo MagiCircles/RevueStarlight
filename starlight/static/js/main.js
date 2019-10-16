@@ -11,44 +11,9 @@ function loadActivities() {
     updateActivities();
     $('.activity').each(function () {
         let activity = $(this);
-        if (!activity.data('loaded-activity')) {
-            activity.data('loaded-activity', true);
-            // Show Revue Starlight International as activity author when Revue_EN
-            if (activity.find('.owner').text() == 'Revue_EN') {
-                activity.find('.owner').text('Revue Starlight International');
-                // Load cards details in place of cards tags
-                if ($(document).width() > 768) {
-                    $.each([
-                        ['card', loadBaseCard],
-                        ['memoir', loadBaseCard],
-                        ['event', undefined],
-                    ], function(_i, item) {
-                        activity.find('.message a[href*="/' + item[0] + '/"]').each(function() {
-                            let a = $(this);
-                            // Only if a doesn't contain HTML and is alone on its line.
-                            if (a.has('*').length == 0 && $.trim(a.closest('p').text()) == $.trim(a.text())) {
-                                let url_parts = a.prop('href').replace(
-                                    '/' + item[0] + '/', '/ajax/' + item[0] + '/').split('/');
-                                url_parts = url_parts.splice(0, url_parts.length - 2)
-                                let url = url_parts.join('/') + '/';
-                                $.ajax({
-                                    type: 'GET',
-                                    url: url,
-                                    success: function(data) {
-                                        a.replaceWith('<div class="well fontx0-8">' + data + '</div>');
-                                        if (typeof(item[1]) != 'undefined') {
-                                            item[1]();
-                                        }
-                                        loadCommons();
-                                        cropActivityWhenTooLong(activity);
-                                    },
-                                    // Fails silently
-                                });
-                            }
-                        });
-                    });
-                }
-            }
+        // Show Revue Starlight International as activity author when Revue_EN
+        if (activity.find('.owner').text() == 'Revue_EN') {
+            activity.find('.owner').text('Revue Starlight International');
         }
     });
 }
