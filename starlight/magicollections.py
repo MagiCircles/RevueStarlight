@@ -148,6 +148,7 @@ class NewsCollection(_ActivityCollection):
         filter_form = forms.NewsFilterForm
         add_button_subtitle = None
         ajax_pagination_callback = 'loadActivities'
+        as_profile_tab = False
 
         def top_buttons(self, request, context):
             # Call parents super to avoid adding warning button
