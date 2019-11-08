@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'corsheaders',
     'bootstrapform',
+    'snowpenguin.django.recaptcha3',
     'rest_framework',
     'storages',
     'magi',
@@ -134,6 +135,11 @@ LOGIN_REDIRECT_URL = '/'
 LOG_EMAIL = 'emails-log@schoolido.lu'
 PASSWORD_EMAIL = 'password@schoolido.lu'
 AWS_SES_RETURN_PATH = 'contact@starlight.academy'
+
+RECAPTCHA_PRIVATE_KEY = ''
+RECAPTCHA_PUBLIC_KEY = ''
+RECAPTCHA_DEFAULT_ACTION = 'generic'
+RECAPTCHA_SCORE_THRESHOLD = 0.5
 
 FAVORITE_CHARACTERS = []
 STAGE_GIRLS_NAMES = {}
