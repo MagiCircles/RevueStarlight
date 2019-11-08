@@ -1,2 +1,3 @@
 git+https://github.com/SchoolIdolTomodachi/MagiCircles.git
 html2text==2018.1.9
+Wand==0.5.4
