@@ -132,7 +132,7 @@ def generate_settings():
             } for model in (models.Card, models.Memoir)
         }
     except IndexError:
-        max_statistics_cards = {}
+        max_statistics = {}
 
     # print 'Get the backgrounds'
     # backgrounds = [
