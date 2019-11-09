@@ -545,7 +545,10 @@ def findSong(model, unique_data, data, manytomany, dictionaries):
             pass
     # Fallback to English name
     if unique_data.get('name', None):
-        return model.objects.filter(**unique_data)[0]
+        try:
+            return model.objects.filter(**unique_data)[0]
+        except IndexError:
+            pass
     return None
 
 IMPORT_CONFIGURATION['songs'] = {
