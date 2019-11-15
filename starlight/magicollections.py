@@ -160,7 +160,8 @@ class NewsCollection(_ActivityCollection):
             context['show_bump'] = True
 
             # Show a popup to tell people about the feed
-            if (context['request'].user.is_authenticated()
+            if (not context['ajax']
+                and context['request'].user.is_authenticated()
                 and context['request'].LANGUAGE_CODE == 'en'):
                 context['corner_popups']['about_feed'] = {
                     'title': u'Starlight Academy is a social network.',
