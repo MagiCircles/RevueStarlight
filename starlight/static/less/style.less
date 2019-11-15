@@ -1,18 +1,7 @@
-/* Uncomment these lines when you need to compile LESS -> CSS */
-// @import "../../../env/lib/python2.7/site-packages/magi/static/less/main.less";
-// @import "../../../env/lib/python2.7/site-packages/magi/static/less/mixins/magicircles.less";
-
-/* Comment these lines when you need to compile LESS -> CSS */
-@import "main.less";
-@import "mixins/magicircles.less";
-
 @import url('https://fonts.googleapis.com/css?family=Gudea:400|Raleway:600|Slabo+27px');
 
 /******************************************/
 /* Variables */
-
-@mainColor: #1A1D24;
-@secondaryColor: #FF3037;
 
 @navbar-height: 70px;
 
@@ -21,13 +10,6 @@
 
 /******************************************/
 /* MagiCircles */
-
-html {
-    .setup-sidebar(@mainColor);
-    .magicircles(@mainColor, @secondaryColor);
-}
-
-@import "generated_colors.less";
 
 body {
     font-family: 'Gudea', sans-serif;
@@ -213,7 +195,7 @@ html {
     }
 }
 
-.about-table tr[data-field="fans"].spread_across  td:last-child img {
+.about-table tr[data-field="fans"].spread_across td:last-child img {
     min-width: 40px;
     max-width: 11%;
 }

@@ -268,9 +268,6 @@ class AccountCollection(_AccountCollection):
         'i_play_style': {
             'type': CuteFormType.HTML,
         },
-        'i_play_style': {
-            'type': CuteFormType.HTML,
-        },
         'i_os': {
             'to_cuteform': lambda _k, _v: models.Account.OS_CHOICES[_k].lower(),
             'transform': CuteFormTransform.FlaticonWithText,
@@ -282,7 +279,7 @@ class AccountCollection(_AccountCollection):
                 'modal': 'true',
                 'modal-text': 'true',
             },
-        }
+        },
     })
 
     fields_icons = {

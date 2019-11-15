@@ -35,6 +35,7 @@ Shoujo☆Kageki Revue Starlight (Lit. Girls☆Opera Revue Starlight) is a multi-
 GAME_URL = '/wiki/About%20Revue%20Starlight/'
 
 COLOR = '#1A1D24'
+SECONDARY_COLOR = '#FF3037'
 
 ############################################################
 # Images
