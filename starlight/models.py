@@ -23,6 +23,7 @@ from magi.item_model import MagiModel, i_choices, getInfoFromChoices
 from magi.utils import (
     AttrDict,
     ColorField,
+    filterRealCollectiblesPerAccount,
     getAge,
     getStaffConfiguration,
     staticImageURL,
@@ -1583,7 +1584,7 @@ class Card(BaseCard):
     _cache_total_collectedcards = models.PositiveIntegerField(null=True)
 
     def to_cache_total_collectedcards(self):
-        return self.collectedcards.all().count()
+        return filterRealCollectiblesPerAccount(self.collectedcards.all()).count()
 
     ############################################################
     # Reverse relations
@@ -1720,7 +1721,7 @@ class Memoir(BaseCard):
     _cache_total_collectedmemoirs = models.PositiveIntegerField(null=True)
 
     def to_cache_total_collectedmemoirs(self):
-        return self.collectedmemoirs.all().count()
+        return filterRealCollectiblesPerAccount(self.collectedmemoirs.all()).count()
 
     ############################################################
     # Reverse relations
