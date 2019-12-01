@@ -17,6 +17,7 @@ from magi.default_settings import (
     DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
     DEFAULT_NAVBAR_ORDERING,
     DEFAULT_PRELAUNCH_ENABLED_PAGES,
+    DEFAULT_SEASONS,
 )
 from starlight.raw import *
 from starlight.utils import starlightGlobalContext
@@ -403,3 +404,15 @@ NAVBAR_ORDERING = [
     'relive',
     'community',
 ] + DEFAULT_NAVBAR_ORDERING
+
+############################################################
+# Seasons
+
+SEASONS = DEFAULT_SEASONS.copy()
+
+del(SEASONS['christmas']['color'])
+del(SEASONS['christmas']['secondary_color'])
+del(SEASONS['christmas']['accent_color'])
+SEASONS['christmas'].update({
+    'site_logo': 'starlight_academy_logo_christmas.png',
+})
