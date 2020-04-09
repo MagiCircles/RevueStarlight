@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime, pytz
 from collections import OrderedDict
-from django.conf import settings as django_settings
 from django.utils.html import mark_safe
 from django.utils.translation import ugettext_lazy as _, get_language, string_concat
 from magi.utils import (
@@ -11,7 +10,6 @@ from magi.utils import (
 from magi.default_settings import (
     DEFAULT_ENABLED_NAVBAR_LISTS,
     DEFAULT_ENABLED_PAGES,
-    DEFAULT_EXTRA_PREFERENCES,
     DEFAULT_HOME_ACTIVITY_TABS,
     DEFAULT_JAVASCRIPT_TRANSLATED_TERMS,
     DEFAULT_LANGUAGES_CANT_SPEAK_ENGLISH,
@@ -20,7 +18,10 @@ from magi.default_settings import (
     DEFAULT_SEASONS,
 )
 from starlight.raw import *
-from starlight.utils import starlightGlobalContext
+from starlight.utils import (
+    getArts,
+    starlightGlobalContext,
+)
 from starlight import models
 
 ############################################################
@@ -53,6 +54,8 @@ DONATE_IMAGE = 'donate.png'
 EMAIL_IMAGE = 'email.png'
 
 EMPTY_IMAGE = 'empty_crown.png'
+
+USERS_BIRTHDAYS_BANNER = 'https://i.imgur.com/0T5j2rr.png'
 
 ############################################################
 # Settings per languages
@@ -97,6 +100,16 @@ HOMEPAGE_ART_POSITION = {
     'x': '0%',
 }
 
+HOMEPAGE_ARTS = [
+    {
+        'url': 'default_art.png',
+        'hd_url': 'default_art_hd.png',
+    },
+]
+
+GET_HOMEPAGE_ARTS = getArts
+RANDOM_ART_FOR_CHARACTER = lambda character_id: getArts(character_id=character_id, just_one=True)
+
 HOME_ACTIVITY_TABS = DEFAULT_HOME_ACTIVITY_TABS.copy()
 if 'staffpicks' in HOME_ACTIVITY_TABS:
     del(HOME_ACTIVITY_TABS['staffpicks'])
@@ -110,20 +123,17 @@ GET_STARTED_VIDEO = 'WLfi932cfFI'
 ############################################################
 # User preferences and profiles
 
-FAVORITE_CHARACTER_NAME = _('Stage girl')
-FAVORITE_CHARACTER_TO_URL = lambda link: (
-    u'/stagegirl/{pk}/{name}/'.format(pk=link.raw_value, name=tourldash(link.value)))
+FAVORITE_CHARACTERS_MODEL = models.StageGirl
+FAVORITE_CHARACTERS_FILTER = lambda _queryset: _queryset.order_by('school')
 
-CUSTOM_PREFERENCES_FORM = True
-
-EXTRA_PREFERENCES = DEFAULT_EXTRA_PREFERENCES + [
-    ('favorite_voiceactress1', lambda: _('{nth} Favorite {thing}').format(
-        thing=_('Voice actress').lower(), nth=_(ordinalNumber(1)))),
-    ('favorite_voiceactress2', lambda: _('{nth} Favorite {thing}').format(
-        thing=_('Voice actress').lower(), nth=_(ordinalNumber(2)))),
-    ('favorite_voiceactress3', lambda: _('{nth} Favorite {thing}').format(
-        thing=_('Voice actress').lower(), nth=_(ordinalNumber(3)))),
-]
+OTHER_CHARACTERS_MODELS = {
+    'VOICE_ACTRESSES': {
+        'model': models.VoiceActress,
+        'filter': lambda _queryset: _queryset.order_by('name'),
+        'allow_set_as_favorite_on_profile': True,
+        'how_many_favorites': 3,
+    },
+}
 
 ACCOUNT_TAB_ORDERING = [
     'about',
@@ -221,8 +231,8 @@ ACTIVITY_TAGS = [
 # Technical settings
 
 MAIN_SITE_URL = 'https://revuestarlight-en.net/'
-SITE_URL = 'http://localhost:{}/'.format(django_settings.DEBUG_PORT) if django_settings.DEBUG else 'https://starlight.academy/'
-SITE_STATIC_URL = '//localhost:{}/'.format(django_settings.DEBUG_PORT) if django_settings.DEBUG else '//i.starlight.academy/'
+SITE_URL = 'https://starlight.academy/'
+SITE_STATIC_URL = '//i.starlight.academy/'
 
 GET_GLOBAL_CONTEXT = starlightGlobalContext
 
@@ -243,17 +253,6 @@ JAVASCRIPT_TRANSLATED_TERMS = DEFAULT_JAVASCRIPT_TRANSLATED_TERMS + [
 ]
 
 ############################################################
-# From settings or generated_settings
-
-STATIC_FILES_VERSION = django_settings.STATIC_FILES_VERSION
-STAFF_CONFIGURATIONS = getattr(django_settings, 'STAFF_CONFIGURATIONS', {})
-HOMEPAGE_ARTS = getattr(django_settings, 'HOMEPAGE_ARTS', None)
-TOTAL_DONATORS = getattr(django_settings, 'TOTAL_DONATORS', 0) or 2
-FAVORITE_CHARACTERS = getattr(django_settings, 'FAVORITE_CHARACTERS', None)
-# todo BACKGROUNDS = getattr(django_settings, 'BACKGROUNDS', None)
-LATEST_NEWS = getattr(django_settings, 'LATEST_NEWS', None)
-
-############################################################
 # Customize pages
 
 ENABLED_PAGES = DEFAULT_ENABLED_PAGES.copy()
@@ -263,9 +262,6 @@ ENABLED_PAGES['wiki'][0]['enabled'] = True
 ENABLED_PAGES['wiki'][0]['custom'] = True
 ENABLED_PAGES['wiki'][1]['enabled'] = True
 ENABLED_PAGES['wiki'][0]['navbar_link'] = False
-
-# Add voice actress cuteform to settings
-ENABLED_PAGES['settings']['custom'] = True
 
 def _externalLinkIcon(title):
     return mark_safe(u'{} <i class="flaticon-link fontx0-8"></i>'.format(title))

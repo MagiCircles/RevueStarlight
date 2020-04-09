@@ -1,23 +1,24 @@
 from __future__ import division
+import random
 from collections import OrderedDict
 from math import floor
 from django.conf import settings as django_settings
+from django.db.models import Q
 from django.db.models.fields import BLANK_CHOICE_DASH
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _, string_concat, get_language
 from magi.utils import (
     CuteFormTransform,
-    FAVORITE_CHARACTERS_IMAGES,
-    FAVORITE_CHARACTERS_NAMES,
-    getFavoriteCharacterChoices,
-    getFavoriteCharacterImageFromPk,
-    getFavoriteCharacterNamesFromPk,
-    getFavoriteCharacterNameFromPk,
+    getCharactersChoices,
+    getCharacterImageFromPk,
+    getCharacterNamesFromPk,
+    getCharacterNameFromPk,
     getTranslatedName,
     globalContext,
     listUnique,
     ordinalNumber,
     mergedFieldCuteForm,
+    presetsFromCharacters,
     staticImageURL,
     tourldash,
     translationURL,
@@ -83,49 +84,13 @@ def displayNameHTML(item, romaji_first=False):
     ))
 
 ############################################################
-# Form choices utils
+# School choices utils
 
 def getSchoolChoices(without_other=False):
     return BLANK_CHOICE_DASH + [
         (school_id, getTranslatedName(school_details))
         for school_id, school_details in django_settings.SCHOOLS.items()
         if not without_other or (without_other and school_details['name'] != 'Other')
-    ]
-
-getStageGirlNamesFromPk = getFavoriteCharacterNamesFromPk
-getStageGirlNameFromPk = getFavoriteCharacterNameFromPk
-getStageGirlChoices = getFavoriteCharacterChoices
-
-def getStageGirlImageFromPk(pk):
-    return getFavoriteCharacterImageFromPk(pk, default=staticImageURL('default/default_stagegirl.png'))
-
-def getVoiceActressChoices():
-    return BLANK_CHOICE_DASH + [
-        (voiceactress_id, getTranslatedName(voiceactress_details))
-        for voiceactress_id, voiceactress_details in django_settings.VOICE_ACTRESSES.items()
-    ]
-
-def getVoiceActressNameFromPk(pk):
-    return getTranslatedName(django_settings.VOICE_ACTRESSES[int(pk)])
-
-def getVoiceActressThumbnailFromPk(pk):
-    return django_settings.VOICE_ACTRESSES[int(pk)]['thumbnail'] or staticImageURL('default/default.png')
-
-def getVoiceActressURLFromPk(pk):
-    voiceactress = django_settings.VOICE_ACTRESSES[int(pk)]
-    return u'/voiceactress/{}/{}/'.format(pk, tourldash(getTranslatedName(voiceactress)))
-
-def presetsFromVoiceActresses(field_name='voice_actress', get_field_value=None):
-    def verbose_name_lambda(pk):
-        return lambda: getVoiceActressNameFromPk(pk)
-    return [
-        (details['name'], {
-            'verbose_name': verbose_name_lambda(pk),
-            'fields': {
-                field_name: pk if not get_field_value else get_field_value(pk),
-            },
-            'image': details['thumbnail'] or 'default/default.png',
-        }) for pk, details in getattr(django_settings, 'VOICE_ACTRESSES', {}).items()
     ]
 
 def getSchoolNameFromPk(pk):
@@ -181,7 +146,7 @@ def getSchoolsCuteForm(white=False):
 
 def getStageGirlsCuteForm():
     return {
-        'to_cuteform': lambda k, v: getStageGirlImageFromPk(k),
+        'to_cuteform': lambda k, v: getCharacterImageFromPk(k),
         'title': _('Stage girl'),
         'extra_settings': {
             'modal': 'true',
@@ -198,7 +163,7 @@ def mergeSchoolStageGirlCuteForm(filter_cuteform):
         },
     }, OrderedDict ([
         ('school', lambda k, v: getSchoolImageFromPk(k)),
-        ('stage_girl', lambda k, v: getStageGirlImageFromPk(int(k))),
+        ('stage_girl', lambda k, v: getCharacterImageFromPk(int(k))),
     ]))
 
 def mergeSingersCuteForm(filter_cuteform):
@@ -209,8 +174,8 @@ def mergeSingersCuteForm(filter_cuteform):
             'modal-text': 'true',
         },
     }, OrderedDict ([
-        ('singers', lambda k, v: getVoiceActressThumbnailFromPk(int(k))),
-        ('stage_girl', lambda k, v: getStageGirlImageFromPk(int(k))),
+        ('singers', lambda k, v: getCharacterImageFromPk(int(k), key='VOICE_ACTRESSES')),
+        ('stage_girl', lambda k, v: getCharacterImageFromPk(int(k))),
         ('school', lambda k, v: getSchoolImageFromPk(k)),
     ]), merged_field_name='singer')
 
@@ -270,3 +235,48 @@ def displayTextWithJapaneseFallback(item, field_name, one_line=False):
         fallback_value[1], from_language=fallback_value[0], to_language=language,
         with_wrapper=True, one_line=one_line,
     ))
+
+############################################################
+# Generated settings
+
+def getArts(character_id=None, just_one=False):
+    from starlight import models
+    cards = models.Card.objects.exclude(
+        (Q(art__isnull=True) | Q(art=''))
+        & (Q(transparent__isnull=True) | Q(transparent='')),
+    ).exclude(
+        show_art_on_homepage=False,
+    )
+
+    if character_id:
+        cards = cards.filter(stage_girl_id=character_id)
+
+    filtered_cards = []
+    for version in models.VERSIONS.values():
+        filtered_cards += list(cards.filter(**{
+            u'{}release_date__isnull'.format(version['prefix']): False
+        }).order_by('-{}release_date'.format(version['prefix']), '-i_rarity')[:10])
+        random.shuffle(filtered_cards)
+
+    if not filtered_cards:
+        filtered_cards = cards
+
+    homepage_arts = []
+    position = { 'size': 'cover', 'x': 'center', 'y': 'center' }
+    for c in filtered_cards:
+        if c.art:
+            homepage_arts.append({
+                'url': c.art_url,
+                'hd_url': c.art_2x_url or c.art_original_url,
+                'about_url': c.item_url,
+            })
+        elif c.transparent:
+            homepage_arts.append({
+                'foreground_url': c.transparent_url,
+                'about_url': c.item_url,
+                'position': position,
+            })
+
+    if just_one:
+        return random.choice(homepage_arts)
+    return homepage_arts

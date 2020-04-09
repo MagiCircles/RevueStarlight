@@ -25,6 +25,8 @@ from magi.utils import (
     ColorField,
     filterRealCollectiblesPerAccount,
     getAge,
+    getCharacterImageFromPk,
+    getCharacterNamesFromPk,
     getStaffConfiguration,
     staticImageURL,
     summarize,
@@ -45,8 +47,6 @@ from starlight.utils import (
     getSchoolNameFromPk,
     getSchoolURLFromPk,
     getSchoolYearChoices,
-    getStageGirlImageFromPk,
-    getStageGirlNamesFromPk,
 )
 
 ############################################################
@@ -714,6 +714,16 @@ class StageGirl(MagiModel):
                 (staticImageURL('default/default.png'), '')
             ]
         ])
+
+    @property
+    def birthday_banner_url(self):
+        if self.birthday_banner:
+            return MagiModel.birthday_banner_url.fget(self)
+        # Latest rarest card
+        try:
+            return Card.objects.filter(stage_girl=self).all().order_by('-i_rarity', '-number')[0].art_original_url
+        except IndexError:
+            return None
 
     ############################################################
     # Unicode
@@ -1571,9 +1581,9 @@ class Card(BaseCard):
             return None
         d = {
             'id': self.stage_girl_id,
-            'image_url': getStageGirlImageFromPk(self.stage_girl_id),
+            'image_url': getCharacterImageFromPk(self.stage_girl_id),
         }
-        d.update(getStageGirlNamesFromPk(self.stage_girl_id))
+        d.update(getCharacterNamesFromPk(self.stage_girl_id))
         return AttrDict(self.cached_json_extra('stage_girl', d))
 
     ############################################################

@@ -13,8 +13,6 @@ from magi.forms import (
     AccountFilterForm as _AccountFilterForm,
     ActivityForm as _ActivityForm,
     FilterActivities as _ActivityFilterForm,
-    UserFilterForm as _UserFilterForm,
-    UserPreferencesForm as _UserPreferencesForm,
 )
 from magi.item_model import i_choices
 from magi.utils import (
@@ -37,11 +35,9 @@ from starlight import settings
 from starlight.utils import (
     calculateMemoirStatistics,
     getSchoolChoices,
-    getVoiceActressChoices,
     getSchoolYearChoices,
-    getStageGirlChoices,
+    getCharactersChoices,
     presetsFromSchools,
-    presetsFromVoiceActresses,
 )
 
 ############################################################
@@ -80,70 +76,6 @@ class ImportableItemForm(AutoForm):
 # MagiCircles' default collections
 ############################################################
 ############################################################
-
-############################################################
-# User
-
-class UserFilterForm(_UserFilterForm):
-
-    def _favorite_voice_actress_to_queryset(self, queryset, request, value):
-        return models.getVoiceActressFans(value, queryset=queryset)
-
-    favorite_voice_actress = forms.ChoiceField()
-    favorite_voice_actress_filter = MagiFilter(to_queryset=_favorite_voice_actress_to_queryset)
-
-    show_more = FormShowMore(cutoff='color', including_cutoff=True, until='ordering')
-
-    def __init__(self, *args, **kwargs):
-        super(UserFilterForm, self).__init__(*args, **kwargs)
-        if 'favorite_voice_actress' in self.fields:
-            self.fields['favorite_voice_actress'].labal = _('Favorite {thing}').format(
-                thing=_('Voice actress').lower())
-            self.fields['favorite_voice_actress'].choices = getVoiceActressChoices()
-        self.reorder_fields([
-            'search',
-            'favorite_voice_actress',
-            'favorite_character',
-            'color',
-            'location',
-            'i_language',
-            'ordering', 'reverse_order',
-        ])
-
-class UserPreferencesForm(_UserPreferencesForm):
-    def __init__(self, *args, **kwargs):
-        super(UserPreferencesForm, self).__init__(*args, **kwargs)
-
-        # Make voice actress preferences a choice field
-        for nth in range(1, 4):
-            field_name = 'd_extra-favorite_voiceactress{}'.format(nth)
-            if field_name in self.fields:
-                self.fields[field_name] = forms.ChoiceField(
-                    required=False,
-                    choices=getVoiceActressChoices(),
-                    label=self.fields[field_name].label,
-                    initial=self.fields[field_name].initial,
-                )
-
-        self.reorder_fields([
-            'm_description', 'location',
-        ] + [
-            u'd_extra-favorite_voiceactress{}'.format(nth)
-            for nth in range(1, 4)
-        ] + [
-            u'favorite_character{}'.format(nth)
-            for nth in range(1, 4)
-        ])
-
-    def clean(self):
-        super(UserPreferencesForm, self).clean()
-        favorites = [
-            v for (k, v) in self.cleaned_data.items()
-            if k.startswith('d_extra-favorite_voiceactress') and v
-        ]
-        if favorites and len(favorites) != len(set(favorites)):
-            raise forms.ValidationError(_('All your favorites must be unique'))
-        return self.cleaned_data
 
 ############################################################
 # Activity
@@ -276,12 +208,13 @@ class AccountFilterForm(_AccountFilterForm):
     show_more = FormShowMore('i_version', until='ordering')
 
     class Meta(_AccountFilterForm.Meta):
-        fields = [
-            'search', 'has_friend_id', 'friend_id',
-            'i_version', 'color', 'favorite_character',
-            'i_play_style', 'i_vs_revue_rank',
-            'i_os',
+        top_fields = _AccountFilterForm.Meta.top_fields + [
+            'i_version',
         ]
+        middle_fields = [
+            'i_play_style', 'i_vs_revue_rank',
+        ] + _AccountFilterForm.Meta.middle_fields
+        fields = top_fields + middle_fields
 
 ############################################################
 ############################################################
@@ -334,7 +267,7 @@ class VoiceActressFilterForm(MagiFiltersForm):
 
         # Prepare fields for ordering for birthday
         if parameters.get('ordering') == 'birthday_month,birthday_day':
-            queryset = birthdayOrderingQueryset(queryset)
+            queryset = birthdayOrderingQueryset(queryset, order_by=False)
 
         return queryset
 
@@ -444,10 +377,10 @@ class SongFilterForm(MagiFiltersForm):
         'singer': {
             'fields': OrderedDict([
                 ('singers', {
-                    'choices': lambda: getVoiceActressChoices(),
+                    'choices': lambda: getCharactersChoices(key='VOICE_ACTRESSES'),
                 }),
                 ('stage_girl', {
-                    'choices': lambda: getStageGirlChoices(),
+                    'choices': lambda: getCharactersChoices(),
                 }),
                 ('school', {
                     'choices': lambda: getSchoolChoices(),
@@ -460,7 +393,7 @@ class SongFilterForm(MagiFiltersForm):
     presets = OrderedDict(
         presetsFromSchools(
             'singer', get_field_value=lambda _id: u'school-{}'.format(_id))
-        + presetsFromVoiceActresses('singer', get_field_value=lambda _pk: u'singers-{}'.format(_pk))
+        + presetsFromCharacters('singer', get_field_value=lambda _pk, _name, _vname: u'singers-{}'.format(_pk), key='VOICE_ACTRESSES')
         + presetsFromCharacters(
             'singer', get_field_value=lambda _id, _name, _vname: u'stage_girl-{}'.format(_id))
     )
@@ -591,7 +524,7 @@ class BaseCardFilterForm(MagiFiltersForm):
                 'choices': lambda: getSchoolChoices(),
             }),
             ('stage_girl', {
-                'choices': lambda: getStageGirlChoices(),
+                'choices': lambda: getCharactersChoices(),
             }),
         ]),
     ]
@@ -616,7 +549,7 @@ class BaseCardFilterForm(MagiFiltersForm):
         })
     ))
 
-    stage_girl = forms.ChoiceField(label=_('Stage girl'), choices=getStageGirlChoices())
+    stage_girl = forms.ChoiceField(label=_('Stage girl'), choices=getCharactersChoices())
 
     school = forms.ChoiceField(label=_('School'), choices=getSchoolChoices())
 

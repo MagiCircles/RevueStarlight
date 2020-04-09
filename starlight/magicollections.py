@@ -32,9 +32,6 @@ from starlight.utils import (
     getElementsCuteForm,
     getSchoolsCuteForm,
     getStageGirlsCuteForm,
-    getVoiceActressNameFromPk,
-    getVoiceActressThumbnailFromPk,
-    getVoiceActressURLFromPk,
     mergeSchoolStageGirlCuteForm,
     mergeSingersCuteForm,
 )
@@ -82,7 +79,7 @@ class UserCollection(_UserCollection):
     filter_cuteform = _UserCollection.filter_cuteform.copy()
     filter_cuteform.update({
         'favorite_voice_actress': {
-            'to_cuteform': lambda k, v: getVoiceActressThumbnailFromPk(k),
+            'to_cuteform': lambda k, v: getCharacterImageFromPk(k, key='VOICE_ACTRESSES'),
             'title': _('Voice actress'),
             'extra_settings': {
                 'modal': 'true',
@@ -90,30 +87,6 @@ class UserCollection(_UserCollection):
             },
         },
     })
-
-    class ItemView(_UserCollection.ItemView):
-
-        def get_meta_links(self, user, *args, **kwargs):
-            first_links, meta_links, links = super(UserCollection.ItemView, self).get_meta_links(
-                user, *args, **kwargs)
-            # Add link to favorite voice actresses from preferences
-            for nth in reversed(range(1, 4)):
-                field_name = 'favorite_voiceactress{}'.format(nth)
-                voiceactress_pk = user.preferences.extra.get(field_name, None)
-                if voiceactress_pk:
-                    meta_links.insert(0, AttrDict({
-                        'name': field_name,
-                        'verbose_name': _('{nth} Favorite {thing}').format(
-                            thing=_('Voice actress').lower(), nth=_(ordinalNumber(nth))),
-                        'value': getVoiceActressNameFromPk(voiceactress_pk),
-                        'raw_value': voiceactress_pk,
-                        'url': getVoiceActressURLFromPk(voiceactress_pk),
-                        'image': getVoiceActressThumbnailFromPk(voiceactress_pk),
-                    }))
-            return (first_links, meta_links, links)
-
-    class ListView(_UserCollection.ListView):
-        filter_form = forms.UserFilterForm
 
 ############################################################
 # News Collection
