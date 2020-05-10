@@ -3755,7 +3755,7 @@ msgstr ""
 #: bang/magicollections.py:1568 bang/magicollections.py:1571
 #: bang/models.py:1645
 msgid "{} Gacha"
-msgstr ""
+msgstr "{} ガチャ"
 
 #: bang/magicollections.py:2174
 msgid "Locations"
@@ -4880,7 +4880,7 @@ msgstr ""
 
 #: starlight/magicollections.py:1295
 msgid "Gachas"
-msgstr ""
+msgstr "ガチャ"
 
 #: magi/seasons.py:72
 msgid "Happy Pi Day!"
